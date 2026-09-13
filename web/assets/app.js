@@ -24,8 +24,7 @@ function renderCategories() {
 function renderPresets() {
   const presets = state.config.presets.filter(item => state.category === 'All' || item.category === state.category);
   $('preset-grid').innerHTML = presets.map(item => `<article class="preset-card" data-category="${item.category}">
-    <span>${item.category}</span><h3>${item.name}</h3><p>${item.description}</p>
-    <button class="preset-button" data-name="${item.name}" type="button">Use scanner <b>→</b></button>
+    <span>${item.category}</span><div class="preset-title"><h3>${item.name}</h3><button class="preset-button" data-name="${item.name}" type="button" aria-label="Use ${item.name}">Use scanner →</button></div><p>${item.description}</p>
   </article>`).join('');
   document.querySelectorAll('.preset-button').forEach(button => button.addEventListener('click', () => applyPreset(button.dataset.name)));
 }

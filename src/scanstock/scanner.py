@@ -12,7 +12,11 @@ from .domain import Candle, ScanCondition
 FIELD_CATALOG = {
     "open": "Open Price", "high": "High Price", "low": "Low Price", "close": "Close Price", "volume": "Volume",
     "change_pct": "Period Change %", "range_pct": "Period Range %", "rsi14": "RSI (14)",
-    "sma20": "SMA (20)", "sma50": "SMA (50)", "sma200": "SMA (200)",
+    "sma9": "SMA (9)", "sma20": "SMA (20)", "sma21": "SMA (21)", "sma50": "SMA (50)", "sma200": "SMA (200)",
+    "ema9": "EMA (9)", "ema21": "EMA (21)", "ema50": "EMA (50)", "ema200": "EMA (200)",
+    "wma9": "WMA (9)", "wma21": "WMA (21)", "wma50": "WMA (50)", "wma200": "WMA (200)",
+    "ema9_cross_above_ema21": "EMA 9 Crossed Above EMA 21",
+    "ema9_cross_below_ema21": "EMA 9 Crossed Below EMA 21",
     "volume_ratio20": "Volume / 20-Period Average", "previous_high20": "Previous 20-Period High",
     "previous_low20": "Previous 20-Period Low", "distance_52w_high_pct": "Distance From 52-Period High %",
     "distance_52w_low_pct": "Distance From 52-Period Low %", "doji": "Doji Pattern",
@@ -43,9 +47,18 @@ class MetricEngine:
         previous_close = candles[-2].close if len(candles) >= 2 else None
         metrics["change_pct"] = ((current.close / previous_close) - 1) * 100 if previous_close else Decimal(0)
         metrics["range_pct"] = ((current.high - current.low) / current.low) * 100 if current.low else Decimal(0)
-        for period in (20, 50, 200):
+        for period in (9, 20, 21, 50, 200):
             if len(closes) >= period:
                 metrics[f"sma{period}"] = Decimal(str(fmean(closes[-period:])))
+        for period in (9, 21, 50, 200):
+            if len(closes) >= period:
+                metrics[f"ema{period}"] = moving_ema(closes, period)
+                metrics[f"wma{period}"] = moving_wma(closes, period)
+        if len(closes) >= 22:
+            previous_ema9, previous_ema21 = moving_ema(closes[:-1], 9), moving_ema(closes[:-1], 21)
+            current_ema9, current_ema21 = metrics["ema9"], metrics["ema21"]
+            metrics["ema9_cross_above_ema21"] = Decimal(1 if previous_ema9 <= previous_ema21 and current_ema9 > current_ema21 else 0)
+            metrics["ema9_cross_below_ema21"] = Decimal(1 if previous_ema9 >= previous_ema21 and current_ema9 < current_ema21 else 0)
         if len(volumes) >= 20:
             average_volume = fmean(volumes[-20:])
             metrics["volume_ratio20"] = Decimal(str(current.volume / average_volume)) if average_volume else Decimal(0)
@@ -134,6 +147,20 @@ def calculate_rsi(values: list[float], period: int = 14) -> Decimal | None:
     if average_loss == 0:
         return Decimal(100)
     return Decimal(str(100 - (100 / (1 + average_gain / average_loss))))
+
+
+def moving_ema(values: list[float], period: int) -> Decimal:
+    multiplier = 2 / (period + 1)
+    result = fmean(values[:period])
+    for value in values[period:]:
+        result = (value - result) * multiplier + result
+    return Decimal(str(result))
+
+
+def moving_wma(values: list[float], period: int) -> Decimal:
+    window = values[-period:]
+    denominator = period * (period + 1) / 2
+    return Decimal(str(sum(value * weight for weight, value in enumerate(window, 1)) / denominator))
 
 
 def aggregate_candles(candles: list[Candle], timeframe: str) -> list[Candle]:

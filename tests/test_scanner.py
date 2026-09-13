@@ -1,8 +1,8 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 from scanstock.domain import Candle, Instrument, ScanCondition
-from scanstock.scanner import StrictScanner, aggregate_candles
+from scanstock.scanner import MetricEngine, StrictScanner, aggregate_candles
 from scanstock.storage.sqlite_repository import SQLiteMarketRepository
 
 
@@ -48,3 +48,14 @@ def test_daily_candles_are_aggregated_into_weekly_ohlcv():
     assert weekly[0].open == Decimal("10")
     assert weekly[0].close == Decimal("14")
     assert weekly[0].volume == 1000
+
+
+def test_moving_average_metrics_are_available_to_custom_scanner():
+    candles = [
+        Candle("TEST", "1D", datetime(2025, 1, 1, tzinfo=timezone.utc) + timedelta(days=index), Decimal(str(100 + index)), Decimal(str(102 + index)), Decimal(str(99 + index)), Decimal(str(101 + index)), 1000, "fake")
+        for index in range(220)
+    ]
+    metrics = MetricEngine.evaluate(candles).metrics
+    for method in ("sma", "ema", "wma"):
+        for period in (9, 21, 50, 200):
+            assert f"{method}{period}" in metrics
