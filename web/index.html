@@ -1,62 +1,77 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ScanStock</title>
-  <link rel="stylesheet" href="/assets/app.css">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ScanStock</title><link rel="stylesheet" href="/assets/app.css">
 </head>
 <body>
   <header class="topbar">
     <div class="brand"><span class="brand-mark">S</span><span>ScanStock</span></div>
     <div class="status" id="status">Loading market database…</div>
   </header>
-
   <main>
     <section class="intro">
-      <div>
-        <h1>Stock Scanner</h1>
-        <p>Choose what the latest Daily candle must satisfy.</p>
-      </div>
+      <div><h1>Stock Scanner</h1><p>Scan the latest completed Daily candle using transparent OHLCV rules.</p></div>
       <span class="badge">Local database</span>
     </section>
 
-    <section class="panel" aria-labelledby="condition-title">
+    <section class="panel presets-panel" aria-labelledby="presets-title">
       <div class="panel-heading">
-        <div>
-          <span class="eyebrow">CONDITION 1</span>
-          <h2 id="condition-title">What stocks do you want to find?</h2>
-        </div>
+        <div><span class="eyebrow">READY-MADE SCANNERS</span><h2 id="presets-title">Start with a proven definition</h2></div>
+        <span class="hint">Research filters—not trade recommendations</span>
+      </div>
+      <div class="category-tabs" id="category-tabs"></div>
+      <div class="preset-grid" id="preset-grid"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="builder-title">
+      <div class="panel-heading">
+        <div><span class="eyebrow">CUSTOM SCANNER</span><h2 id="builder-title">Build your own filters</h2></div>
         <button id="reset" class="button secondary" type="button">Reset</button>
       </div>
-
-      <div class="examples">
-        <span>Quick examples:</span>
-        <button class="example" data-example="green" type="button">Green candle</button>
-        <button class="example" data-example="price" type="button">Close above ₹1,000</button>
-        <button class="example" data-example="volume" type="button">Volume above 10 lakh</button>
-      </div>
-      <form id="scanner-form" class="condition-builder">
-        <span class="sentence-start">Find stocks where</span>
+      <div class="builder-toolbar">
         <label><span>Timeframe</span><select id="timeframe"><option value="1D">Daily</option></select></label>
-        <label><span>Data</span><select id="field"><option value="close">Close price</option><option value="open">Open price</option><option value="high">High price</option><option value="low">Low price</option><option value="volume">Volume</option></select></label>
-        <label><span>Relationship</span><select id="operator"><option value=">">is above</option><option value=">=">is at least</option><option value="<">is below</option><option value="<=">is at most</option><option value="=">equals</option><option value="!=">does not equal</option></select></label>
-        <label><span>Compare against</span><select id="compare-mode"><option value="field">Another candle value</option><option value="value">A number</option></select></label>
-        <label id="field-box"><span>Candle value</span><select id="compare-field"><option value="open">Open price</option><option value="close">Close price</option><option value="high">High price</option><option value="low">Low price</option><option value="volume">Volume</option></select></label>
-        <label id="value-box" hidden><span>Number</span><input id="compare-value" type="number" step="any" placeholder="For example: 1000"></label>
-        <button class="button primary" type="submit">Find matching stocks</button>
+        <label><span>Stocks must match</span><select id="match-mode"><option value="all">ALL conditions</option><option value="any">ANY condition</option></select></label>
+        <button id="add-condition" class="button secondary add-button" type="button">+ Add condition</button>
+      </div>
+      <form id="scanner-form">
+        <div id="condition-list" class="condition-list"></div>
+        <div class="builder-actions">
+          <span id="builder-message" class="hint">You can combine up to 12 conditions.</span>
+          <button class="button primary" type="submit">Run custom scan</button>
+        </div>
       </form>
-      <div class="condition-preview"><strong id="preview">Daily Close is above Daily Open</strong><span id="explanation">Finds stocks whose latest Daily candle is green.</span></div>
     </section>
 
     <section class="panel results-panel" aria-labelledby="results-title">
-      <div class="panel-heading">
+      <div class="panel-heading results-heading">
         <div><span class="eyebrow">RESULTS</span><h2 id="results-title">Matching stocks</h2></div>
-        <span class="result-count" id="result-count">Not scanned</span>
+        <div class="results-summary"><span id="active-scan">No scanner selected</span><strong id="result-count">Not scanned</strong></div>
       </div>
-      <div class="empty" id="empty">Run the condition to see matching stocks.</div>
-      <div class="table-wrap" id="table-wrap" hidden>
-        <table><thead><tr><th>Symbol</th><th>Date</th><th>Open</th><th>High</th><th>Low</th><th>Close</th><th>Volume</th></tr></thead><tbody id="results-body"></tbody></table>
+      <div class="empty" id="empty">Choose a ready-made scanner or build your own.</div>
+      <div id="results-content" hidden>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th><button class="sort" data-key="symbol">Symbol</button></th>
+              <th><button class="sort" data-key="timestamp">Date</button></th>
+              <th><button class="sort numeric" data-key="open">Open</button></th>
+              <th><button class="sort numeric" data-key="high">High</button></th>
+              <th><button class="sort numeric" data-key="low">Low</button></th>
+              <th><button class="sort numeric" data-key="close">Close</button></th>
+              <th><button class="sort numeric" data-key="change_pct">Change %</button></th>
+              <th><button class="sort numeric" data-key="rsi14">RSI 14</button></th>
+              <th><button class="sort numeric" data-key="volume">Volume</button></th>
+            </tr></thead><tbody id="results-body"></tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <label><span>Rows</span><select id="page-size"><option>10</option><option selected>25</option><option>50</option><option>100</option></select></label>
+          <span id="page-range"></span>
+          <button id="previous-page" class="button secondary" type="button">Previous</button>
+          <span id="page-number"></span>
+          <button id="next-page" class="button secondary" type="button">Next</button>
+        </div>
       </div>
     </section>
   </main>

@@ -154,6 +154,23 @@ class SQLiteMarketRepository:
             close=Decimal(str(row[6])), volume=int(row[7]), provider=row[8],
         ) for row in rows]
 
+    def candle_series(self, timeframe: str) -> dict[str, list[Candle]]:
+        with self._lock:
+            rows = self._connection.execute("""
+                SELECT c.symbol,c.timeframe,c.timestamp,c.open,c.high,c.low,c.close,c.volume,c.provider
+                FROM candles c JOIN instruments i ON i.symbol=c.symbol AND i.active=1
+                WHERE c.timeframe=? ORDER BY c.symbol,c.timestamp
+            """, (timeframe,)).fetchall()
+        series: dict[str, list[Candle]] = {}
+        for row in rows:
+            candle = Candle(
+                symbol=row[0], timeframe=row[1], timestamp=datetime.fromisoformat(row[2]),
+                open=Decimal(str(row[3])), high=Decimal(str(row[4])), low=Decimal(str(row[5])),
+                close=Decimal(str(row[6])), volume=int(row[7]), provider=row[8],
+            )
+            series.setdefault(candle.symbol, []).append(candle)
+        return series
+
     def record_sync(self, symbol: str, timeframe: str, status: str, rows: int, message: str = "") -> None:
         self._connection.execute(
             "INSERT INTO sync_runs(symbol,timeframe,status,rows_written,message,created_at) VALUES(?,?,?,?,?,?)",

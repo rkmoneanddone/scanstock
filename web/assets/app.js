@@ -1,70 +1,106 @@
 const $ = (id) => document.getElementById(id);
-const labels = { open:"Open", high:"High", low:"Low", close:"Close", volume:"Volume" };
-const relationships = { ">":"is above", ">=":"is at least", "<":"is below", "<=":"is at most", "=":"equals", "!=":"does not equal" };
+const state = { config:null, conditions:[], results:[], sortKey:'symbol', sortDirection:'asc', page:1, pageSize:25, category:'All' };
 
-async function loadStatus() {
-  const response = await fetch('/api/status');
-  const data = await response.json();
-  $('status').textContent = `${data.loaded_stocks}/${data.configured_stocks} stocks ready · ${data.total_candles.toLocaleString()} candles`;
+const optionList = (items, selected) => items.map(item => `<option value="${item.value}" ${item.value === selected ? 'selected' : ''}>${item.label}</option>`).join('');
+const number = (value, digits=2) => value == null ? '—' : Number(value).toLocaleString('en-IN', { maximumFractionDigits:digits });
+
+async function loadApp() {
+  const [configResponse, statusResponse] = await Promise.all([fetch('/api/config'), fetch('/api/status')]);
+  state.config = await configResponse.json();
+  const status = await statusResponse.json();
+  $('status').textContent = `${status.loaded_stocks}/${status.configured_stocks} stocks ready · ${status.total_candles.toLocaleString()} candles`;
+  renderCategories(); renderPresets(); resetBuilder();
 }
 
-function updateMode() {
-  const valueMode = $('compare-mode').value === 'value';
-  $('value-box').hidden = !valueMode;
-  $('field-box').hidden = valueMode;
-  updatePreview();
+function renderCategories() {
+  const categories = ['All', ...new Set(state.config.presets.map(item => item.category))];
+  $('category-tabs').innerHTML = categories.map(category => `<button class="category ${category === state.category ? 'active' : ''}" data-category="${category}" type="button">${category}</button>`).join('');
+  document.querySelectorAll('.category').forEach(button => button.addEventListener('click', () => {
+    state.category = button.dataset.category; renderCategories(); renderPresets();
+  }));
 }
 
-function updatePreview() {
-  const field = $('field').value;
-  const right = $('compare-mode').value === 'field' ? `Daily ${labels[$('compare-field').value]}` : ($('compare-value').value || 'a number');
-  $('preview').textContent = `Daily ${labels[field]} ${relationships[$('operator').value]} ${right}`;
-  if ($('compare-mode').value === 'field' && field === 'close' && $('compare-field').value === 'open' && $('operator').value === '>') {
-    $('explanation').textContent = 'Finds stocks whose latest Daily candle is green.';
-  } else if ($('compare-mode').value === 'value') {
-    $('explanation').textContent = `Checks the latest Daily ${labels[field].toLowerCase()} against your number.`;
-  } else {
-    $('explanation').textContent = 'Compares two values from each stock’s latest Daily candle.';
-  }
+function renderPresets() {
+  const presets = state.config.presets.filter(item => state.category === 'All' || item.category === state.category);
+  $('preset-grid').innerHTML = presets.map((item, index) => `<article class="preset-card">
+    <span>${item.category}</span><h3>${item.name}</h3><p>${item.description}</p>
+    <button class="preset-button" data-name="${item.name}" type="button">Use scanner <b>→</b></button>
+  </article>`).join('');
+  document.querySelectorAll('.preset-button').forEach(button => button.addEventListener('click', () => applyPreset(button.dataset.name)));
 }
 
-function applyExample(name) {
-  $('timeframe').value = '1D';
-  $('operator').value = '>';
-  if (name === 'green') {
-    $('field').value = 'close'; $('compare-mode').value = 'field'; $('compare-field').value = 'open';
-  } else if (name === 'price') {
-    $('field').value = 'close'; $('compare-mode').value = 'value'; $('compare-value').value = '1000';
-  } else if (name === 'volume') {
-    $('field').value = 'volume'; $('compare-mode').value = 'value'; $('compare-value').value = '1000000';
-  }
-  updateMode();
+function blankCondition() { return { field:'close', operator:'>', compare_mode:'field', compare_field:'open', compare_value:null }; }
+
+function renderBuilder() {
+  $('condition-list').innerHTML = state.conditions.map((condition, index) => `<div class="condition-row" data-index="${index}">
+    <span class="condition-number">${index + 1}</span>
+    <label><span>Metric</span><select data-property="field">${optionList(state.config.fields, condition.field)}</select></label>
+    <label><span>Rule</span><select data-property="operator">${optionList(state.config.operators, condition.operator)}</select></label>
+    <label><span>Compare with</span><select data-property="compare_mode"><option value="field" ${condition.compare_mode === 'field' ? 'selected' : ''}>Another metric</option><option value="value" ${condition.compare_mode === 'value' ? 'selected' : ''}>Fixed value</option></select></label>
+    <label class="right-field" ${condition.compare_mode === 'value' ? 'hidden' : ''}><span>Metric</span><select data-property="compare_field">${optionList(state.config.fields, condition.compare_field)}</select></label>
+    <label class="right-value" ${condition.compare_mode === 'field' ? 'hidden' : ''}><span>Value</span><input data-property="compare_value" type="number" step="any" value="${condition.compare_value ?? ''}" placeholder="Enter value"></label>
+    <button class="remove-condition" type="button" aria-label="Remove condition" ${state.conditions.length === 1 ? 'disabled' : ''}>×</button>
+  </div>`).join('');
+  document.querySelectorAll('.condition-row').forEach(row => {
+    const index = Number(row.dataset.index);
+    row.querySelectorAll('[data-property]').forEach(control => control.addEventListener('change', () => {
+      const property = control.dataset.property;
+      state.conditions[index][property] = property === 'compare_value' ? (control.value === '' ? null : Number(control.value)) : control.value;
+      if (property === 'compare_mode') renderBuilder();
+    }));
+    row.querySelector('.remove-condition').addEventListener('click', () => { state.conditions.splice(index, 1); renderBuilder(); });
+  });
 }
 
-function number(value) { return Number(value).toLocaleString('en-IN', { maximumFractionDigits:2 }); }
+function resetBuilder() { state.conditions = [blankCondition()]; $('match-mode').value = 'all'; renderBuilder(); }
 
-$('scanner-form').addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const payload = {
-    timeframe:$('timeframe').value, field:$('field').value, operator:$('operator').value,
-    compare_mode:$('compare-mode').value,
-    compare_field:$('compare-mode').value === 'field' ? $('compare-field').value : null,
-    compare_value:$('compare-mode').value === 'value' ? $('compare-value').value : null
-  };
-  if (payload.compare_mode === 'value' && payload.compare_value === '') { $('compare-value').focus(); return; }
-  $('result-count').textContent = 'Scanning…';
+function applyPreset(name) {
+  const preset = state.config.presets.find(item => item.name === name);
+  state.conditions = structuredClone(preset.conditions); $('match-mode').value = 'all'; renderBuilder();
+  runScan(preset.name);
+}
+
+async function runScan(name='Custom scanner') {
+  const missingValue = state.conditions.some(condition => condition.compare_mode === 'value' && (condition.compare_value === null || condition.compare_value === ''));
+  if (missingValue) { $('builder-message').textContent = 'Enter a fixed value for every value-based condition.'; return; }
+  $('result-count').textContent = 'Scanning…'; $('active-scan').textContent = name;
+  const payload = { timeframe:$('timeframe').value, match_mode:$('match-mode').value, conditions:state.conditions };
   const response = await fetch('/api/scan', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
   const data = await response.json();
-  if (!response.ok) { $('result-count').textContent = data.detail || 'Scan failed'; return; }
+  if (!response.ok) { $('result-count').textContent = 'Scan failed'; $('empty').textContent = data.detail || 'Unable to run scan.'; $('empty').hidden = false; return; }
+  state.results = data.matches; state.page = 1;
   $('result-count').textContent = `${data.match_count} matching stocks`;
-  $('results-body').innerHTML = data.matches.map(row => `<tr><td>${row.symbol}</td><td>${new Date(row.timestamp).toLocaleDateString('en-IN')}</td><td>${number(row.open)}</td><td>${number(row.high)}</td><td>${number(row.low)}</td><td>${number(row.close)}</td><td>${number(row.volume)}</td></tr>`).join('');
-  $('empty').hidden = data.match_count > 0;
-  $('empty').textContent = 'No stocks matched this condition.';
-  $('table-wrap').hidden = data.match_count === 0;
-});
+  $('empty').textContent = data.match_count ? '' : 'No stocks matched this scanner.';
+  $('empty').hidden = data.match_count > 0; $('results-content').hidden = data.match_count === 0;
+  renderResults();
+}
 
-$('reset').addEventListener('click', () => { $('scanner-form').reset(); updateMode(); });
-document.querySelectorAll('.example').forEach(button => button.addEventListener('click', () => applyExample(button.dataset.example)));
-['field','operator','compare-mode','compare-field','compare-value'].forEach(id => $(id).addEventListener('input', id === 'compare-mode' ? updateMode : updatePreview));
-updateMode();
-loadStatus().catch(() => { $('status').textContent = 'Database status unavailable'; });
+function renderResults() {
+  const direction = state.sortDirection === 'asc' ? 1 : -1;
+  const rows = [...state.results].sort((a,b) => {
+    const av = a[state.sortKey], bv = b[state.sortKey];
+    if (av == null) return 1; if (bv == null) return -1;
+    return (typeof av === 'string' ? av.localeCompare(bv) : av - bv) * direction;
+  });
+  const pages = Math.max(1, Math.ceil(rows.length / state.pageSize)); state.page = Math.min(state.page, pages);
+  const start = (state.page - 1) * state.pageSize, visible = rows.slice(start, start + state.pageSize);
+  $('results-body').innerHTML = visible.map(row => `<tr><td>${row.symbol}</td><td>${new Date(row.timestamp).toLocaleDateString('en-IN')}</td><td>${number(row.open)}</td><td>${number(row.high)}</td><td>${number(row.low)}</td><td>${number(row.close)}</td><td class="${row.change_pct >= 0 ? 'positive' : 'negative'}">${number(row.change_pct)}%</td><td>${number(row.rsi14,1)}</td><td>${number(row.volume,0)}</td></tr>`).join('');
+  $('page-range').textContent = rows.length ? `${start + 1}–${Math.min(start + state.pageSize, rows.length)} of ${rows.length}` : '';
+  $('page-number').textContent = `Page ${state.page} of ${pages}`;
+  $('previous-page').disabled = state.page === 1; $('next-page').disabled = state.page === pages;
+  document.querySelectorAll('.sort').forEach(button => {
+    button.classList.toggle('active', button.dataset.key === state.sortKey);
+    button.dataset.direction = button.dataset.key === state.sortKey ? state.sortDirection : '';
+  });
+}
+
+$('scanner-form').addEventListener('submit', event => { event.preventDefault(); runScan(); });
+$('reset').addEventListener('click', resetBuilder);
+$('add-condition').addEventListener('click', () => { if (state.conditions.length < 12) { state.conditions.push(blankCondition()); renderBuilder(); } });
+$('page-size').addEventListener('change', event => { state.pageSize = Number(event.target.value); state.page = 1; renderResults(); });
+$('previous-page').addEventListener('click', () => { state.page -= 1; renderResults(); });
+$('next-page').addEventListener('click', () => { state.page += 1; renderResults(); });
+document.querySelectorAll('.sort').forEach(button => button.addEventListener('click', () => {
+  const key = button.dataset.key; state.sortDirection = state.sortKey === key && state.sortDirection === 'asc' ? 'desc' : 'asc'; state.sortKey = key; state.page = 1; renderResults();
+}));
+loadApp().catch(() => { $('status').textContent = 'Database unavailable'; $('empty').textContent = 'Scanner configuration could not be loaded.'; });
