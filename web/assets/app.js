@@ -1,8 +1,28 @@
 const $ = (id) => document.getElementById(id);
 const state = { config:null, conditions:[], results:[], sortKey:'symbol', sortDirection:'asc', page:1, pageSize:25, category:'All' };
 
-const optionList = (items, selected) => items.map(item => `<option value="${item.value}" ${item.value === selected ? 'selected' : ''}>${item.label}</option>`).join('');
+const optionList = (items, selected) => items.map(item => `<option value="${item.value}" ${item.value === selected ? 'selected' : ''}>${periodText(item.label)}</option>`).join('');
 const number = (value, digits=2) => value == null ? '—' : Number(value).toLocaleString('en-IN', { maximumFractionDigits:digits });
+const timeframeName = () => $('timeframe').selectedOptions[0]?.text || 'Daily';
+
+function periodText(text) {
+  const code = $('timeframe').value;
+  const units = { '1D':'Day', '1W':'Week', '1M':'Month', '1Y':'Year' };
+  if (units[code]) return text.replace(/(\d+)-Period/g, `$1-${units[code]}`).replace(/(\d+)-period/g, (_, n) => `${n}-${units[code].toLowerCase()}`);
+  const unit = code === '3M' ? '3-Month' : '6-Month';
+  return text.replace(/(\d+)-Period/g, `$1 × ${unit}`).replace(/(\d+)-period/g, (_, n) => `${n} selected ${unit.toLowerCase()} candles`);
+}
+
+function conditionSummary() {
+  const fields = Object.fromEntries(state.config.fields.map(item => [item.value, item.label]));
+  const operators = Object.fromEntries(state.config.operators.map(item => [item.value, item.label]));
+  const parts = state.conditions.slice(0, 2).map(condition => {
+    const right = condition.compare_mode === 'field' ? fields[condition.compare_field] : condition.compare_value;
+    return `${periodText(fields[condition.field])} ${operators[condition.operator]} ${periodText(String(right))}`;
+  });
+  if (state.conditions.length > 2) parts.push(`+${state.conditions.length - 2} more`);
+  return parts.join($('match-mode').value === 'all' ? ' AND ' : ' OR ');
+}
 
 async function loadApp() {
   const [configResponse, statusResponse] = await Promise.all([fetch('/api/config'), fetch('/api/status')]);
@@ -15,7 +35,7 @@ async function loadApp() {
 
 function renderCategories() {
   const categories = ['All', ...new Set(state.config.presets.map(item => item.category))];
-  $('category-tabs').innerHTML = categories.map(category => `<button class="category ${category === state.category ? 'active' : ''}" data-category="${category}" type="button">${category}</button>`).join('');
+  $('category-tabs').innerHTML = categories.map(category => `<button class="category ${category === state.category ? 'active' : ''}" data-category="${category}" type="button">${periodText(category)}</button>`).join('');
   document.querySelectorAll('.category').forEach(button => button.addEventListener('click', () => {
     state.category = button.dataset.category; renderCategories(); renderPresets();
   }));
@@ -24,7 +44,7 @@ function renderCategories() {
 function renderPresets() {
   const presets = state.config.presets.filter(item => state.category === 'All' || item.category === state.category);
   $('preset-grid').innerHTML = presets.map(item => `<article class="preset-card" data-category="${item.category}">
-    <span>${item.category}</span><div class="preset-title"><h3>${item.name}</h3><button class="preset-button" data-name="${item.name}" type="button" aria-label="Use ${item.name}">Use scanner →</button></div><p>${item.description}</p>
+    <span>${item.category}</span><div class="preset-title"><h3>${periodText(item.name)}</h3><button class="preset-button" data-name="${item.name}" type="button" aria-label="Use ${item.name}">Use scanner →</button></div><p>${periodText(item.description)}</p>
   </article>`).join('');
   document.querySelectorAll('.preset-button').forEach(button => button.addEventListener('click', () => applyPreset(button.dataset.name)));
 }
@@ -57,14 +77,17 @@ function resetBuilder() { state.conditions = [blankCondition()]; $('match-mode')
 function applyPreset(name) {
   const preset = state.config.presets.find(item => item.name === name);
   state.conditions = structuredClone(preset.conditions); $('match-mode').value = 'all'; renderBuilder();
-  runScan(preset.name);
+  runScan(periodText(preset.name), preset.category);
 }
 
-async function runScan(name='Custom scanner') {
+async function runScan(name=null, category='Custom Scanner') {
   const missingValue = state.conditions.some(condition => condition.compare_mode === 'value' && (condition.compare_value === null || condition.compare_value === ''));
   if (missingValue) { $('builder-message').textContent = 'Enter a fixed value for every value-based condition.'; return; }
-  $('result-count').textContent = 'Scanning…'; $('active-scan').textContent = name;
-  $('loading-detail').textContent = `${$('timeframe').selectedOptions[0].text} · ${name}`;
+  name = name || conditionSummary();
+  $('result-count').textContent = 'Scanning…';
+  $('active-scan').textContent = `${timeframeName()} · ${name}`;
+  $('active-scan').dataset.category = category;
+  $('loading-detail').textContent = `${timeframeName()} · ${name}`;
   $('loading').hidden = false;
   const payload = { timeframe:$('timeframe').value, match_mode:$('match-mode').value, conditions:state.conditions };
   let response, data;
@@ -104,6 +127,7 @@ function renderResults() {
 $('scanner-form').addEventListener('submit', event => { event.preventDefault(); runScan(); });
 $('reset').addEventListener('click', resetBuilder);
 $('add-condition').addEventListener('click', () => { if (state.conditions.length < 12) { state.conditions.push(blankCondition()); renderBuilder(); } });
+$('timeframe').addEventListener('change', () => { renderCategories(); renderPresets(); renderBuilder(); });
 $('page-size').addEventListener('change', event => { state.pageSize = Number(event.target.value); state.page = 1; renderResults(); });
 $('previous-page').addEventListener('click', () => { state.page -= 1; renderResults(); });
 $('next-page').addEventListener('click', () => { state.page += 1; renderResults(); });
