@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 
 from scanstock.domain import Candle, Instrument, ScanCondition
-from scanstock.scanner import StrictScanner
+from scanstock.scanner import StrictScanner, aggregate_candles
 from scanstock.storage.sqlite_repository import SQLiteMarketRepository
 
 
@@ -36,3 +36,15 @@ def test_multiple_conditions_support_all_and_any(tmp_path):
     ]
     assert [row["symbol"] for row in StrictScanner(repo).run("1D", conditions, "all")] == ["UP"]
     assert [row["symbol"] for row in StrictScanner(repo).run("1D", conditions, "any")] == ["DOWN", "UP"]
+
+
+def test_daily_candles_are_aggregated_into_weekly_ohlcv():
+    candles = [
+        Candle("TEST", "1D", datetime(2026, 1, day, tzinfo=timezone.utc), Decimal(str(9 + day)), Decimal(str(11 + day)), Decimal(str(8 + day)), Decimal(str(10 + day)), day * 100, "fake")
+        for day in range(1, 6)
+    ]
+    weekly = aggregate_candles(candles, "1W")
+    assert len(weekly) == 2
+    assert weekly[0].open == Decimal("10")
+    assert weekly[0].close == Decimal("14")
+    assert weekly[0].volume == 1000

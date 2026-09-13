@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from .container import repository
 from .domain import ScanCondition
-from .scanner import FIELD_CATALOG, StrictScanner
+from .scanner import FIELD_CATALOG, TIMEFRAMES, StrictScanner
 
 ROOT = Path(__file__).resolve().parents[2]
 WEB_ROOT = ROOT / "web"
@@ -37,7 +37,7 @@ class ConditionRequest(BaseModel):
 
 
 class ScanRequest(BaseModel):
-    timeframe: Literal["1D"] = "1D"
+    timeframe: Literal["1D", "1W", "1M", "3M", "6M", "1Y"] = "1D"
     match_mode: Literal["all", "any"] = "all"
     conditions: list[ConditionRequest] = Field(min_length=1, max_length=12)
 
@@ -55,7 +55,7 @@ def home() -> FileResponse:
 @app.get("/api/config")
 def scanner_config() -> dict:
     return {
-        "timeframes": [{"value": "1D", "label": "Daily"}],
+        "timeframes": [{"value": value, "label": label} for value, label in TIMEFRAMES.items()],
         "fields": [{"value": value, "label": label} for value, label in FIELD_CATALOG.items()],
         "operators": [
             {"value": ">", "label": "is above"}, {"value": ">=", "label": "is at least"},

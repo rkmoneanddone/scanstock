@@ -11,14 +11,15 @@ from .domain import Candle, ScanCondition
 
 FIELD_CATALOG = {
     "open": "Open Price", "high": "High Price", "low": "Low Price", "close": "Close Price", "volume": "Volume",
-    "change_pct": "Daily Change %", "range_pct": "Daily Range %", "rsi14": "RSI (14)",
+    "change_pct": "Period Change %", "range_pct": "Period Range %", "rsi14": "RSI (14)",
     "sma20": "SMA (20)", "sma50": "SMA (50)", "sma200": "SMA (200)",
-    "volume_ratio20": "Volume / 20-Day Average", "previous_high20": "Previous 20-Day High",
-    "previous_low20": "Previous 20-Day Low", "distance_52w_high_pct": "Distance From 52-Week High %",
-    "distance_52w_low_pct": "Distance From 52-Week Low %", "doji": "Doji Pattern",
+    "volume_ratio20": "Volume / 20-Period Average", "previous_high20": "Previous 20-Period High",
+    "previous_low20": "Previous 20-Period Low", "distance_52w_high_pct": "Distance From 52-Period High %",
+    "distance_52w_low_pct": "Distance From 52-Period Low %", "doji": "Doji Pattern",
     "bullish_engulfing": "Bullish Engulfing", "bearish_engulfing": "Bearish Engulfing", "nr7": "Narrowest Range in 7 Days",
 }
 OPERATORS = {">": operator.gt, ">=": operator.ge, "<": operator.lt, "<=": operator.le, "=": operator.eq, "!=": operator.ne}
+TIMEFRAMES = {"1D": "Daily", "1W": "Weekly", "1M": "Monthly", "3M": "3 Months", "6M": "6 Months", "1Y": "Yearly"}
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,10 +53,10 @@ class MetricEngine:
             prior20 = candles[-21:-1]
             metrics["previous_high20"] = max(c.high for c in prior20)
             metrics["previous_low20"] = min(c.low for c in prior20)
-        if len(candles) >= 252:
-            year = candles[-252:]
-            high52 = max(c.high for c in year)
-            low52 = min(c.low for c in year)
+        if len(candles) >= 52:
+            window52 = candles[-52:]
+            high52 = max(c.high for c in window52)
+            low52 = min(c.low for c in window52)
             metrics["distance_52w_high_pct"] = ((high52 - current.close) / high52) * 100 if high52 else Decimal(0)
             metrics["distance_52w_low_pct"] = ((current.close - low52) / low52) * 100 if low52 else Decimal(0)
         rsi = calculate_rsi(closes)
@@ -79,15 +80,16 @@ class StrictScanner:
         self.repository = repository
 
     def run(self, timeframe: str, conditions: list[ScanCondition], match_mode: str = "all") -> list[dict]:
-        if timeframe != "1D":
-            raise ValueError("V1 currently supports Daily candles only")
+        if timeframe not in TIMEFRAMES:
+            raise ValueError("Unsupported timeframe")
         if not conditions:
             raise ValueError("At least one condition is required")
         if match_mode not in {"all", "any"}:
             raise ValueError("Match mode must be all or any")
         self._validate(conditions)
         matches: list[dict] = []
-        for candles in self.repository.candle_series(timeframe).values():
+        for daily_candles in self.repository.candle_series("1D").values():
+            candles = aggregate_candles(daily_candles, timeframe)
             stock = MetricEngine.evaluate(candles)
             if stock is None:
                 continue
@@ -132,3 +134,31 @@ def calculate_rsi(values: list[float], period: int = 14) -> Decimal | None:
     if average_loss == 0:
         return Decimal(100)
     return Decimal(str(100 - (100 / (1 + average_gain / average_loss))))
+
+
+def aggregate_candles(candles: list[Candle], timeframe: str) -> list[Candle]:
+    if timeframe == "1D":
+        return candles
+    buckets: dict[tuple[int, ...], list[Candle]] = {}
+    for candle in candles:
+        dt = candle.timestamp
+        if timeframe == "1W":
+            iso = dt.isocalendar(); key = (iso.year, iso.week)
+        elif timeframe == "1M":
+            key = (dt.year, dt.month)
+        elif timeframe == "3M":
+            key = (dt.year, (dt.month - 1) // 3)
+        elif timeframe == "6M":
+            key = (dt.year, (dt.month - 1) // 6)
+        else:
+            key = (dt.year,)
+        buckets.setdefault(key, []).append(candle)
+    result: list[Candle] = []
+    for period in buckets.values():
+        first, last = period[0], period[-1]
+        result.append(Candle(
+            symbol=last.symbol, timeframe=timeframe, timestamp=last.timestamp,
+            open=first.open, high=max(item.high for item in period), low=min(item.low for item in period),
+            close=last.close, volume=sum(item.volume for item in period), provider=last.provider,
+        ))
+    return result

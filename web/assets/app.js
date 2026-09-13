@@ -7,6 +7,7 @@ const number = (value, digits=2) => value == null ? '—' : Number(value).toLoca
 async function loadApp() {
   const [configResponse, statusResponse] = await Promise.all([fetch('/api/config'), fetch('/api/status')]);
   state.config = await configResponse.json();
+  $('timeframe').innerHTML = optionList(state.config.timeframes, '1D');
   const status = await statusResponse.json();
   $('status').textContent = `${status.loaded_stocks}/${status.configured_stocks} stocks ready · ${status.total_candles.toLocaleString()} candles`;
   renderCategories(); renderPresets(); resetBuilder();
@@ -22,7 +23,7 @@ function renderCategories() {
 
 function renderPresets() {
   const presets = state.config.presets.filter(item => state.category === 'All' || item.category === state.category);
-  $('preset-grid').innerHTML = presets.map((item, index) => `<article class="preset-card">
+  $('preset-grid').innerHTML = presets.map(item => `<article class="preset-card" data-category="${item.category}">
     <span>${item.category}</span><h3>${item.name}</h3><p>${item.description}</p>
     <button class="preset-button" data-name="${item.name}" type="button">Use scanner <b>→</b></button>
   </article>`).join('');
@@ -64,9 +65,16 @@ async function runScan(name='Custom scanner') {
   const missingValue = state.conditions.some(condition => condition.compare_mode === 'value' && (condition.compare_value === null || condition.compare_value === ''));
   if (missingValue) { $('builder-message').textContent = 'Enter a fixed value for every value-based condition.'; return; }
   $('result-count').textContent = 'Scanning…'; $('active-scan').textContent = name;
+  $('loading-detail').textContent = `${$('timeframe').selectedOptions[0].text} · ${name}`;
+  $('loading').hidden = false;
   const payload = { timeframe:$('timeframe').value, match_mode:$('match-mode').value, conditions:state.conditions };
-  const response = await fetch('/api/scan', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
-  const data = await response.json();
+  let response, data;
+  try {
+    response = await fetch('/api/scan', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    data = await response.json();
+  } catch (error) {
+    $('result-count').textContent = 'Scan failed'; $('empty').textContent = 'Unable to reach the scanner.'; $('empty').hidden = false; return;
+  } finally { $('loading').hidden = true; }
   if (!response.ok) { $('result-count').textContent = 'Scan failed'; $('empty').textContent = data.detail || 'Unable to run scan.'; $('empty').hidden = false; return; }
   state.results = data.matches; state.page = 1;
   $('result-count').textContent = `${data.match_count} matching stocks`;
@@ -84,7 +92,7 @@ function renderResults() {
   });
   const pages = Math.max(1, Math.ceil(rows.length / state.pageSize)); state.page = Math.min(state.page, pages);
   const start = (state.page - 1) * state.pageSize, visible = rows.slice(start, start + state.pageSize);
-  $('results-body').innerHTML = visible.map(row => `<tr><td>${row.symbol}</td><td>${new Date(row.timestamp).toLocaleDateString('en-IN')}</td><td>${number(row.open)}</td><td>${number(row.high)}</td><td>${number(row.low)}</td><td>${number(row.close)}</td><td class="${row.change_pct >= 0 ? 'positive' : 'negative'}">${number(row.change_pct)}%</td><td>${number(row.rsi14,1)}</td><td>${number(row.volume,0)}</td></tr>`).join('');
+  $('results-body').innerHTML = visible.map(row => { const tone = row.change_pct > 0 ? 'positive' : row.change_pct < 0 ? 'negative' : 'neutral'; return `<tr><td>${row.symbol}</td><td>${new Date(row.timestamp).toLocaleDateString('en-IN')}</td><td>${number(row.open)}</td><td>${number(row.high)}</td><td>${number(row.low)}</td><td class="${tone}">${number(row.close)}</td><td class="${tone}">${row.change_pct > 0 ? '+' : ''}${number(row.change_pct)}%</td><td>${number(row.rsi14,1)}</td><td>${number(row.volume,0)}</td></tr>`; }).join('');
   $('page-range').textContent = rows.length ? `${start + 1}–${Math.min(start + state.pageSize, rows.length)} of ${rows.length}` : '';
   $('page-number').textContent = `Page ${state.page} of ${pages}`;
   $('previous-page').disabled = state.page === 1; $('next-page').disabled = state.page === pages;

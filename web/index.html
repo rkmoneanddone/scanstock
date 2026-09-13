@@ -11,7 +11,7 @@
   </header>
   <main>
     <section class="intro">
-      <div><h1>Stock Scanner</h1><p>Scan the latest completed Daily candle using transparent OHLCV rules.</p></div>
+      <div><h1>Stock Scanner</h1><p>Scan the latest completed candle using transparent OHLCV rules.</p></div>
       <span class="badge">Local database</span>
     </section>
 
@@ -30,7 +30,7 @@
         <button id="reset" class="button secondary" type="button">Reset</button>
       </div>
       <div class="builder-toolbar">
-        <label><span>Timeframe</span><select id="timeframe"><option value="1D">Daily</option></select></label>
+        <label><span>Timeframe</span><select id="timeframe"></select></label>
         <label><span>Stocks must match</span><select id="match-mode"><option value="all">ALL conditions</option><option value="any">ANY condition</option></select></label>
         <button id="add-condition" class="button secondary add-button" type="button">+ Add condition</button>
       </div>
@@ -75,6 +75,9 @@
       </div>
     </section>
   </main>
+  <div id="loading" class="loading" hidden role="status" aria-live="polite">
+    <div class="loading-card"><span class="spinner"></span><strong>Scanning stocks…</strong><small id="loading-detail">Applying your filters</small></div>
+  </div>
   <script src="/assets/app.js"></script>
 </body>
 </html>
