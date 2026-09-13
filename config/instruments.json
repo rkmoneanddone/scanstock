@@ -1,0 +1,23 @@
+[
+  {"symbol":"RELIANCE","security_id":"2885","display_name":"Reliance Industries","exchange_segment":"NSE_EQ","instrument_type":"EQUITY"},
+  {"symbol":"TCS","security_id":"11536","display_name":"Tata Consultancy Services","exchange_segment":"NSE_EQ","instrument_type":"EQUITY"},
+  {"symbol":"HDFCBANK","security_id":"1333","display_name":"HDFC Bank","exchange_segment":"NSE_EQ","instrument_type":"EQUITY"},
+  {"symbol":"ICICIBANK","security_id":"4963","display_name":"ICICI Bank","exchange_segment":"NSE_EQ","instrument_type":"EQUITY"},
+  {"symbol":"INFY","security_id":"1594","display_name":"Infosys","exchange_segment":"NSE_EQ","instrument_type":"EQUITY"},
+  {"symbol":"BHARTIARTL","security_id":"10604","display_name":"Bharti Airtel","exchange_segment":"NSE_EQ","instrument_type":"EQUITY"},
+  {"symbol":"SBIN","security_id":"3045","display_name":"State Bank of India","exchange_segment":"NSE_EQ","instrument_type":"EQUITY"},
+  {"symbol":"ITC","security_id":"1660","display_name":"ITC","exchange_segment":"NSE_EQ","instrument_type":"EQUITY"},
+  {"symbol":"LT","security_id":"11483","display_name":"Larsen & Toubro","exchange_segment":"NSE_EQ","instrument_type":"EQUITY"},
+  {"symbol":"HINDUNILVR","security_id":"1394","display_name":"Hindustan Unilever","exchange_segment":"NSE_EQ","instrument_type":"EQUITY"},
+  {"symbol":"BAJAJFINSV","security_id":"16675","display_name":"Bajaj Finserv","exchange_segment":"NSE_EQ","instrument_type":"EQUITY"},
+  {"symbol":"MARUTI","security_id":"10999","display_name":"Maruti Suzuki","exchange_segment":"NSE_EQ","instrument_type":"EQUITY"},
+  {"symbol":"KOTAKBANK","security_id":"1922","display_name":"Kotak Mahindra Bank","exchange_segment":"NSE_EQ","instrument_type":"EQUITY"},
+  {"symbol":"AXISBANK","security_id":"5900","display_name":"Axis Bank","exchange_segment":"NSE_EQ","instrument_type":"EQUITY"},
+  {"symbol":"SUNPHARMA","security_id":"3351","display_name":"Sun Pharmaceutical","exchange_segment":"NSE_EQ","instrument_type":"EQUITY"},
+  {"symbol":"TITAN","security_id":"3506","display_name":"Titan","exchange_segment":"NSE_EQ","instrument_type":"EQUITY"},
+  {"symbol":"ULTRACEMCO","security_id":"11532","display_name":"UltraTech Cement","exchange_segment":"NSE_EQ","instrument_type":"EQUITY"},
+  {"symbol":"NTPC","security_id":"11630","display_name":"NTPC","exchange_segment":"NSE_EQ","instrument_type":"EQUITY"},
+  {"symbol":"POWERGRID","security_id":"14977","display_name":"Power Grid Corporation of India","exchange_segment":"NSE_EQ","instrument_type":"EQUITY"},
+  {"symbol":"M&M","security_id":"2031","display_name":"Mahindra & Mahindra","exchange_segment":"NSE_EQ","instrument_type":"EQUITY"}
+]
+

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ScanStock</title>
+  <link rel="stylesheet" href="/assets/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">S</span><span>ScanStock</span></div>
+    <div class="status" id="status">Loading market database…</div>
+  </header>
+
+  <main>
+    <section class="intro">
+      <div>
+        <h1>Stock Scanner</h1>
+        <p>Choose what the latest Daily candle must satisfy.</p>
+      </div>
+      <span class="badge">Local database</span>
+    </section>
+
+    <section class="panel" aria-labelledby="condition-title">
+      <div class="panel-heading">
+        <div>
+          <span class="eyebrow">CONDITION 1</span>
+          <h2 id="condition-title">What stocks do you want to find?</h2>
+        </div>
+        <button id="reset" class="button secondary" type="button">Reset</button>
+      </div>
+
+      <div class="examples">
+        <span>Quick examples:</span>
+        <button class="example" data-example="green" type="button">Green candle</button>
+        <button class="example" data-example="price" type="button">Close above ₹1,000</button>
+        <button class="example" data-example="volume" type="button">Volume above 10 lakh</button>
+      </div>
+      <form id="scanner-form" class="condition-builder">
+        <span class="sentence-start">Find stocks where</span>
+        <label><span>Timeframe</span><select id="timeframe"><option value="1D">Daily</option></select></label>
+        <label><span>Data</span><select id="field"><option value="close">Close price</option><option value="open">Open price</option><option value="high">High price</option><option value="low">Low price</option><option value="volume">Volume</option></select></label>
+        <label><span>Relationship</span><select id="operator"><option value=">">is above</option><option value=">=">is at least</option><option value="<">is below</option><option value="<=">is at most</option><option value="=">equals</option><option value="!=">does not equal</option></select></label>
+        <label><span>Compare against</span><select id="compare-mode"><option value="field">Another candle value</option><option value="value">A number</option></select></label>
+        <label id="field-box"><span>Candle value</span><select id="compare-field"><option value="open">Open price</option><option value="close">Close price</option><option value="high">High price</option><option value="low">Low price</option><option value="volume">Volume</option></select></label>
+        <label id="value-box" hidden><span>Number</span><input id="compare-value" type="number" step="any" placeholder="For example: 1000"></label>
+        <button class="button primary" type="submit">Find matching stocks</button>
+      </form>
+      <div class="condition-preview"><strong id="preview">Daily Close is above Daily Open</strong><span id="explanation">Finds stocks whose latest Daily candle is green.</span></div>
+    </section>
+
+    <section class="panel results-panel" aria-labelledby="results-title">
+      <div class="panel-heading">
+        <div><span class="eyebrow">RESULTS</span><h2 id="results-title">Matching stocks</h2></div>
+        <span class="result-count" id="result-count">Not scanned</span>
+      </div>
+      <div class="empty" id="empty">Run the condition to see matching stocks.</div>
+      <div class="table-wrap" id="table-wrap" hidden>
+        <table><thead><tr><th>Symbol</th><th>Date</th><th>Open</th><th>High</th><th>Low</th><th>Close</th><th>Volume</th></tr></thead><tbody id="results-body"></tbody></table>
+      </div>
+    </section>
+  </main>
+  <script src="/assets/app.js"></script>
+</body>
+</html>
