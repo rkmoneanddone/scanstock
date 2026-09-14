@@ -55,6 +55,7 @@ FIELD_CATALOG = {
 OPERATORS = {">": operator.gt, ">=": operator.ge, "<": operator.lt, "<=": operator.le, "=": operator.eq, "!=": operator.ne}
 TIMEFRAMES = {"1D": "Daily", "1W": "Weekly", "1M": "Monthly", "3M": "3 Months", "6M": "6 Months", "1Y": "Yearly"}
 DAILY_HISTORY_LIMITS = {"1D": 260, "1W": 1600, "1M": 6500, "3M": 6500, "6M": 6500, "1Y": 6500}
+ATH_RECENT_DAILY_LIMITS = {"1D": 90, "1W": 500, "1M": 2000, "3M": 6500, "6M": 6500, "1Y": 6500}
 METRIC_SCHEMA_VERSION = Decimal(4)
 
 
@@ -161,16 +162,22 @@ class StrictScanner:
         if ath_required:
             enriched = []
             for stock in evaluated:
-                if stock.metrics.get("ath_retest_rule_version") != Decimal(3):
+                if stock.metrics.get("ath_retest_rule_version") != Decimal(4):
                     previous_ath = self.repository.previous_all_time_high(stock.candle.symbol, timeframe)
                     series = self.repository.candles_for_symbol(
-                        stock.candle.symbol, "1D", max(6500, DAILY_HISTORY_LIMITS[timeframe])
+                        stock.candle.symbol, "1D", ATH_RECENT_DAILY_LIMITS[timeframe]
                     )
                     aggregated = aggregate_candles(series, timeframe)
+                    aggregated = aggregated[-62:]
+                    history_baseline = self.repository.previous_all_time_high(
+                        stock.candle.symbol, timeframe, aggregated[0].timestamp
+                    ) if aggregated else None
                     breakout_reference = self.repository.previous_all_time_high(
                         stock.candle.symbol, timeframe, aggregated[-2].timestamp
                     ) if len(aggregated) >= 2 else None
-                    add_ath_interaction_metrics(aggregated, stock.metrics, previous_ath, breakout_reference)
+                    add_ath_interaction_metrics(
+                        aggregated, stock.metrics, previous_ath, breakout_reference, history_baseline
+                    )
                     enriched.append((stock.candle, stock.metrics))
             self.repository.save_metric_snapshots(timeframe, enriched)
         matches: list[dict] = []
@@ -301,7 +308,7 @@ class StrictScanner:
 
 def add_ath_interaction_metrics(
     candles: list[Candle], metrics: dict[str, Decimal], previous_ath: Decimal | None,
-    breakout_reference: Decimal | None,
+    breakout_reference: Decimal | None, history_baseline: Decimal | None = None,
 ) -> None:
     """Add deterministic ATH visit, breakout and immediate-retest signals."""
     for key in (
@@ -315,7 +322,7 @@ def add_ath_interaction_metrics(
         "ath_approach_count": Decimal(0), "ath_distance_below_pct": Decimal(0),
         "distance_from_previous_ath_pct": Decimal(0), "ath_retest_distance_pct": Decimal(0),
         "ath_retest_candles_above": Decimal(0), "ath_retest_advance_pct": Decimal(0),
-        "ath_retest_rule_version": Decimal(3),
+        "ath_retest_rule_version": Decimal(4),
     })
     if not candles or previous_ath is None or previous_ath <= 0:
         return
@@ -355,7 +362,7 @@ def add_ath_interaction_metrics(
     # Genuine ATH retest: locate an earlier ATH breakout, require at least five
     # consecutive closes above that old ATH, a 5%+ advance away from it, and only
     # then allow the latest candle to return within 2% while closing above support.
-    rolling_ath = candles[0].high
+    rolling_ath = max(candles[0].high, history_baseline or candles[0].high)
     valid_retest = None
     for index in range(1, len(candles) - 5):
         candle = candles[index]
@@ -364,7 +371,8 @@ def add_ath_interaction_metrics(
             post_breakout_closes = candles[index:-1]
             held = len(post_breakout_closes)
             never_closed_below = all(held_candle.close >= old_ath for held_candle in post_breakout_closes)
-            if held >= 5 and never_closed_below:
+            bullish_context = "sma50" in metrics and current.close >= metrics["sma50"]
+            if held >= 5 and never_closed_below and bullish_context:
                 interim = candles[index + 5:-1]
                 maximum = max((item.high for item in interim), default=candle.high)
                 advance = ((maximum / old_ath) - 1) * 100
