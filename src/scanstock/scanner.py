@@ -44,7 +44,7 @@ FIELD_CATALOG = {
 }
 OPERATORS = {">": operator.gt, ">=": operator.ge, "<": operator.lt, "<=": operator.le, "=": operator.eq, "!=": operator.ne}
 TIMEFRAMES = {"1D": "Daily", "1W": "Weekly", "1M": "Monthly", "3M": "3 Months", "6M": "6 Months", "1Y": "Yearly"}
-DAILY_HISTORY_LIMITS = {"1D": 600, "1W": 1600, "1M": 6500, "3M": 6500, "6M": 6500, "1Y": 6500}
+DAILY_HISTORY_LIMITS = {"1D": 260, "1W": 1600, "1M": 6500, "3M": 6500, "6M": 6500, "1Y": 6500}
 
 
 @dataclass(frozen=True, slots=True)
@@ -188,19 +188,21 @@ class StrictScanner:
             if cached is not None:
                 return cached
             saved = self.repository.metric_snapshots(timeframe)
-            if len(saved) == self.repository.loaded_symbol_count("1D"):
+            missing_symbols = self.repository.symbols_without_metric_snapshots(timeframe)
+            if not missing_symbols:
                 result = tuple(EvaluatedStock(candle, metrics) for candle, metrics in saved.values())
                 self._evaluated_by_timeframe[timeframe] = result
                 return result
-            daily_series = self.repository.candle_series("1D", DAILY_HISTORY_LIMITS[timeframe])
-            evaluated = []
+            daily_series = self.repository.candle_series_for_symbols(
+                missing_symbols, "1D", DAILY_HISTORY_LIMITS[timeframe]
+            )
+            missing_symbol_set = set(missing_symbols)
+            evaluated = [EvaluatedStock(candle, metrics) for candle, metrics in saved.values()]
             for daily_candles in daily_series.values():
-                symbol = daily_candles[-1].symbol
-                existing = saved.get(symbol)
-                stock = EvaluatedStock(*existing) if existing is not None else MetricEngine.evaluate(aggregate_candles(daily_candles, timeframe))
+                stock = MetricEngine.evaluate(aggregate_candles(daily_candles, timeframe))
                 if stock is not None:
                     evaluated.append(stock)
-            missing = [(stock.candle, stock.metrics) for stock in evaluated if stock.candle.symbol not in saved]
+            missing = [(stock.candle, stock.metrics) for stock in evaluated if stock.candle.symbol in missing_symbol_set]
             self.repository.save_metric_snapshots(timeframe, missing)
             result = tuple(evaluated)
             self._evaluated_by_timeframe[timeframe] = result
