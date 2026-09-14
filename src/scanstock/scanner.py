@@ -161,24 +161,26 @@ class StrictScanner:
         )
         if ath_required:
             enriched = []
-            for stock in evaluated:
-                if stock.metrics.get("ath_retest_rule_version") != Decimal(4):
-                    previous_ath = self.repository.previous_all_time_high(stock.candle.symbol, timeframe)
-                    series = self.repository.candles_for_symbol(
-                        stock.candle.symbol, "1D", ATH_RECENT_DAILY_LIMITS[timeframe]
-                    )
-                    aggregated = aggregate_candles(series, timeframe)
-                    aggregated = aggregated[-62:]
-                    history_baseline = self.repository.previous_all_time_high(
-                        stock.candle.symbol, timeframe, aggregated[0].timestamp
-                    ) if aggregated else None
-                    breakout_reference = self.repository.previous_all_time_high(
-                        stock.candle.symbol, timeframe, aggregated[-2].timestamp
-                    ) if len(aggregated) >= 2 else None
-                    add_ath_interaction_metrics(
-                        aggregated, stock.metrics, previous_ath, breakout_reference, history_baseline
-                    )
-                    enriched.append((stock.candle, stock.metrics))
+            pending = [stock for stock in evaluated
+                       if stock.metrics.get("ath_retest_rule_version") != Decimal(4)]
+            recent_series = self.repository.candle_series_for_symbols(
+                [stock.candle.symbol for stock in pending], "1D", ATH_RECENT_DAILY_LIMITS[timeframe]
+            )
+            for stock in pending:
+                previous_ath = self.repository.previous_all_time_high(stock.candle.symbol, timeframe)
+                series = recent_series.get(stock.candle.symbol, [])
+                aggregated = aggregate_candles(series, timeframe)
+                aggregated = aggregated[-62:]
+                history_baseline = self.repository.previous_all_time_high(
+                    stock.candle.symbol, timeframe, aggregated[0].timestamp
+                ) if aggregated else None
+                breakout_reference = self.repository.previous_all_time_high(
+                    stock.candle.symbol, timeframe, aggregated[-2].timestamp
+                ) if len(aggregated) >= 2 else None
+                add_ath_interaction_metrics(
+                    aggregated, stock.metrics, previous_ath, breakout_reference, history_baseline
+                )
+                enriched.append((stock.candle, stock.metrics))
             self.repository.save_metric_snapshots(timeframe, enriched)
         matches: list[dict] = []
         for stock in evaluated:
