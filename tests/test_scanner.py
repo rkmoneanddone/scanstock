@@ -164,6 +164,24 @@ def test_ath_breakout_retest_rejects_close_below_old_ath():
     assert stock.metrics["ath_breakout_retest"] == 0
 
 
+def test_ath_retest_rejects_return_after_intervening_breakdown():
+    start = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    rows = [
+        (95, 100, 94, 96), (99, 104, 98, 103), (103, 107, 102, 106),
+        (106, 110, 105, 109), (109, 111, 107, 110), (110, 112, 108, 109),
+        (109, 110, 97, 99),  # The old ATH failed on a closing basis.
+        (101, 103, 99, 102),
+    ]
+    candles = [
+        Candle("BROKEN", "1D", start + timedelta(days=index), *(Decimal(str(value)) for value in row), 100, "fake")
+        for index, row in enumerate(rows)
+    ]
+    stock = MetricEngine.evaluate(candles)
+    assert stock is not None
+    add_ath_interaction_metrics(candles, stock.metrics, Decimal("112"), Decimal("110"))
+    assert stock.metrics["ath_breakout_retest"] == 0
+
+
 def test_vcp_setup_exposes_contractions_volume_and_pivot_evidence():
     start = datetime(2025, 1, 1, tzinfo=timezone.utc)
     candles = []
