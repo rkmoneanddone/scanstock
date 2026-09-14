@@ -183,7 +183,8 @@ async function loadChart(row, timeframe) {
 
 function candlestickSvg(candles, row) {
   if (!candles.length) return '<div class="chart-error">No chart data available.</div>';
-  const width = 920, height = 330, left = 58, right = 14, top = 16, priceBottom = 242, volumeTop = 258, bottom = 306;
+  const width = 920, height = 410, left = 58, right = 14, top = 16, priceBottom = 230;
+  const volumeTop = 244, volumeBottom = 292, rsiTop = 310, rsiBottom = 382, bottom = volumeBottom;
   const innerWidth = width - left - right, priceHeight = priceBottom - top, volumeHeight = bottom - volumeTop;
   const highest = Math.max(...candles.map(c => c.high)), lowest = Math.min(...candles.map(c => c.low));
   const priceSpan = highest - lowest || 1, maxVolume = Math.max(...candles.map(c => c.volume)) || 1;
@@ -248,7 +249,27 @@ function candlestickSvg(candles, row) {
   const firstDate = new Date(candles[0].timestamp).toLocaleDateString('en-IN');
   const lastDate = new Date(candles[candles.length-1].timestamp).toLocaleDateString('en-IN');
   const legend = Object.entries(maColors).map(([period,color], index) => `<g transform="translate(${left+index*82},${top+2})"><line stroke="${color}" stroke-width="2" x1="0" y1="0" x2="16" y2="0"/><text x="20" y="4">${maType} ${period}</text></g>`).join('');
-  return `<svg class="stock-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="Candlestick and volume chart"><g class="chart-grid">${grid}<line x1="${left}" y1="${priceBottom}" x2="${width-right}" y2="${priceBottom}"/></g>${marks}${overlays}${annotations}${scanMarker}<g class="chart-legend">${legend}</g><g class="chart-dates"><text x="${left}" y="${height-7}">${firstDate}</text><text x="${width-right}" y="${height-7}" text-anchor="end">${lastDate}</text><text x="${left-7}" y="${volumeTop+12}" text-anchor="end">VOL</text></g></svg>`;
+  const rsiValues = rsiSeries(closes, 14);
+  const rsiY = value => rsiTop + (100 - value) / 100 * (rsiBottom - rsiTop);
+  const rsiPoints = rsiValues.map((value, index) => value == null ? null : `${x(index)},${rsiY(value)}`).filter(Boolean);
+  const rsiGuides = [70,50,30].map(value => `<line class="rsi-guide ${value === 50 ? 'middle' : ''}" x1="${left}" y1="${rsiY(value)}" x2="${width-right}" y2="${rsiY(value)}"/><text x="${left-7}" y="${rsiY(value)+4}" text-anchor="end">${value}</text>`).join('');
+  const rsiChart = `<g class="rsi-panel">${rsiGuides}<text x="${left-7}" y="${rsiTop+10}" text-anchor="end">RSI</text>${rsiPoints.length > 1 ? `<polyline class="rsi-line" points="${rsiPoints.join(' ')}"/>` : ''}</g>`;
+  return `<svg class="stock-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="Candlestick, volume and RSI chart"><g class="chart-grid">${grid}<line x1="${left}" y1="${priceBottom}" x2="${width-right}" y2="${priceBottom}"/></g>${marks}${overlays}${annotations}${scanMarker}<g class="chart-legend">${legend}</g>${rsiChart}<g class="chart-dates"><text x="${left}" y="${height-7}">${firstDate}</text><text x="${width-right}" y="${height-7}" text-anchor="end">${lastDate}</text><text x="${left-7}" y="${volumeTop+12}" text-anchor="end">VOL</text></g></svg>`;
+}
+
+function rsiSeries(values, period=14) {
+  const result = Array(values.length).fill(null);
+  if (values.length <= period) return result;
+  for (let index = period; index < values.length; index += 1) {
+    let gains = 0, losses = 0;
+    for (let cursor = index - period + 1; cursor <= index; cursor += 1) {
+      const change = values[cursor] - values[cursor - 1];
+      if (change >= 0) gains += change; else losses -= change;
+    }
+    const averageGain = gains / period, averageLoss = losses / period;
+    result[index] = averageLoss === 0 ? 100 : 100 - 100 / (1 + averageGain / averageLoss);
+  }
+  return result;
 }
 
 function movingAverageSeries(values, period, method) {
