@@ -161,7 +161,7 @@ class StrictScanner:
         if ath_required:
             enriched = []
             for stock in evaluated:
-                if stock.metrics.get("ath_retest_rule_version") != Decimal(2):
+                if stock.metrics.get("ath_retest_rule_version") != Decimal(3):
                     previous_ath = self.repository.previous_all_time_high(stock.candle.symbol, timeframe)
                     series = self.repository.candles_for_symbol(
                         stock.candle.symbol, "1D", max(6500, DAILY_HISTORY_LIMITS[timeframe])
@@ -315,7 +315,7 @@ def add_ath_interaction_metrics(
         "ath_approach_count": Decimal(0), "ath_distance_below_pct": Decimal(0),
         "distance_from_previous_ath_pct": Decimal(0), "ath_retest_distance_pct": Decimal(0),
         "ath_retest_candles_above": Decimal(0), "ath_retest_advance_pct": Decimal(0),
-        "ath_retest_rule_version": Decimal(2),
+        "ath_retest_rule_version": Decimal(3),
     })
     if not candles or previous_ath is None or previous_ath <= 0:
         return
@@ -361,12 +361,10 @@ def add_ath_interaction_metrics(
         candle = candles[index]
         old_ath = rolling_ath
         if candle.close > old_ath:
-            held = 0
-            for held_candle in candles[index:-1]:
-                if held_candle.close < old_ath:
-                    break
-                held += 1
-            if held >= 5:
+            post_breakout_closes = candles[index:-1]
+            held = len(post_breakout_closes)
+            never_closed_below = all(held_candle.close >= old_ath for held_candle in post_breakout_closes)
+            if held >= 5 and never_closed_below:
                 interim = candles[index + 5:-1]
                 maximum = max((item.high for item in interim), default=candle.high)
                 advance = ((maximum / old_ath) - 1) * 100
