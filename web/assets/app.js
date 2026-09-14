@@ -5,6 +5,41 @@ const optionList = (items, selected) => items.map(item => `<option value="${item
 const number = (value, digits=2) => value == null ? '—' : Number(value).toLocaleString('en-IN', { maximumFractionDigits:digits });
 const timeframeName = () => $('timeframe').selectedOptions[0]?.text || 'Daily';
 
+let marketUpdateTimer = null;
+
+async function refreshMarketUpdateStatus() {
+  try {
+    const response = await fetch('/api/market-update');
+    if (!response.ok) return;
+    const job = await response.json();
+    const button = $('market-update');
+    button.disabled = job.running;
+    button.textContent = job.running ? `Updating ${job.processed}/${job.total || '…'}` : 'Update Market Data';
+    $('market-update-status').textContent = job.message;
+    $('market-update-status').classList.toggle('failed', Boolean(job.error));
+    if (job.running && !marketUpdateTimer) marketUpdateTimer = setInterval(refreshMarketUpdateStatus, 2000);
+    if (!job.running && marketUpdateTimer) {
+      clearInterval(marketUpdateTimer); marketUpdateTimer = null; loadDatabaseStatus();
+    }
+  } catch (error) { console.error(error); }
+}
+
+async function startMarketUpdate() {
+  const button = $('market-update');
+  button.disabled = true;
+  $('market-update-status').textContent = 'Starting market update…';
+  try {
+    const response = await fetch('/api/market-update', {method:'POST'});
+    const data = await response.json();
+    if (!response.ok && response.status !== 409) throw new Error(data.detail || 'Could not start market update');
+    await refreshMarketUpdateStatus();
+  } catch (error) {
+    button.disabled = false;
+    $('market-update-status').textContent = error.message;
+    $('market-update-status').classList.add('failed');
+  }
+}
+
 function periodText(text) {
   const code = $('timeframe').value;
   const units = { '1D':'Day', '1W':'Week', '1M':'Month', '1Y':'Year' };
@@ -33,7 +68,7 @@ async function loadApp() {
   const remainingLoaderTime = 500 - (performance.now() - loaderStarted);
   if (remainingLoaderTime > 0) await new Promise(resolve => setTimeout(resolve, remainingLoaderTime));
   renderCategories(); renderPresets(); resetBuilder();
-  loadDatabaseStatus();
+  loadDatabaseStatus(); refreshMarketUpdateStatus();
 }
 
 async function loadDatabaseStatus() {
@@ -308,6 +343,7 @@ function escapeXml(value) {
 function closeDetails() { $('detail-modal').hidden = true; document.body.classList.remove('modal-open'); }
 
 $('scanner-form').addEventListener('submit', event => { event.preventDefault(); runScan(); });
+$('market-update').addEventListener('click', startMarketUpdate);
 $('reset').addEventListener('click', resetBuilder);
 $('add-condition').addEventListener('click', () => { if (state.conditions.length < 12) { state.conditions.push(blankCondition()); renderBuilder(); } });
 $('timeframe').addEventListener('change', () => { renderCategories(); renderPresets(); renderBuilder(); });
