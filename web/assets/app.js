@@ -202,10 +202,11 @@ function candlestickSvg(candles, row) {
     const date = new Date(candle.timestamp).toLocaleDateString('en-IN');
     return `<g><title>${date} · O ${number(candle.open)} · H ${number(candle.high)} · L ${number(candle.low)} · C ${number(candle.close)} · Vol ${number(candle.volume,0)}</title><line class="candle-wick" stroke="${tone}" x1="${candleX}" y1="${highY}" x2="${candleX}" y2="${lowY}"/><rect fill="${tone}" x="${candleX-bodyWidth/2}" y="${bodyY}" width="${bodyWidth}" height="${bodyHeight}"/><rect fill="${tone}" opacity=".36" x="${candleX-bodyWidth/2}" y="${bottom-volumeHeightValue}" width="${bodyWidth}" height="${volumeHeightValue}"/></g>`;
   }).join('');
-  const emaColors = {9:'#2563eb',21:'#f59e0b',50:'#8b5cf6',200:'#475569'};
+  const maColors = {9:'#2563eb',21:'#16a34a',50:'#f59e0b',200:'#dc2626'};
+  const maType = state.activeScan.includes('WMA') ? 'WMA' : state.activeScan.includes('SMA') ? 'SMA' : 'EMA';
   const closes = candles.map(candle => candle.close);
-  const overlays = Object.entries(emaColors).map(([period, color]) => {
-    const values = emaSeries(closes, Number(period));
+  const overlays = Object.entries(maColors).map(([period, color]) => {
+    const values = movingAverageSeries(closes, Number(period), maType);
     const points = values.map((value, index) => value == null ? null : `${x(index)},${y(value)}`).filter(Boolean);
     return points.length > 1 ? `<polyline class="ema-line" stroke="${color}" points="${points.join(' ')}"/>` : '';
   }).join('');
@@ -223,13 +224,23 @@ function candlestickSvg(candles, row) {
   const scanMarker = `<g class="scan-marker"><path d="M ${latestX} ${Math.max(top+5,latestY-4)} l -5 -8 h 10 z"/><text x="${Math.min(width-right-4,latestX+9)}" y="${Math.max(top+12,latestY-14)}" text-anchor="end">${escapeXml(state.activeScan)}</text></g>`;
   const firstDate = new Date(candles[0].timestamp).toLocaleDateString('en-IN');
   const lastDate = new Date(candles[candles.length-1].timestamp).toLocaleDateString('en-IN');
-  const legend = Object.entries(emaColors).map(([period,color], index) => `<g transform="translate(${left+index*82},${top+2})"><line stroke="${color}" stroke-width="2" x1="0" y1="0" x2="16" y2="0"/><text x="20" y="4">EMA ${period}</text></g>`).join('');
+  const legend = Object.entries(maColors).map(([period,color], index) => `<g transform="translate(${left+index*82},${top+2})"><line stroke="${color}" stroke-width="2" x1="0" y1="0" x2="16" y2="0"/><text x="20" y="4">${maType} ${period}</text></g>`).join('');
   return `<svg class="stock-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="Candlestick and volume chart"><g class="chart-grid">${grid}<line x1="${left}" y1="${priceBottom}" x2="${width-right}" y2="${priceBottom}"/></g>${marks}${overlays}${annotations}${scanMarker}<g class="chart-legend">${legend}</g><g class="chart-dates"><text x="${left}" y="${height-7}">${firstDate}</text><text x="${width-right}" y="${height-7}" text-anchor="end">${lastDate}</text><text x="${left-7}" y="${volumeTop+12}" text-anchor="end">VOL</text></g></svg>`;
 }
 
-function emaSeries(values, period) {
+function movingAverageSeries(values, period, method) {
   const result = Array(values.length).fill(null);
   if (values.length < period) return result;
+  if (method === 'SMA' || method === 'WMA') {
+    const denominator = period * (period + 1) / 2;
+    for (let index = period - 1; index < values.length; index += 1) {
+      const window = values.slice(index - period + 1, index + 1);
+      result[index] = method === 'SMA'
+        ? window.reduce((sum, value) => sum + value, 0) / period
+        : window.reduce((sum, value, offset) => sum + value * (offset + 1), 0) / denominator;
+    }
+    return result;
+  }
   let ema = values.slice(0, period).reduce((sum, value) => sum + value, 0) / period;
   result[period-1] = ema;
   const multiplier = 2 / (period + 1);
