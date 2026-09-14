@@ -292,18 +292,31 @@ class SQLiteMarketRepository:
             """, (timeframe,)).fetchall()]
 
     def candle_series_for_symbols(self, symbols: Sequence[str], timeframe: str, limit_per_symbol: int) -> dict[str, list[Candle]]:
-        series: dict[str, list[Candle]] = {}
+        requested = list(dict.fromkeys(symbols))
+        series: dict[str, list[Candle]] = {symbol: [] for symbol in requested}
+        if not requested:
+            return series
         with self._lock:
-            for symbol in symbols:
-                rows = self._connection.execute("""
-                    SELECT symbol,timeframe,timestamp,open,high,low,close,volume,provider FROM candles
-                    WHERE symbol=? AND timeframe=? ORDER BY timestamp DESC LIMIT ?
-                """, (symbol, timeframe, limit_per_symbol)).fetchall()
-                series[symbol] = [Candle(
-                    symbol=row[0], timeframe=row[1], timestamp=datetime.fromisoformat(row[2]),
-                    open=Decimal(str(row[3])), high=Decimal(str(row[4])), low=Decimal(str(row[5])),
-                    close=Decimal(str(row[6])), volume=int(row[7]), provider=row[8],
-                ) for row in reversed(rows)]
+            # SQLite has a bound-parameter limit. A handful of chunked window
+            # queries replaces one query per stock while keeping each stock's
+            # latest N candles and using the covering timeframe/symbol index.
+            for offset in range(0, len(requested), 400):
+                chunk = requested[offset:offset + 400]
+                placeholders = ",".join("?" for _ in chunk)
+                rows = self._connection.execute(f"""
+                    SELECT symbol,timeframe,timestamp,open,high,low,close,volume,provider FROM (
+                        SELECT symbol,timeframe,timestamp,open,high,low,close,volume,provider,
+                               ROW_NUMBER() OVER (PARTITION BY symbol ORDER BY timestamp DESC) AS position
+                        FROM candles
+                        WHERE timeframe=? AND symbol IN ({placeholders})
+                    ) WHERE position<=? ORDER BY symbol,timestamp
+                """, (timeframe, *chunk, limit_per_symbol)).fetchall()
+                for row in rows:
+                    series[row[0]].append(Candle(
+                        symbol=row[0], timeframe=row[1], timestamp=datetime.fromisoformat(row[2]),
+                        open=Decimal(str(row[3])), high=Decimal(str(row[4])), low=Decimal(str(row[5])),
+                        close=Decimal(str(row[6])), volume=int(row[7]), provider=row[8],
+                    ))
         return series
 
     def previous_all_time_high(self, symbol: str, timeframe: str, reference_timestamp: datetime | None = None) -> Decimal | None:
