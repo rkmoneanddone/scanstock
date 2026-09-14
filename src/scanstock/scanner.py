@@ -35,6 +35,8 @@ FIELD_CATALOG = {
     "rsi_double_top": "RSI Double Top", "rsi_double_bottom": "RSI Double Bottom",
     "pattern_pivot_1": "First Pivot", "pattern_pivot_2": "Second Pivot",
     "pattern_neckline": "Pattern Neckline", "pattern_separation": "Pivot Separation",
+    "all_time_high_breakout": "All-Time High Breakout", "previous_all_time_high": "Previous All-Time High",
+    "distance_from_previous_ath_pct": "Distance From Previous All-Time High %",
     "vcp_setup": "VCP Setup Detected", "vcp_breakout": "VCP Breakout Detected",
     "vcp_contractions": "VCP Contractions", "vcp_outer_range_pct": "VCP Outer Range %",
     "vcp_middle_range_pct": "VCP Middle Range %", "vcp_inner_range_pct": "VCP Inner Range %",
@@ -45,6 +47,7 @@ FIELD_CATALOG = {
 OPERATORS = {">": operator.gt, ">=": operator.ge, "<": operator.lt, "<=": operator.le, "=": operator.eq, "!=": operator.ne}
 TIMEFRAMES = {"1D": "Daily", "1W": "Weekly", "1M": "Monthly", "3M": "3 Months", "6M": "6 Months", "1Y": "Yearly"}
 DAILY_HISTORY_LIMITS = {"1D": 260, "1W": 1600, "1M": 6500, "3M": 6500, "6M": 6500, "1Y": 6500}
+METRIC_SCHEMA_VERSION = Decimal(2)
 
 
 @dataclass(frozen=True, slots=True)
@@ -63,7 +66,7 @@ class MetricEngine:
         volumes = [c.volume for c in candles]
         metrics: dict[str, Decimal] = {
             "open": current.open, "high": current.high, "low": current.low,
-            "close": current.close, "volume": Decimal(current.volume),
+            "close": current.close, "volume": Decimal(current.volume), "__schema_version": METRIC_SCHEMA_VERSION,
         }
         previous_close = candles[-2].close if len(candles) >= 2 else None
         metrics["change_pct"] = ((current.close / previous_close) - 1) * 100 if previous_close else Decimal(0)
@@ -169,11 +172,21 @@ class StrictScanner:
             "bullish_fvg", "bearish_fvg", "volume_increasing", "volume_decreasing",
             "volume_up_price_down", "volume_down_price_up", "bearish_rsi_divergence",
             "bullish_rsi_divergence", "double_top", "double_bottom", "rsi_double_top", "rsi_double_bottom",
+            "all_time_high_breakout",
         }
         measurements = None
         if any(condition.field in pattern_fields for condition in conditions):
-            keys = ("fvg_gap_pct", "volume_trend_ratio", "price_trend_pct5", "pattern_pivot_1",
-                    "pattern_pivot_2", "pattern_neckline", "pattern_separation")
+            selected = {condition.field for condition in conditions}
+            keys = []
+            if selected & {"bullish_fvg", "bearish_fvg"}:
+                keys += ["fvg_gap_pct"]
+            if selected & {"volume_increasing", "volume_decreasing", "volume_up_price_down", "volume_down_price_up"}:
+                keys += ["volume_trend_ratio", "price_trend_pct5"]
+            if selected & {"bearish_rsi_divergence", "bullish_rsi_divergence", "double_top", "double_bottom",
+                           "rsi_double_top", "rsi_double_bottom"}:
+                keys += ["pattern_pivot_1", "pattern_pivot_2", "pattern_neckline", "pattern_separation"]
+            if "all_time_high_breakout" in selected:
+                keys += ["previous_all_time_high", "distance_from_previous_ath_pct"]
             measurements = [{"metric": FIELD_CATALOG[key], "value": float(stock.metrics[key])}
                             for key in keys if key in stock.metrics]
         return {"timeframe": TIMEFRAMES[timeframe], "checks": checks, "vcp": vcp, "measurements": measurements}
@@ -188,6 +201,12 @@ class StrictScanner:
             if cached is not None:
                 return cached
             saved = self.repository.metric_snapshots(timeframe)
+            stale_symbols = [symbol for symbol, (_, metrics) in saved.items()
+                             if metrics.get("__schema_version") != METRIC_SCHEMA_VERSION]
+            if stale_symbols:
+                self.repository.delete_metric_snapshots(stale_symbols)
+                for symbol in stale_symbols:
+                    saved.pop(symbol, None)
             missing_symbols = self.repository.symbols_without_metric_snapshots(timeframe)
             if not missing_symbols:
                 result = tuple(EvaluatedStock(candle, metrics) for candle, metrics in saved.values())
@@ -201,6 +220,12 @@ class StrictScanner:
             for daily_candles in daily_series.values():
                 stock = MetricEngine.evaluate(aggregate_candles(daily_candles, timeframe))
                 if stock is not None:
+                    previous_ath = self.repository.previous_all_time_high(stock.candle.symbol, timeframe)
+                    stock.metrics["previous_all_time_high"] = previous_ath or Decimal(0)
+                    stock.metrics["all_time_high_breakout"] = Decimal(int(previous_ath is not None and stock.candle.close > previous_ath))
+                    stock.metrics["distance_from_previous_ath_pct"] = (
+                        ((stock.candle.close / previous_ath) - 1) * 100 if previous_ath else Decimal(0)
+                    )
                     evaluated.append(stock)
             missing = [(stock.candle, stock.metrics) for stock in evaluated if stock.candle.symbol in missing_symbol_set]
             self.repository.save_metric_snapshots(timeframe, missing)
