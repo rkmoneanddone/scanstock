@@ -43,7 +43,8 @@ FIELD_CATALOG = {
     "ath_approach_count": "ATH Approach Number", "ath_distance_below_pct": "Distance Below ATH %",
     "ath_first_close_above": "First Close Above ATH", "ath_second_close_above": "Second Close Above ATH",
     "ath_breakout_retest": "ATH Breakout Retest", "ath_breakout_reference": "ATH Breakout Reference",
-    "ath_retest_distance_pct": "Retest Distance From ATH %",
+    "ath_retest_distance_pct": "Retest Distance From ATH %", "ath_retest_candles_above": "Closes Held Above ATH",
+    "ath_retest_advance_pct": "Maximum Advance Before Retest %",
     "vcp_setup": "VCP Setup Detected", "vcp_breakout": "VCP Breakout Detected",
     "vcp_contractions": "VCP Contractions", "vcp_outer_range_pct": "VCP Outer Range %",
     "vcp_middle_range_pct": "VCP Middle Range %", "vcp_inner_range_pct": "VCP Inner Range %",
@@ -160,10 +161,10 @@ class StrictScanner:
         if ath_required:
             enriched = []
             for stock in evaluated:
-                if "ath_breakout_retest" not in stock.metrics:
+                if stock.metrics.get("ath_retest_rule_version") != Decimal(2):
                     previous_ath = self.repository.previous_all_time_high(stock.candle.symbol, timeframe)
                     series = self.repository.candles_for_symbol(
-                        stock.candle.symbol, "1D", DAILY_HISTORY_LIMITS[timeframe]
+                        stock.candle.symbol, "1D", max(6500, DAILY_HISTORY_LIMITS[timeframe])
                     )
                     aggregated = aggregate_candles(series, timeframe)
                     breakout_reference = self.repository.previous_all_time_high(
@@ -235,7 +236,8 @@ class StrictScanner:
             if selected & {"ath_first_close_above", "ath_second_close_above"}:
                 keys += ["ath_breakout_reference", "distance_from_previous_ath_pct"]
             if "ath_breakout_retest" in selected:
-                keys += ["ath_breakout_reference", "ath_retest_distance_pct"]
+                keys += ["ath_breakout_reference", "ath_retest_candles_above",
+                         "ath_retest_advance_pct", "ath_retest_distance_pct"]
             measurements = [{"metric": FIELD_CATALOG[key], "value": float(stock.metrics[key])}
                             for key in keys if key in stock.metrics]
         return {"timeframe": TIMEFRAMES[timeframe], "checks": checks, "vcp": vcp, "measurements": measurements}
@@ -312,6 +314,8 @@ def add_ath_interaction_metrics(
         "ath_breakout_reference": breakout_reference or Decimal(0),
         "ath_approach_count": Decimal(0), "ath_distance_below_pct": Decimal(0),
         "distance_from_previous_ath_pct": Decimal(0), "ath_retest_distance_pct": Decimal(0),
+        "ath_retest_candles_above": Decimal(0), "ath_retest_advance_pct": Decimal(0),
+        "ath_retest_rule_version": Decimal(2),
     })
     if not candles or previous_ath is None or previous_ath <= 0:
         return
@@ -348,15 +352,35 @@ def add_ath_interaction_metrics(
         first_breakout_was_previous and current.close > breakout_reference
     ))
 
-    # Immediate post-breakout retest: latest candle trades within 2% of the old ATH,
-    # never closes below it, and follows the first confirmed close above that ATH.
-    distance = ((current.low - breakout_reference) / breakout_reference) * 100
-    metrics["ath_retest_distance_pct"] = distance
-    touched_level = current.low <= breakout_reference * Decimal("1.02")
-    held_as_support = current.close >= breakout_reference
-    metrics["ath_breakout_retest"] = Decimal(int(
-        first_breakout_was_previous and touched_level and held_as_support
-    ))
+    # Genuine ATH retest: locate an earlier ATH breakout, require at least five
+    # consecutive closes above that old ATH, a 5%+ advance away from it, and only
+    # then allow the latest candle to return within 2% while closing above support.
+    rolling_ath = candles[0].high
+    valid_retest = None
+    for index in range(1, len(candles) - 5):
+        candle = candles[index]
+        old_ath = rolling_ath
+        if candle.close > old_ath:
+            held = 0
+            for held_candle in candles[index:-1]:
+                if held_candle.close < old_ath:
+                    break
+                held += 1
+            if held >= 5:
+                interim = candles[index + 5:-1]
+                maximum = max((item.high for item in interim), default=candle.high)
+                advance = ((maximum / old_ath) - 1) * 100
+                touched = current.low <= old_ath * Decimal("1.02") and current.high >= old_ath * Decimal("0.98")
+                if advance >= Decimal(5) and touched and current.close >= old_ath:
+                    valid_retest = (old_ath, held, advance)
+        rolling_ath = max(rolling_ath, candle.high)
+    if valid_retest:
+        level, held, advance = valid_retest
+        metrics["ath_breakout_retest"] = Decimal(1)
+        metrics["ath_breakout_reference"] = level
+        metrics["ath_retest_candles_above"] = Decimal(held)
+        metrics["ath_retest_advance_pct"] = advance
+        metrics["ath_retest_distance_pct"] = ((current.low - level) / level) * 100
 
 
 def calculate_rsi(values: list[float], period: int = 14) -> Decimal | None:
