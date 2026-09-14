@@ -36,5 +36,6 @@
   {"category":"Chart Patterns","name":"Double Top","description":"Two confirmed highs within 3%, a meaningful valley, and a close below the neckline.","conditions":[{"field":"double_top","operator":"=","compare_mode":"value","compare_value":1}]},
   {"category":"Chart Patterns","name":"Double Bottom","description":"Two confirmed lows within 3%, a meaningful peak, and a close above the neckline.","conditions":[{"field":"double_bottom","operator":"=","compare_mode":"value","compare_value":1}]},
   {"category":"Divergence","name":"RSI Double Top","description":"Two RSI swing highs within five points followed by a break below the intervening RSI valley.","conditions":[{"field":"rsi_double_top","operator":"=","compare_mode":"value","compare_value":1}]},
-  {"category":"Divergence","name":"RSI Double Bottom","description":"Two RSI swing lows within five points followed by a break above the intervening RSI peak.","conditions":[{"field":"rsi_double_bottom","operator":"=","compare_mode":"value","compare_value":1}]}
+  {"category":"Divergence","name":"RSI Double Bottom","description":"Two RSI swing lows within five points followed by a break above the intervening RSI peak.","conditions":[{"field":"rsi_double_bottom","operator":"=","compare_mode":"value","compare_value":1}]},
+  {"category":"Breakouts","name":"All-Time High Breakout","description":"Latest selected-timeframe candle closes above the highest price recorded before that period.","conditions":[{"field":"all_time_high_breakout","operator":"=","compare_mode":"value","compare_value":1}]}
 ]
