@@ -150,8 +150,30 @@ class StrictScanner:
         if match_mode not in {"all", "any"}:
             raise ValueError("Match mode must be all or any")
         self._validate(conditions)
+        evaluated = self._evaluated(timeframe)
+        ath_required = any(
+            condition.field.startswith("ath_") or condition.field == "all_time_high_breakout"
+            or (condition.compare_field or "").startswith("ath_")
+            or condition.compare_field == "previous_all_time_high"
+            for condition in conditions
+        )
+        if ath_required:
+            enriched = []
+            for stock in evaluated:
+                if "ath_breakout_retest" not in stock.metrics:
+                    previous_ath = self.repository.previous_all_time_high(stock.candle.symbol, timeframe)
+                    series = self.repository.candles_for_symbol(
+                        stock.candle.symbol, "1D", DAILY_HISTORY_LIMITS[timeframe]
+                    )
+                    aggregated = aggregate_candles(series, timeframe)
+                    breakout_reference = self.repository.previous_all_time_high(
+                        stock.candle.symbol, timeframe, aggregated[-2].timestamp
+                    ) if len(aggregated) >= 2 else None
+                    add_ath_interaction_metrics(aggregated, stock.metrics, previous_ath, breakout_reference)
+                    enriched.append((stock.candle, stock.metrics))
+            self.repository.save_metric_snapshots(timeframe, enriched)
         matches: list[dict] = []
-        for stock in self._evaluated(timeframe):
+        for stock in evaluated:
             checks = [self._matches(stock.metrics, condition) for condition in conditions]
             if (all(checks) if match_mode == "all" else any(checks)):
                 candle = stock.candle
@@ -248,11 +270,6 @@ class StrictScanner:
                 aggregated = aggregate_candles(daily_candles, timeframe)
                 stock = MetricEngine.evaluate(aggregated)
                 if stock is not None:
-                    previous_ath = self.repository.previous_all_time_high(stock.candle.symbol, timeframe)
-                    breakout_reference = self.repository.previous_all_time_high(
-                        stock.candle.symbol, timeframe, aggregated[-2].timestamp
-                    ) if len(aggregated) >= 2 else None
-                    add_ath_interaction_metrics(aggregated, stock.metrics, previous_ath, breakout_reference)
                     evaluated.append(stock)
             missing = [(stock.candle, stock.metrics) for stock in evaluated if stock.candle.symbol in missing_symbol_set]
             self.repository.save_metric_snapshots(timeframe, missing)
@@ -287,7 +304,7 @@ def add_ath_interaction_metrics(
     """Add deterministic ATH visit, breakout and immediate-retest signals."""
     for key in (
         "ath_approach_first", "ath_approach_second", "ath_first_close_above",
-        "ath_second_close_above", "ath_breakout_retest",
+        "ath_second_close_above", "ath_breakout_retest", "all_time_high_breakout",
     ):
         metrics[key] = Decimal(0)
     metrics.update({
@@ -317,6 +334,7 @@ def add_ath_interaction_metrics(
     metrics["ath_first_close_above"] = Decimal(int(
         previous_close is not None and previous_close <= previous_ath < current.close
     ))
+    metrics["all_time_high_breakout"] = metrics["ath_first_close_above"]
 
     if breakout_reference is None or breakout_reference <= 0 or len(candles) < 2:
         return
