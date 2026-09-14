@@ -281,6 +281,31 @@ class SQLiteMarketRepository:
                 WHERE c.timeframe=?
             """, (timeframe,)).fetchone()[0])
 
+    def symbols_without_metric_snapshots(self, timeframe: str) -> list[str]:
+        with self._lock:
+            return [row[0] for row in self._connection.execute("""
+                SELECT i.symbol FROM instruments i
+                WHERE i.active=1
+                  AND EXISTS (SELECT 1 FROM candles c WHERE c.symbol=i.symbol AND c.timeframe='1D')
+                  AND NOT EXISTS (SELECT 1 FROM latest_metrics m WHERE m.symbol=i.symbol AND m.timeframe=?)
+                ORDER BY i.symbol
+            """, (timeframe,)).fetchall()]
+
+    def candle_series_for_symbols(self, symbols: Sequence[str], timeframe: str, limit_per_symbol: int) -> dict[str, list[Candle]]:
+        series: dict[str, list[Candle]] = {}
+        with self._lock:
+            for symbol in symbols:
+                rows = self._connection.execute("""
+                    SELECT symbol,timeframe,timestamp,open,high,low,close,volume,provider FROM candles
+                    WHERE symbol=? AND timeframe=? ORDER BY timestamp DESC LIMIT ?
+                """, (symbol, timeframe, limit_per_symbol)).fetchall()
+                series[symbol] = [Candle(
+                    symbol=row[0], timeframe=row[1], timestamp=datetime.fromisoformat(row[2]),
+                    open=Decimal(str(row[3])), high=Decimal(str(row[4])), low=Decimal(str(row[5])),
+                    close=Decimal(str(row[6])), volume=int(row[7]), provider=row[8],
+                ) for row in reversed(rows)]
+        return series
+
     def metric_snapshots(self, timeframe: str) -> dict[str, tuple[Candle, dict[str, Decimal]]]:
         with self._lock:
             rows = self._connection.execute("""
