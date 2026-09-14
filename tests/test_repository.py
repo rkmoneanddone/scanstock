@@ -1,8 +1,26 @@
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 
 from scanstock.domain import Candle, Instrument
 from scanstock.storage.sqlite_repository import SQLiteMarketRepository
+
+
+def test_bulk_symbol_series_returns_latest_limit_in_chronological_order(tmp_path):
+    repository = SQLiteMarketRepository(tmp_path / "bulk.db")
+    repository.migrate()
+    start = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    symbols = ["ONE", "TWO"]
+    with repository.transaction() as transaction:
+        transaction.upsert_instruments([Instrument(symbol, symbol, symbol) for symbol in symbols])
+        transaction.upsert_candles([
+            Candle(symbol, "1D", start + timedelta(days=index), Decimal("10"), Decimal("12"),
+                   Decimal("9"), Decimal(str(10 + index)), 100, "fake")
+            for symbol in symbols for index in range(3)
+        ])
+    series = repository.candle_series_for_symbols(symbols, "1D", 2)
+    assert list(series) == symbols
+    assert [candle.close for candle in series["ONE"]] == [Decimal("11"), Decimal("12")]
+    assert [candle.timestamp for candle in series["TWO"]] == sorted(candle.timestamp for candle in series["TWO"])
 
 
 def test_atomic_upsert_is_idempotent(tmp_path):
