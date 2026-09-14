@@ -97,3 +97,37 @@ def test_vcp_setup_exposes_contractions_volume_and_pivot_evidence():
     assert stock.metrics["vcp_contractions"] == 3
     assert stock.metrics["vcp_volume_dryup_ratio"] < Decimal("0.8")
     assert stock.metrics["vcp_pivot"] == Decimal(200)
+
+
+def test_candlestick_fvg_and_volume_metrics_are_deterministic():
+    start = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    candles = [
+        Candle("TEST", "1D", start + timedelta(days=index), Decimal("100"), Decimal("102"), Decimal("98"), Decimal("101"), 100, "fake")
+        for index in range(8)
+    ]
+    candles.extend([
+        Candle("TEST", "1D", start + timedelta(days=8), Decimal("105"), Decimal("106"), Decimal("99"), Decimal("100"), 200, "fake"),
+        Candle("TEST", "1D", start + timedelta(days=9), Decimal("102"), Decimal("104"), Decimal("101"), Decimal("102.5"), 200, "fake"),
+        Candle("TEST", "1D", start + timedelta(days=10), Decimal("107"), Decimal("112"), Decimal("107"), Decimal("111"), 200, "fake"),
+    ])
+    metrics = MetricEngine.evaluate(candles).metrics
+    assert metrics["morning_star"] == 1
+    assert metrics["bullish_fvg"] == 1
+    assert metrics["volume_increasing"] == 1
+
+
+def test_all_new_preset_fields_are_exposed_by_metric_engine():
+    start = datetime(2025, 1, 1, tzinfo=timezone.utc)
+    candles = [
+        Candle("TEST", "1D", start + timedelta(days=index), Decimal(str(100 + index)),
+               Decimal(str(102 + index)), Decimal(str(99 + index)), Decimal(str(101 + index)), 1000 + index, "fake")
+        for index in range(100)
+    ]
+    metrics = MetricEngine.evaluate(candles).metrics
+    expected = {
+        "morning_star", "evening_star", "three_white_soldiers", "three_black_crows",
+        "bullish_fvg", "bearish_fvg", "volume_increasing", "volume_decreasing",
+        "volume_up_price_down", "volume_down_price_up", "bearish_rsi_divergence",
+        "bullish_rsi_divergence", "double_top", "double_bottom", "rsi_double_top", "rsi_double_bottom",
+    }
+    assert expected <= metrics.keys()
