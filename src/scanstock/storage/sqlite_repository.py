@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sqlite3
 import threading
 from contextlib import contextmanager
@@ -22,6 +23,7 @@ class SQLiteMarketRepository:
         self._revision = 0
         self._connection.execute("PRAGMA foreign_keys = ON")
         self._connection.execute("PRAGMA journal_mode = WAL")
+        self._connection.execute("PRAGMA busy_timeout = 5000")
 
     @contextmanager
     def transaction(self) -> Iterator["SQLiteMarketRepository"]:
@@ -113,6 +115,21 @@ class SQLiteMarketRepository:
             evidence_json TEXT NOT NULL,
             PRIMARY KEY (scan_run_id, symbol)
         );
+        CREATE TABLE IF NOT EXISTS latest_metrics (
+            symbol TEXT NOT NULL REFERENCES instruments(symbol),
+            timeframe TEXT NOT NULL,
+            candle_timestamp TEXT NOT NULL,
+            open NUMERIC NOT NULL,
+            high NUMERIC NOT NULL,
+            low NUMERIC NOT NULL,
+            close NUMERIC NOT NULL,
+            volume INTEGER NOT NULL,
+            provider TEXT NOT NULL,
+            metrics_json TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            PRIMARY KEY (symbol, timeframe)
+        );
+        CREATE INDEX IF NOT EXISTS ix_latest_metrics_timeframe ON latest_metrics(timeframe, symbol);
         """)
             self._connection.execute("""
                 INSERT OR IGNORE INTO history_bounds(symbol,timeframe,checked_from,updated_at)
@@ -146,6 +163,10 @@ class SQLiteMarketRepository:
               close=excluded.close, volume=excluded.volume, provider=excluded.provider
         """, [(c.symbol, c.timeframe, c.timestamp.isoformat(), str(c.open), str(c.high), str(c.low), str(c.close), c.volume, c.provider) for c in candles])
         if candles:
+            self._connection.executemany(
+                "DELETE FROM latest_metrics WHERE symbol=?",
+                [(symbol,) for symbol in sorted({c.symbol for c in candles})],
+            )
             self._revision += 1
         return len(candles)
 
@@ -251,6 +272,46 @@ class SQLiteMarketRepository:
             open=Decimal(str(row[3])), high=Decimal(str(row[4])), low=Decimal(str(row[5])),
             close=Decimal(str(row[6])), volume=int(row[7]), provider=row[8],
         ) for row in reversed(rows)]
+
+    def loaded_symbol_count(self, timeframe: str) -> int:
+        with self._lock:
+            return int(self._connection.execute("""
+                SELECT COUNT(DISTINCT c.symbol) FROM candles c
+                JOIN instruments i ON i.symbol=c.symbol AND i.active=1
+                WHERE c.timeframe=?
+            """, (timeframe,)).fetchone()[0])
+
+    def metric_snapshots(self, timeframe: str) -> dict[str, tuple[Candle, dict[str, Decimal]]]:
+        with self._lock:
+            rows = self._connection.execute("""
+                SELECT m.symbol,m.candle_timestamp,m.open,m.high,m.low,m.close,m.volume,m.provider,m.metrics_json
+                FROM latest_metrics m JOIN instruments i ON i.symbol=m.symbol AND i.active=1
+                WHERE m.timeframe=? ORDER BY m.symbol
+            """, (timeframe,)).fetchall()
+        snapshots = {}
+        for row in rows:
+            candle = Candle(row[0], timeframe, datetime.fromisoformat(row[1]), Decimal(str(row[2])),
+                            Decimal(str(row[3])), Decimal(str(row[4])), Decimal(str(row[5])), int(row[6]), row[7])
+            snapshots[row[0]] = (candle, {key: Decimal(value) for key, value in json.loads(row[8]).items()})
+        return snapshots
+
+    def save_metric_snapshots(self, timeframe: str, snapshots: Sequence[tuple[Candle, dict[str, Decimal]]]) -> None:
+        if not snapshots:
+            return
+        now = datetime.now(timezone.utc).isoformat()
+        rows = [(c.symbol, timeframe, c.timestamp.isoformat(), str(c.open), str(c.high), str(c.low), str(c.close),
+                 c.volume, c.provider, json.dumps({key: str(value) for key, value in metrics.items()}, separators=(",", ":")), now)
+                for c, metrics in snapshots]
+        with self._lock:
+            self._connection.executemany("""
+                INSERT INTO latest_metrics(symbol,timeframe,candle_timestamp,open,high,low,close,volume,provider,metrics_json,updated_at)
+                VALUES(?,?,?,?,?,?,?,?,?,?,?)
+                ON CONFLICT(symbol,timeframe) DO UPDATE SET
+                  candle_timestamp=excluded.candle_timestamp,open=excluded.open,high=excluded.high,
+                  low=excluded.low,close=excluded.close,volume=excluded.volume,provider=excluded.provider,
+                  metrics_json=excluded.metrics_json,updated_at=excluded.updated_at
+            """, rows)
+            self._connection.commit()
 
     def record_sync(self, symbol: str, timeframe: str, status: str, rows: int, message: str = "", attempted_through: date | None = None) -> None:
         now = datetime.now(timezone.utc).isoformat()
