@@ -26,14 +26,26 @@ function conditionSummary() {
 
 async function loadApp() {
   const loaderStarted = performance.now();
-  const [configResponse, statusResponse] = await Promise.all([fetch('/api/config'), fetch('/api/status')]);
+  const configResponse = await fetch('/api/config');
+  if (!configResponse.ok) throw new Error(`Scanner configuration failed (${configResponse.status})`);
   state.config = await configResponse.json();
   $('timeframe').innerHTML = optionList(state.config.timeframes, '1D');
-  const status = await statusResponse.json();
-  $('status').textContent = `${status.loaded_stocks}/${status.configured_stocks} stocks ready · ${status.total_candles.toLocaleString()} candles`;
   const remainingLoaderTime = 500 - (performance.now() - loaderStarted);
   if (remainingLoaderTime > 0) await new Promise(resolve => setTimeout(resolve, remainingLoaderTime));
   renderCategories(); renderPresets(); resetBuilder();
+  loadDatabaseStatus();
+}
+
+async function loadDatabaseStatus() {
+  try {
+    const response = await fetch('/api/status');
+    if (!response.ok) throw new Error(`Database status failed (${response.status})`);
+    const status = await response.json();
+    $('status').textContent = `${status.loaded_stocks}/${status.configured_stocks} stocks ready · ${status.total_candles.toLocaleString()} candles`;
+  } catch (error) {
+    $('status').textContent = 'Scanner ready · database status unavailable';
+    console.error(error);
+  }
 }
 
 function renderCategories() {
@@ -172,4 +184,9 @@ setupCollapse('toggle-custom', 'custom-body');
 $('detail-close').addEventListener('click', closeDetails);
 $('detail-modal').addEventListener('click', event => { if (event.target === $('detail-modal')) closeDetails(); });
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && !$('detail-modal').hidden) closeDetails(); });
-loadApp().catch(() => { $('status').textContent = 'Database unavailable'; $('empty').textContent = 'Scanner configuration could not be loaded.'; });
+loadApp().catch(error => {
+  $('status').textContent = 'Scanner configuration unavailable';
+  $('preset-grid').innerHTML = '<div class="preset-load-error">Scanner cards could not be loaded. Restart ScanStock and refresh this page.</div>';
+  $('empty').textContent = 'Scanner configuration could not be loaded.';
+  console.error(error);
+});
