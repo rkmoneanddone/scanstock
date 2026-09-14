@@ -59,7 +59,7 @@ function renderCategories() {
 function renderPresets() {
   const presets = state.config.presets.filter(item => state.category === 'All' || item.category === state.category);
   $('preset-grid').innerHTML = presets.map(item => `<article class="preset-card" data-category="${item.category}">
-    <span>${item.category}</span><div class="preset-title"><h3>${periodText(item.name)}</h3><button class="preset-button" data-name="${item.name}" type="button" aria-label="Use ${item.name}">Use scanner →</button></div><p>${periodText(item.description)}</p>
+    <div class="preset-topline"><span>${item.category}</span><button class="preset-button" data-name="${item.name}" type="button" aria-label="Use ${item.name}">Use scanner →</button></div><div class="preset-title"><h3>${periodText(item.name)}</h3></div><p>${periodText(item.description)}</p>
   </article>`).join('');
   document.querySelectorAll('.preset-button').forEach(button => button.addEventListener('click', () => applyPreset(button.dataset.name)));
 }
@@ -205,8 +205,9 @@ function candlestickSvg(candles, row) {
   const maColors = {9:'#2563eb',21:'#16a34a',50:'#f59e0b',200:'#dc2626'};
   const maType = state.activeScan.includes('WMA') ? 'WMA' : state.activeScan.includes('SMA') ? 'SMA' : 'EMA';
   const closes = candles.map(candle => candle.close);
+  const maSeries = Object.fromEntries(Object.keys(maColors).map(period => [period, movingAverageSeries(closes, Number(period), maType)]));
   const overlays = Object.entries(maColors).map(([period, color]) => {
-    const values = movingAverageSeries(closes, Number(period), maType);
+    const values = maSeries[period];
     const points = values.map((value, index) => value == null ? null : `${x(index)},${y(value)}`).filter(Boolean);
     return points.length > 1 ? `<polyline class="ema-line" stroke="${color}" points="${points.join(' ')}"/>` : '';
   }).join('');
@@ -220,8 +221,23 @@ function candlestickSvg(candles, row) {
     ['Previous ATH', evidenceValue('Previous All-Time High'), '#e11d48'],
   ].filter(([, value]) => Number.isFinite(value) && value >= lowest && value <= highest);
   const annotations = levels.map(([label, value, color]) => `<g class="chart-level"><line stroke="${color}" x1="${left}" y1="${y(value)}" x2="${width-right}" y2="${y(value)}"/><text fill="${color}" x="${width-right-3}" y="${y(value)-4}" text-anchor="end">${label} ${number(value)}</text></g>`).join('');
-  const latestX = x(candles.length-1), latestY = y(candles[candles.length-1].high);
-  const scanMarker = `<g class="scan-marker"><path d="M ${latestX} ${Math.max(top+5,latestY-4)} l -5 -8 h 10 z"/><text x="${Math.min(width-right-4,latestX+9)}" y="${Math.max(top+12,latestY-14)}" text-anchor="end">${escapeXml(state.activeScan)}</text></g>`;
+  let markerIndex = candles.length - 1;
+  let markerLabel = state.activeScan;
+  if (/Bullish (EMA|SMA|WMA) Alignment \+ Close Above 9/.test(state.activeScan)) {
+    for (let index = candles.length - 1; index > 0; index -= 1) {
+      const averages = ['9','21','50','200'].map(period => maSeries[period][index]);
+      const previous9 = maSeries['9'][index - 1];
+      const aligned = averages.every(Number.isFinite) && averages[0] > averages[1] && averages[1] > averages[2] && averages[2] > averages[3];
+      if (aligned && Number.isFinite(previous9) && candles[index - 1].close <= previous9 && candles[index].close > averages[0]) {
+        markerIndex = index;
+        markerLabel = `${maType} 9 crossover + first close`;
+        break;
+      }
+    }
+  }
+  const markerX = x(markerIndex), markerY = y(candles[markerIndex].low);
+  const markerTextX = Math.min(width-right-4, Math.max(left+130, markerX+9));
+  const scanMarker = `<g class="scan-marker crossover-marker"><path d="M ${markerX} ${Math.min(priceBottom-4,markerY+4)} l -6 10 h 12 z"/><text x="${markerTextX}" y="${Math.min(priceBottom-8,markerY+25)}" text-anchor="end">${escapeXml(markerLabel)}</text></g>`;
   const firstDate = new Date(candles[0].timestamp).toLocaleDateString('en-IN');
   const lastDate = new Date(candles[candles.length-1].timestamp).toLocaleDateString('en-IN');
   const legend = Object.entries(maColors).map(([period,color], index) => `<g transform="translate(${left+index*82},${top+2})"><line stroke="${color}" stroke-width="2" x1="0" y1="0" x2="16" y2="0"/><text x="20" y="4">${maType} ${period}</text></g>`).join('');
