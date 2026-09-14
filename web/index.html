@@ -18,35 +18,40 @@
     <section class="panel presets-panel" aria-labelledby="presets-title">
       <div class="panel-heading">
         <div><span class="eyebrow">READY-MADE SCANNERS</span><h2 id="presets-title">Start with a proven definition</h2></div>
-        <span class="hint">Research filters—not trade recommendations</span>
+        <div class="heading-actions"><span class="hint">Research filters—not trade recommendations</span><button id="toggle-presets" class="collapse-button" type="button" aria-expanded="true" aria-controls="preset-body">−</button></div>
       </div>
-      <div class="category-tabs" id="category-tabs"></div>
-      <div class="preset-grid" id="preset-grid"></div>
+      <div id="preset-body"><div class="category-tabs" id="category-tabs"></div><div class="preset-grid" id="preset-grid"></div></div>
     </section>
 
     <section class="panel custom-panel" aria-labelledby="builder-title">
       <div class="panel-heading">
         <div><span class="eyebrow">CUSTOM SCANNER</span><h2 id="builder-title">Build your own filters</h2></div>
-        <button id="reset" class="button secondary" type="button">Reset</button>
+        <div class="heading-actions"><button id="reset" class="button secondary" type="button">Reset</button><button id="toggle-custom" class="collapse-button" type="button" aria-expanded="true" aria-controls="custom-body">−</button></div>
       </div>
-      <div class="builder-toolbar">
-        <label><span>Timeframe</span><select id="timeframe"></select></label>
-        <label><span>Stocks must match</span><select id="match-mode"><option value="all">ALL conditions</option><option value="any">ANY condition</option></select></label>
-        <button id="add-condition" class="button secondary add-button" type="button">+ Add condition</button>
-      </div>
-      <form id="scanner-form">
-        <div id="condition-list" class="condition-list"></div>
-        <div class="builder-actions">
-          <span id="builder-message" class="hint">You can combine up to 12 conditions.</span>
-          <button class="button primary" type="submit">Run custom scan</button>
+      <div id="custom-body">
+        <div class="builder-toolbar">
+          <label><span>Timeframe</span><select id="timeframe"></select></label>
+          <label><span>Stocks must match</span><select id="match-mode"><option value="all">ALL conditions</option><option value="any">ANY condition</option></select></label>
+          <button id="add-condition" class="button secondary add-button" type="button">+ Add condition</button>
         </div>
-      </form>
+        <form id="scanner-form">
+          <div id="condition-list" class="condition-list"></div>
+          <div class="builder-actions">
+            <span id="builder-message" class="hint">You can combine up to 12 conditions.</span>
+            <button class="button primary" type="submit">Run custom scan</button>
+          </div>
+        </form>
+      </div>
     </section>
 
     <section class="panel results-panel" aria-labelledby="results-title">
       <div class="panel-heading results-heading">
         <div><span class="eyebrow">RESULTS</span><h2 id="results-title">Matching stocks</h2></div>
-        <div class="results-summary"><span id="active-scan" class="scan-label">No scanner selected</span><strong id="result-count">Not scanned</strong></div>
+        <div id="result-timeframe" class="result-timeframe">No timeframe</div>
+        <div class="results-tools">
+          <div class="results-summary"><span id="active-scan" class="scan-label">No scanner selected</span><strong id="result-count">Not scanned</strong></div>
+          <label class="result-search"><span>Search results</span><input id="result-search" type="search" placeholder="Search symbol…" autocomplete="off"></label>
+        </div>
       </div>
       <div class="empty" id="empty">Choose a ready-made scanner or build your own.</div>
       <div id="results-content" hidden>

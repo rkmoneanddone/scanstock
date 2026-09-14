@@ -1,5 +1,5 @@
 const $ = (id) => document.getElementById(id);
-const state = { config:null, conditions:[], results:[], sortKey:'symbol', sortDirection:'asc', page:1, pageSize:25, category:'All' };
+const state = { config:null, conditions:[], results:[], sortKey:'symbol', sortDirection:'asc', page:1, pageSize:25, category:'All', search:'' };
 
 const optionList = (items, selected) => items.map(item => `<option value="${item.value}" ${item.value === selected ? 'selected' : ''}>${periodText(item.label)}</option>`).join('');
 const number = (value, digits=2) => value == null ? '—' : Number(value).toLocaleString('en-IN', { maximumFractionDigits:digits });
@@ -85,8 +85,9 @@ async function runScan(name=null, category='Custom Scanner') {
   if (missingValue) { $('builder-message').textContent = 'Enter a fixed value for every value-based condition.'; return; }
   name = name || conditionSummary();
   $('result-count').textContent = 'Scanning…';
-  $('active-scan').textContent = `${timeframeName()} · ${name}`;
+  $('active-scan').textContent = name;
   $('active-scan').dataset.category = category;
+  $('result-timeframe').textContent = `${timeframeName()} timeframe`;
   $('loading-detail').textContent = `${timeframeName()} · ${name}`;
   $('loading').hidden = false;
   const payload = { timeframe:$('timeframe').value, match_mode:$('match-mode').value, conditions:state.conditions };
@@ -98,7 +99,7 @@ async function runScan(name=null, category='Custom Scanner') {
     $('result-count').textContent = 'Scan failed'; $('empty').textContent = 'Unable to reach the scanner.'; $('empty').hidden = false; return;
   } finally { $('loading').hidden = true; }
   if (!response.ok) { $('result-count').textContent = 'Scan failed'; $('empty').textContent = data.detail || 'Unable to run scan.'; $('empty').hidden = false; return; }
-  state.results = data.matches; state.page = 1;
+  state.results = data.matches; state.page = 1; state.search = ''; $('result-search').value = '';
   $('result-count').textContent = `${data.match_count} matching stocks`;
   $('empty').textContent = data.match_count ? '' : 'No stocks matched this scanner.';
   $('empty').hidden = data.match_count > 0; $('results-content').hidden = data.match_count === 0;
@@ -107,7 +108,7 @@ async function runScan(name=null, category='Custom Scanner') {
 
 function renderResults() {
   const direction = state.sortDirection === 'asc' ? 1 : -1;
-  const rows = [...state.results].sort((a,b) => {
+  const rows = state.results.filter(row => row.symbol.toLowerCase().includes(state.search)).sort((a,b) => {
     const av = a[state.sortKey], bv = b[state.sortKey];
     if (av == null) return 1; if (bv == null) return -1;
     return (typeof av === 'string' ? av.localeCompare(bv) : av - bv) * direction;
@@ -116,6 +117,7 @@ function renderResults() {
   const start = (state.page - 1) * state.pageSize, visible = rows.slice(start, start + state.pageSize);
   $('results-body').innerHTML = visible.map(row => { const tone = row.change_pct > 0 ? 'positive' : row.change_pct < 0 ? 'negative' : 'neutral'; return `<tr><td>${row.symbol}</td><td>${new Date(row.timestamp).toLocaleDateString('en-IN')}</td><td>${number(row.open)}</td><td>${number(row.high)}</td><td>${number(row.low)}</td><td class="${tone}">${number(row.close)}</td><td class="${tone}">${row.change_pct > 0 ? '+' : ''}${number(row.change_pct)}%</td><td>${number(row.rsi14,1)}</td><td>${number(row.volume,0)}</td></tr>`; }).join('');
   $('page-range').textContent = rows.length ? `${start + 1}–${Math.min(start + state.pageSize, rows.length)} of ${rows.length}` : '';
+  $('result-count').textContent = state.search ? `${rows.length} shown · ${state.results.length} matched` : `${state.results.length} matching stocks`;
   $('page-number').textContent = `Page ${state.page} of ${pages}`;
   $('previous-page').disabled = state.page === 1; $('next-page').disabled = state.page === pages;
   document.querySelectorAll('.sort').forEach(button => {
@@ -128,10 +130,21 @@ $('scanner-form').addEventListener('submit', event => { event.preventDefault(); 
 $('reset').addEventListener('click', resetBuilder);
 $('add-condition').addEventListener('click', () => { if (state.conditions.length < 12) { state.conditions.push(blankCondition()); renderBuilder(); } });
 $('timeframe').addEventListener('change', () => { renderCategories(); renderPresets(); renderBuilder(); });
+$('result-search').addEventListener('input', event => { state.search = event.target.value.trim().toLowerCase(); state.page = 1; renderResults(); });
 $('page-size').addEventListener('change', event => { state.pageSize = Number(event.target.value); state.page = 1; renderResults(); });
 $('previous-page').addEventListener('click', () => { state.page -= 1; renderResults(); });
 $('next-page').addEventListener('click', () => { state.page += 1; renderResults(); });
 document.querySelectorAll('.sort').forEach(button => button.addEventListener('click', () => {
   const key = button.dataset.key; state.sortDirection = state.sortKey === key && state.sortDirection === 'asc' ? 'desc' : 'asc'; state.sortKey = key; state.page = 1; renderResults();
 }));
+function setupCollapse(buttonId, bodyId) {
+  $(buttonId).addEventListener('click', () => {
+    const expanded = $(buttonId).getAttribute('aria-expanded') === 'true';
+    $(buttonId).setAttribute('aria-expanded', String(!expanded));
+    $(buttonId).textContent = expanded ? '+' : '−';
+    $(bodyId).hidden = expanded;
+  });
+}
+setupCollapse('toggle-presets', 'preset-body');
+setupCollapse('toggle-custom', 'custom-body');
 loadApp().catch(() => { $('status').textContent = 'Database unavailable'; $('empty').textContent = 'Scanner configuration could not be loaded.'; });
