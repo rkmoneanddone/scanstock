@@ -155,17 +155,33 @@ class SQLiteMarketRepository:
         """, [(i.symbol, i.security_id, i.display_name, i.exchange_segment, i.instrument_type, now) for i in instruments])
 
     def upsert_candles(self, candles: Sequence[Candle]) -> int:
-        self._connection.executemany("""
+        grouped: dict[str, list[Candle]] = {}
+        for candle in candles:
+            grouped.setdefault(candle.symbol, []).append(candle)
+        changed_symbols = []
+        statement = """
             INSERT INTO candles(symbol,timeframe,timestamp,open,high,low,close,volume,provider)
             VALUES (?,?,?,?,?,?,?,?,?)
             ON CONFLICT(symbol,timeframe,timestamp) DO UPDATE SET
               open=excluded.open, high=excluded.high, low=excluded.low,
               close=excluded.close, volume=excluded.volume, provider=excluded.provider
-        """, [(c.symbol, c.timeframe, c.timestamp.isoformat(), str(c.open), str(c.high), str(c.low), str(c.close), c.volume, c.provider) for c in candles])
-        if candles:
+            WHERE candles.open!=excluded.open OR candles.high!=excluded.high
+               OR candles.low!=excluded.low OR candles.close!=excluded.close
+               OR candles.volume!=excluded.volume OR candles.provider!=excluded.provider
+        """
+        for symbol, symbol_candles in grouped.items():
+            changes_before = self._connection.total_changes
+            self._connection.executemany(statement, [
+                (c.symbol, c.timeframe, c.timestamp.isoformat(), str(c.open), str(c.high),
+                 str(c.low), str(c.close), c.volume, c.provider)
+                for c in symbol_candles
+            ])
+            if self._connection.total_changes > changes_before:
+                changed_symbols.append(symbol)
+        if changed_symbols:
             self._connection.executemany(
                 "DELETE FROM latest_metrics WHERE symbol=?",
-                [(symbol,) for symbol in sorted({c.symbol for c in candles})],
+                [(symbol,) for symbol in changed_symbols],
             )
             self._revision += 1
         return len(candles)
