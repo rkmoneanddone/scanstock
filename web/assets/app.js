@@ -25,11 +25,14 @@ function conditionSummary() {
 }
 
 async function loadApp() {
+  const loaderStarted = performance.now();
   const [configResponse, statusResponse] = await Promise.all([fetch('/api/config'), fetch('/api/status')]);
   state.config = await configResponse.json();
   $('timeframe').innerHTML = optionList(state.config.timeframes, '1D');
   const status = await statusResponse.json();
   $('status').textContent = `${status.loaded_stocks}/${status.configured_stocks} stocks ready · ${status.total_candles.toLocaleString()} candles`;
+  const remainingLoaderTime = 500 - (performance.now() - loaderStarted);
+  if (remainingLoaderTime > 0) await new Promise(resolve => setTimeout(resolve, remainingLoaderTime));
   renderCategories(); renderPresets(); resetBuilder();
 }
 
