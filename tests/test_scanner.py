@@ -131,18 +131,24 @@ def test_all_time_high_breakout_uses_history_before_latest_period(tmp_path):
     assert matches[0]["details"]["measurements"][0]["metric"] == "Previous All-Time High"
 
 
-def test_ath_breakout_retest_requires_touch_and_hold_after_first_breakout():
+def test_ath_breakout_retest_requires_five_holds_advance_and_return():
     start = datetime(2026, 1, 1, tzinfo=timezone.utc)
     candles = [
         Candle("RETEST", "1D", start, Decimal("95"), Decimal("100"), Decimal("94"), Decimal("96"), 100, "fake"),
         Candle("RETEST", "1D", start + timedelta(days=1), Decimal("99"), Decimal("104"), Decimal("98"), Decimal("103"), 150, "fake"),
-        Candle("RETEST", "1D", start + timedelta(days=2), Decimal("103"), Decimal("105"), Decimal("100.5"), Decimal("102"), 120, "fake"),
+        Candle("RETEST", "1D", start + timedelta(days=2), Decimal("103"), Decimal("106"), Decimal("102"), Decimal("105"), 120, "fake"),
+        Candle("RETEST", "1D", start + timedelta(days=3), Decimal("105"), Decimal("109"), Decimal("104"), Decimal("108"), 120, "fake"),
+        Candle("RETEST", "1D", start + timedelta(days=4), Decimal("108"), Decimal("111"), Decimal("106"), Decimal("110"), 120, "fake"),
+        Candle("RETEST", "1D", start + timedelta(days=5), Decimal("110"), Decimal("112"), Decimal("107"), Decimal("109"), 120, "fake"),
+        Candle("RETEST", "1D", start + timedelta(days=6), Decimal("109"), Decimal("110"), Decimal("105"), Decimal("107"), 120, "fake"),
+        Candle("RETEST", "1D", start + timedelta(days=7), Decimal("104"), Decimal("105"), Decimal("100.5"), Decimal("102"), 120, "fake"),
     ]
     stock = MetricEngine.evaluate(candles)
     assert stock is not None
-    add_ath_interaction_metrics(candles, stock.metrics, Decimal("104"), Decimal("100"))
+    add_ath_interaction_metrics(candles, stock.metrics, Decimal("112"), Decimal("110"))
     assert stock.metrics["ath_breakout_retest"] == 1
-    assert stock.metrics["ath_second_close_above"] == 1
+    assert stock.metrics["ath_breakout_reference"] == Decimal("100")
+    assert stock.metrics["ath_retest_candles_above"] >= 5
 
 
 def test_ath_breakout_retest_rejects_close_below_old_ath():
