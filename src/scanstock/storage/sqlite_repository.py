@@ -19,6 +19,7 @@ class SQLiteMarketRepository:
         path.parent.mkdir(parents=True, exist_ok=True)
         self._lock = threading.RLock()
         self._connection = sqlite3.connect(path, check_same_thread=False)
+        self._revision = 0
         self._connection.execute("PRAGMA foreign_keys = ON")
         self._connection.execute("PRAGMA journal_mode = WAL")
 
@@ -66,6 +67,7 @@ class SQLiteMarketRepository:
             CHECK (volume >= 0)
         );
         CREATE INDEX IF NOT EXISTS ix_candles_tf_time ON candles(timeframe, timestamp);
+        CREATE INDEX IF NOT EXISTS ix_candles_tf_symbol_time ON candles(timeframe, symbol, timestamp);
         CREATE TABLE IF NOT EXISTS sync_runs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             symbol TEXT NOT NULL,
@@ -143,7 +145,15 @@ class SQLiteMarketRepository:
               open=excluded.open, high=excluded.high, low=excluded.low,
               close=excluded.close, volume=excluded.volume, provider=excluded.provider
         """, [(c.symbol, c.timeframe, c.timestamp.isoformat(), str(c.open), str(c.high), str(c.low), str(c.close), c.volume, c.provider) for c in candles])
+        if candles:
+            self._revision += 1
         return len(candles)
+
+    def data_version(self) -> tuple[int, int]:
+        """Changes for this connection plus changes committed by another process."""
+        with self._lock:
+            external_version = int(self._connection.execute("PRAGMA data_version").fetchone()[0])
+            return self._revision, external_version
 
     def _boundary_candle_date(self, aggregate: str, symbol: str, timeframe: str) -> date | None:
         if aggregate not in {"MIN", "MAX"}:

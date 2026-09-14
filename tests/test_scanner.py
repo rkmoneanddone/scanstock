@@ -59,3 +59,18 @@ def test_moving_average_metrics_are_available_to_custom_scanner():
     for method in ("sma", "ema", "wma"):
         for period in (9, 21, 50, 200):
             assert f"{method}{period}" in metrics
+
+
+def test_scanner_cache_invalidates_when_candles_change(tmp_path):
+    repo = SQLiteMarketRepository(tmp_path / "cache.db")
+    repo.migrate()
+    scanner = StrictScanner(repo)
+    condition = [ScanCondition("close", ">", "field", compare_field="open")]
+    with repo.transaction() as tx:
+        tx.upsert_instruments([Instrument("ONE", "1", "One")])
+        tx.upsert_candles([Candle("ONE", "1D", datetime(2026, 1, 1, tzinfo=timezone.utc), Decimal("10"), Decimal("12"), Decimal("9"), Decimal("11"), 100, "fake")])
+    assert [row["symbol"] for row in scanner.run("1D", condition)] == ["ONE"]
+    with repo.transaction() as tx:
+        tx.upsert_instruments([Instrument("TWO", "2", "Two")])
+        tx.upsert_candles([Candle("TWO", "1D", datetime(2026, 1, 1, tzinfo=timezone.utc), Decimal("20"), Decimal("22"), Decimal("19"), Decimal("21"), 100, "fake")])
+    assert [row["symbol"] for row in scanner.run("1D", condition)] == ["ONE", "TWO"]

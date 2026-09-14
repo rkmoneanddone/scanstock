@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import operator
+import threading
 from dataclasses import dataclass
 from decimal import Decimal
 from statistics import fmean
@@ -91,6 +92,10 @@ class MetricEngine:
 class StrictScanner:
     def __init__(self, repository: MarketRepository) -> None:
         self.repository = repository
+        self._cache_lock = threading.RLock()
+        self._cache_version: tuple[int, int] | None = None
+        self._daily_series: dict[str, list[Candle]] | None = None
+        self._evaluated_by_timeframe: dict[str, tuple[EvaluatedStock, ...]] = {}
 
     def run(self, timeframe: str, conditions: list[ScanCondition], match_mode: str = "all") -> list[dict]:
         if timeframe not in TIMEFRAMES:
@@ -101,11 +106,7 @@ class StrictScanner:
             raise ValueError("Match mode must be all or any")
         self._validate(conditions)
         matches: list[dict] = []
-        for daily_candles in self.repository.candle_series("1D").values():
-            candles = aggregate_candles(daily_candles, timeframe)
-            stock = MetricEngine.evaluate(candles)
-            if stock is None:
-                continue
+        for stock in self._evaluated(timeframe):
             checks = [self._matches(stock.metrics, condition) for condition in conditions]
             if (all(checks) if match_mode == "all" else any(checks)):
                 candle = stock.candle
@@ -117,6 +118,27 @@ class StrictScanner:
                     "rsi14": float(stock.metrics["rsi14"]) if "rsi14" in stock.metrics else None,
                 })
         return matches
+
+    def _evaluated(self, timeframe: str) -> tuple[EvaluatedStock, ...]:
+        version = self.repository.data_version()
+        with self._cache_lock:
+            if version != self._cache_version:
+                self._cache_version = version
+                self._daily_series = None
+                self._evaluated_by_timeframe.clear()
+            cached = self._evaluated_by_timeframe.get(timeframe)
+            if cached is not None:
+                return cached
+            if self._daily_series is None:
+                self._daily_series = self.repository.candle_series("1D")
+            evaluated = []
+            for daily_candles in self._daily_series.values():
+                stock = MetricEngine.evaluate(aggregate_candles(daily_candles, timeframe))
+                if stock is not None:
+                    evaluated.append(stock)
+            result = tuple(evaluated)
+            self._evaluated_by_timeframe[timeframe] = result
+            return result
 
     @staticmethod
     def _validate(conditions: list[ScanCondition]) -> None:

@@ -19,6 +19,7 @@ WEB_ROOT = ROOT / "web"
 PRESETS_PATH = ROOT / "config" / "scanners.json"
 app = FastAPI(title="ScanStock", version="0.2.0")
 app.mount("/assets", StaticFiles(directory=WEB_ROOT / "assets"), name="assets")
+scanner = StrictScanner(repository(ROOT))
 
 
 class ConditionRequest(BaseModel):
@@ -77,7 +78,7 @@ def database_status() -> dict:
 def run_scan(request: ScanRequest) -> dict:
     try:
         conditions = [ScanCondition(**condition.model_dump()) for condition in request.conditions]
-        matches = StrictScanner(repository(ROOT)).run(request.timeframe, conditions, request.match_mode)
+        matches = scanner.run(request.timeframe, conditions, request.match_mode)
         return {"match_count": len(matches), "matches": matches}
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
