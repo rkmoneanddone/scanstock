@@ -9,3 +9,4 @@
 body{background:#fff}.preset-card{border-left-width:2px}
 .preset-card[data-category="Fair Value Gaps"]{background:#f5f3ff;border-left-color:#7c3aed}.preset-card[data-category="Volume Analysis"]{background:#ecfeff;border-left-color:#0891b2}.preset-card[data-category="Divergence"]{background:#fff1f2;border-left-color:#e11d48}.preset-card[data-category="Chart Patterns"]{background:#fefce8;border-left-color:#ca8a04}
 .category,.category.active{color:#0200ff!important}.preset-loading{grid-column:1/-1;min-height:92px;display:flex;align-items:center;justify-content:center;gap:10px;color:#475467;font-size:12px}.preset-loading .spinner{width:24px;height:24px}
+.preset-load-error{grid-column:1/-1;margin:4px 0;padding:12px;border:1px solid #fecaca;border-radius:7px;background:#fef2f2;color:#b91c1c;font-size:12px}
