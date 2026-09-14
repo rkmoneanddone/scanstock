@@ -224,25 +224,20 @@ function candlestickSvg(candles, row) {
   let markerIndex = candles.length - 1;
   let markerLabel = state.activeScan;
   if (/Bullish (EMA|SMA|WMA) Alignment \+ Close Above 9/.test(state.activeScan)) {
-    const candidates = [];
-    const searchStart = Math.max(1, candles.length - 160);
-    for (let index = searchStart; index < candles.length - 5; index += 1) {
-      const current9 = maSeries['9'][index], previous9 = maSeries['9'][index - 1];
-      const current21 = maSeries['21'][index], current50 = maSeries['50'][index];
-      const crossed = Number.isFinite(previous9) && Number.isFinite(current9)
-        && candles[index - 1].close <= previous9 && candles[index].close > current9;
-      const shortTermBullish = Number.isFinite(current21) && current9 >= current21;
-      const fiftyNotFalling = !Number.isFinite(current50) || index < 5
-        || !Number.isFinite(maSeries['50'][index - 5]) || current50 >= maSeries['50'][index - 5] * .995;
-      if (!crossed || !shortTermBullish || !fiftyNotFalling) continue;
-      const futureHigh = Math.max(...candles.slice(index + 1).map(candle => candle.high));
-      const followThrough = (futureHigh / candles[index].close - 1) * 100;
-      if (followThrough >= 8) candidates.push({index, followThrough});
-    }
-    if (candidates.length) {
-      candidates.sort((a, b) => b.followThrough - a.followThrough || b.index - a.index);
-      markerIndex = candidates[0].index;
-      markerLabel = `${maType} 9 move started`;
+    const fullyAligned = index => {
+      const ma9 = maSeries['9'][index], ma21 = maSeries['21'][index];
+      const ma50 = maSeries['50'][index], ma200 = maSeries['200'][index];
+      return [ma9, ma21, ma50, ma200].every(Number.isFinite)
+        && ma9 > ma21 && ma21 > ma50 && ma50 > ma200
+        && candles[index].close > ma9;
+    };
+    // The selected stock qualifies now. Walk back through this same uninterrupted
+    // fully-aligned regime and mark its first qualifying candle—only after every
+    // 9/21/50/200 crossover has completed.
+    if (fullyAligned(candles.length - 1)) {
+      markerIndex = candles.length - 1;
+      while (markerIndex > 0 && fullyAligned(markerIndex - 1)) markerIndex -= 1;
+      markerLabel = `First candle after full ${maType} alignment`;
     } else {
       markerLabel = `${maType} alignment current`;
     }
