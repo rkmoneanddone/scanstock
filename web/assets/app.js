@@ -1,5 +1,5 @@
 const $ = (id) => document.getElementById(id);
-const state = { config:null, conditions:[], results:[], sortKey:'symbol', sortDirection:'asc', page:1, pageSize:25, category:'All', search:'', activeScan:'', activeTimeframe:'' };
+const state = { config:null, conditions:[], results:[], sortKey:'symbol', sortDirection:'asc', page:1, pageSize:25, category:'All', search:'', activeScan:'', activeTimeframe:'', activeTimeframeCode:'1D', chartCache:new Map() };
 
 const optionList = (items, selected) => items.map(item => `<option value="${item.value}" ${item.value === selected ? 'selected' : ''}>${periodText(item.label)}</option>`).join('');
 const number = (value, digits=2) => value == null ? '—' : Number(value).toLocaleString('en-IN', { maximumFractionDigits:digits });
@@ -100,6 +100,7 @@ async function runScan(name=null, category='Custom Scanner') {
   if (missingValue) { $('builder-message').textContent = 'Enter a fixed value for every value-based condition.'; return; }
   name = name || conditionSummary();
   state.activeScan = name; state.activeTimeframe = timeframeName();
+  state.activeTimeframeCode = $('timeframe').value;
   $('result-count').textContent = 'Scanning…';
   $('active-scan').textContent = name;
   $('active-scan').dataset.category = category;
@@ -131,8 +132,8 @@ function renderResults() {
   });
   const pages = Math.max(1, Math.ceil(rows.length / state.pageSize)); state.page = Math.min(state.page, pages);
   const start = (state.page - 1) * state.pageSize, visible = rows.slice(start, start + state.pageSize);
-  $('results-body').innerHTML = visible.map(row => { const tone = row.change_pct > 0 ? 'positive' : row.change_pct < 0 ? 'negative' : 'neutral'; return `<tr><td>${row.symbol}</td><td>${new Date(row.timestamp).toLocaleDateString('en-IN')}</td><td>${number(row.open)}</td><td>${number(row.high)}</td><td>${number(row.low)}</td><td class="${tone}">${number(row.close)}</td><td class="${tone}">${row.change_pct > 0 ? '+' : ''}${number(row.change_pct)}%</td><td>${number(row.rsi14,1)}</td><td>${number(row.volume,0)}</td><td><button class="detail-button" data-symbol="${row.symbol}" type="button" aria-label="View ${row.symbol} scan details">›</button></td></tr>`; }).join('');
-  document.querySelectorAll('.detail-button').forEach(button => button.addEventListener('click', () => openDetails(button.dataset.symbol)));
+  $('results-body').innerHTML = visible.map(row => { const tone = row.change_pct > 0 ? 'positive' : row.change_pct < 0 ? 'negative' : 'neutral'; return `<tr><td><button class="stock-link" data-symbol="${row.symbol}" type="button">${row.symbol}</button></td><td>${new Date(row.timestamp).toLocaleDateString('en-IN')}</td><td>${number(row.open)}</td><td>${number(row.high)}</td><td>${number(row.low)}</td><td class="${tone}">${number(row.close)}</td><td class="${tone}">${row.change_pct > 0 ? '+' : ''}${number(row.change_pct)}%</td><td>${number(row.rsi14,1)}</td><td>${number(row.volume,0)}</td><td><button class="detail-button" data-symbol="${row.symbol}" type="button" aria-label="View ${row.symbol} scan details">›</button></td></tr>`; }).join('');
+  document.querySelectorAll('.detail-button,.stock-link').forEach(button => button.addEventListener('click', () => openDetails(button.dataset.symbol)));
   $('page-range').textContent = rows.length ? `${start + 1}–${Math.min(start + state.pageSize, rows.length)} of ${rows.length}` : '';
   $('result-count').textContent = state.search ? `${rows.length} shown · ${state.results.length} matched` : `${state.results.length} matching stocks`;
   $('page-number').textContent = `Page ${state.page} of ${pages}`;
@@ -156,6 +157,53 @@ function openDetails(symbol) {
   $('measurement-metrics').innerHTML = hasMeasurements ? measurements.map(item => `<div><span>${item.metric}</span><strong>${number(item.value)}</strong></div>`).join('') : '';
   $('detail-modal').hidden = false;
   document.body.classList.add('modal-open');
+  loadChart(symbol, state.activeTimeframeCode);
+}
+
+async function loadChart(symbol, timeframe) {
+  const slot = $('detail-chart-slot');
+  const cacheKey = `${symbol}:${timeframe}`;
+  slot.innerHTML = '<div class="chart-loading"><span class="spinner"></span><span>Loading chart…</span></div>';
+  $('chart-period').textContent = `${state.activeTimeframe} · latest 120 periods`;
+  try {
+    let data = state.chartCache.get(cacheKey);
+    if (!data) {
+      const response = await fetch(`/api/chart/${encodeURIComponent(symbol)}?timeframe=${encodeURIComponent(timeframe)}&limit=120`);
+      data = await response.json();
+      if (!response.ok) throw new Error(data.detail || 'Chart request failed');
+      state.chartCache.set(cacheKey, data);
+    }
+    slot.innerHTML = candlestickSvg(data.candles);
+    $('chart-period').textContent = `${data.timeframe} · ${data.candles.length} periods`;
+  } catch (error) {
+    slot.innerHTML = `<div class="chart-error">${error.message || 'Chart could not be loaded.'}</div>`;
+  }
+}
+
+function candlestickSvg(candles) {
+  if (!candles.length) return '<div class="chart-error">No chart data available.</div>';
+  const width = 920, height = 330, left = 58, right = 14, top = 16, priceBottom = 242, volumeTop = 258, bottom = 306;
+  const innerWidth = width - left - right, priceHeight = priceBottom - top, volumeHeight = bottom - volumeTop;
+  const highest = Math.max(...candles.map(c => c.high)), lowest = Math.min(...candles.map(c => c.low));
+  const priceSpan = highest - lowest || 1, maxVolume = Math.max(...candles.map(c => c.volume)) || 1;
+  const step = innerWidth / candles.length, bodyWidth = Math.max(1.5, Math.min(7, step * .62));
+  const x = index => left + step * index + step / 2;
+  const y = value => top + (highest - value) / priceSpan * priceHeight;
+  const grid = Array.from({length:5}, (_, index) => {
+    const value = highest - priceSpan * index / 4, lineY = y(value);
+    return `<line x1="${left}" y1="${lineY}" x2="${width-right}" y2="${lineY}"/><text x="${left-7}" y="${lineY+4}" text-anchor="end">${number(value)}</text>`;
+  }).join('');
+  const marks = candles.map((candle, index) => {
+    const candleX = x(index), openY = y(candle.open), closeY = y(candle.close), highY = y(candle.high), lowY = y(candle.low);
+    const bullish = candle.close >= candle.open, tone = bullish ? '#16a34a' : '#dc2626';
+    const bodyY = Math.min(openY, closeY), bodyHeight = Math.max(1.5, Math.abs(closeY-openY));
+    const volumeHeightValue = candle.volume / maxVolume * volumeHeight;
+    const date = new Date(candle.timestamp).toLocaleDateString('en-IN');
+    return `<g><title>${date} · O ${number(candle.open)} · H ${number(candle.high)} · L ${number(candle.low)} · C ${number(candle.close)} · Vol ${number(candle.volume,0)}</title><line class="candle-wick" stroke="${tone}" x1="${candleX}" y1="${highY}" x2="${candleX}" y2="${lowY}"/><rect fill="${tone}" x="${candleX-bodyWidth/2}" y="${bodyY}" width="${bodyWidth}" height="${bodyHeight}"/><rect fill="${tone}" opacity=".36" x="${candleX-bodyWidth/2}" y="${bottom-volumeHeightValue}" width="${bodyWidth}" height="${volumeHeightValue}"/></g>`;
+  }).join('');
+  const firstDate = new Date(candles[0].timestamp).toLocaleDateString('en-IN');
+  const lastDate = new Date(candles[candles.length-1].timestamp).toLocaleDateString('en-IN');
+  return `<svg class="stock-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="Candlestick and volume chart"><g class="chart-grid">${grid}<line x1="${left}" y1="${priceBottom}" x2="${width-right}" y2="${priceBottom}"/></g>${marks}<g class="chart-dates"><text x="${left}" y="${height-7}">${firstDate}</text><text x="${width-right}" y="${height-7}" text-anchor="end">${lastDate}</text><text x="${left-7}" y="${volumeTop+12}" text-anchor="end">VOL</text></g></svg>`;
 }
 
 function closeDetails() { $('detail-modal').hidden = true; document.body.classList.remove('modal-open'); }
