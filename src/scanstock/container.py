@@ -36,5 +36,4 @@ def provider(root: Path) -> MarketDataProvider:
     token = os.getenv("DHAN_API_TOKEN")
     if not client_id or not token:
         raise RuntimeError("Copy .env.example to .env and set DHAN_CLIENT_ID and DHAN_API_TOKEN")
-    return DhanMarketDataProvider(client_id, token, cfg.max_retries)
-
+    return DhanMarketDataProvider(client_id, token, cfg.max_retries, cfg.request_delay_seconds)

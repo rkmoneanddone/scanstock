@@ -75,6 +75,13 @@ class SQLiteMarketRepository:
             message TEXT NOT NULL DEFAULT '',
             created_at TEXT NOT NULL
         );
+        CREATE TABLE IF NOT EXISTS sync_watermarks (
+            symbol TEXT NOT NULL REFERENCES instruments(symbol),
+            timeframe TEXT NOT NULL,
+            attempted_through TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            PRIMARY KEY (symbol, timeframe)
+        );
         CREATE TABLE IF NOT EXISTS scan_definitions (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
@@ -136,6 +143,13 @@ class SQLiteMarketRepository:
     def last_candle_date(self, symbol: str, timeframe: str) -> date | None:
         return self._boundary_candle_date("MAX", symbol, timeframe)
 
+    def last_sync_through(self, symbol: str, timeframe: str) -> date | None:
+        with self._lock:
+            row = self._connection.execute(
+                "SELECT attempted_through FROM sync_watermarks WHERE symbol=? AND timeframe=?", (symbol, timeframe)
+            ).fetchone()
+        return date.fromisoformat(row[0]) if row else None
+
     def latest_candles(self, timeframe: str) -> list[Candle]:
         with self._lock:
             rows = self._connection.execute("""
@@ -171,16 +185,24 @@ class SQLiteMarketRepository:
             series.setdefault(candle.symbol, []).append(candle)
         return series
 
-    def record_sync(self, symbol: str, timeframe: str, status: str, rows: int, message: str = "") -> None:
+    def record_sync(self, symbol: str, timeframe: str, status: str, rows: int, message: str = "", attempted_through: date | None = None) -> None:
+        now = datetime.now(timezone.utc).isoformat()
         self._connection.execute(
             "INSERT INTO sync_runs(symbol,timeframe,status,rows_written,message,created_at) VALUES(?,?,?,?,?,?)",
-            (symbol, timeframe, status, rows, message, datetime.now(timezone.utc).isoformat()),
+            (symbol, timeframe, status, rows, message, now),
         )
+        if status == "SUCCESS" and attempted_through is not None:
+            self._connection.execute("""
+                INSERT INTO sync_watermarks(symbol,timeframe,attempted_through,updated_at) VALUES(?,?,?,?)
+                ON CONFLICT(symbol,timeframe) DO UPDATE SET
+                  attempted_through=excluded.attempted_through, updated_at=excluded.updated_at
+            """, (symbol, timeframe, attempted_through.isoformat(), now))
 
     def status_rows(self) -> list[tuple]:
         with self._lock:
             return self._connection.execute("""
-                SELECT i.symbol, COUNT(c.timestamp), MIN(c.timestamp), MAX(c.timestamp)
+                SELECT i.symbol, COUNT(c.timestamp), MIN(c.timestamp), MAX(c.timestamp), w.attempted_through
                 FROM instruments i LEFT JOIN candles c ON c.symbol=i.symbol AND c.timeframe='1D'
-                WHERE i.active=1 GROUP BY i.symbol ORDER BY i.symbol
+                LEFT JOIN sync_watermarks w ON w.symbol=i.symbol AND w.timeframe='1D'
+                WHERE i.active=1 GROUP BY i.symbol,w.attempted_through ORDER BY i.symbol
             """).fetchall()

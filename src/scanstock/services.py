@@ -19,13 +19,15 @@ class DailyHistorySyncService:
         for instrument in instruments:
             first = self.repository.first_candle_date(instrument.symbol, "1D")
             last = self.repository.last_candle_date(instrument.symbol, "1D")
+            synced_through = self.repository.last_sync_through(instrument.symbol, "1D")
             ranges: list[tuple[str, date, date]] = []
             if first is None or last is None:
                 ranges.append(("FULL", self.initial_start, end))
             else:
                 if self.initial_start < first:
                     ranges.append(("BACKFILL", self.initial_start, first))
-                if last < end:
+                latest_covered = max(value for value in (last, synced_through) if value is not None)
+                if latest_covered < end:
                     ranges.append(("FORWARD", last, end))
             if not ranges:
                 print(f"[CURRENT] {instrument.symbol}: {first} -> {last}")
@@ -36,7 +38,7 @@ class DailyHistorySyncService:
                     candles = self.provider.daily_history(instrument, start, range_end)
                     with self.repository.transaction() as transaction:
                         rows = transaction.upsert_candles(candles)
-                        transaction.record_sync(instrument.symbol, "1D", "SUCCESS", rows, mode)
+                        transaction.record_sync(instrument.symbol, "1D", "SUCCESS", rows, f"{mode} through {range_end}", range_end)
                     print(f"[OK] {instrument.symbol}: {rows} candles")
                 except Exception as exc:
                     with self.repository.transaction() as transaction:

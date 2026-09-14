@@ -12,9 +12,10 @@ from scanstock.domain import Candle, Instrument
 class DhanMarketDataProvider:
     name = "dhan"
 
-    def __init__(self, client_id: str, token: str, max_retries: int = 7) -> None:
+    def __init__(self, client_id: str, token: str, max_retries: int = 7, request_delay: float = 3.0) -> None:
         self._client = dhanhq(DhanContext(client_id, token))
         self._max_retries = max_retries
+        self._request_delay = request_delay
 
     def daily_history(self, instrument: Instrument, start: date, end: date) -> list[Candle]:
         response = None
@@ -29,7 +30,7 @@ class DhanMarketDataProvider:
             remarks = response.get("remarks", {}) if isinstance(response, dict) else {}
             if not isinstance(remarks, dict) or remarks.get("error_code") != "DH-904":
                 break
-            time.sleep(min(2**attempt, 30))
+            time.sleep(max(self._request_delay, min(2**attempt, 30)))
         if not isinstance(response, dict) or response.get("status") != "success":
             raise RuntimeError(f"Dhan request failed: {response}")
         data = response.get("data", {})
@@ -46,4 +47,3 @@ class DhanMarketDataProvider:
                 close=Decimal(str(close)), volume=int(volume), provider=self.name,
             ))
         return candles
-

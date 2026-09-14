@@ -47,9 +47,9 @@ def main() -> None:
         cfg = settings(ROOT)
         DailyHistorySyncService(provider(ROOT), repo, cfg.initial_from_date, cfg.request_delay_seconds).sync(instruments, args.to_date)
     elif args.command == "status":
-        print("symbol       candles  first                       last")
-        for symbol, count, first, last in repo.status_rows():
-            print(f"{symbol:<12} {count:>7}  {first or '-':<27} {last or '-'}")
+        print("symbol       candles  first                       last                        synced-through")
+        for symbol, count, first, last, synced_through in repo.status_rows():
+            print(f"{symbol:<12} {count:>7}  {first or '-':<27} {last or '-':<27} {synced_through or '-'}")
     elif args.command == "serve":
         import uvicorn
         uvicorn.run("scanstock.web:app", host=args.host, port=args.port, reload=False)
