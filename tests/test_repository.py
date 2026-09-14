@@ -23,6 +23,26 @@ def test_bulk_symbol_series_returns_latest_limit_in_chronological_order(tmp_path
     assert [candle.timestamp for candle in series["TWO"]] == sorted(candle.timestamp for candle in series["TWO"])
 
 
+def test_identical_candle_upsert_preserves_metric_cache(tmp_path):
+    repository = SQLiteMarketRepository(tmp_path / "cache.db")
+    repository.migrate()
+    candle = Candle("ONE", "1D", datetime(2026, 1, 1, tzinfo=timezone.utc),
+                    Decimal("10"), Decimal("12"), Decimal("9"), Decimal("11"), 100, "fake")
+    with repository.transaction() as transaction:
+        transaction.upsert_instruments([Instrument("ONE", "1", "One")])
+        transaction.upsert_candles([candle])
+    repository.save_metric_snapshots("1D", [(candle, {"close": Decimal("11")})])
+    with repository.transaction() as transaction:
+        transaction.upsert_candles([candle])
+    assert "ONE" in repository.metric_snapshots("1D")
+
+    changed = Candle("ONE", "1D", candle.timestamp, Decimal("10"), Decimal("13"),
+                     Decimal("9"), Decimal("12"), 120, "fake")
+    with repository.transaction() as transaction:
+        transaction.upsert_candles([changed])
+    assert "ONE" not in repository.metric_snapshots("1D")
+
+
 def test_atomic_upsert_is_idempotent(tmp_path):
     repo = SQLiteMarketRepository(tmp_path / "test.db")
     repo.migrate()
