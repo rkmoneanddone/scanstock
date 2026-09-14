@@ -63,6 +63,20 @@ def test_moving_average_metrics_are_available_to_custom_scanner():
             assert f"{method}{period}" in metrics
 
 
+def test_first_close_above_nine_requires_bullish_alignment_for_each_ma_family():
+    start = datetime(2025, 1, 1, tzinfo=timezone.utc)
+    closes = [Decimal(str(100 + index * .5)) for index in range(220)]
+    closes[-2], closes[-1] = Decimal("190"), Decimal("215")
+    candles = [
+        Candle("MA", "1D", start + timedelta(days=index), close - 1, close + 2, close - 2, close, 1000, "fake")
+        for index, close in enumerate(closes)
+    ]
+    metrics = MetricEngine.evaluate(candles).metrics
+    for method in ("ema", "sma", "wma"):
+        assert metrics[f"{method}9"] > metrics[f"{method}21"] > metrics[f"{method}50"] > metrics[f"{method}200"]
+        assert metrics[f"close_cross_above_{method}9"] == 1
+
+
 def test_scanner_cache_invalidates_when_candles_change(tmp_path):
     repo = SQLiteMarketRepository(tmp_path / "cache.db")
     repo.migrate()
