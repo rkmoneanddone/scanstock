@@ -226,20 +226,25 @@ function candlestickSvg(candles, row) {
   let markerIndex = candles.length - 1;
   let markerLabel = state.activeScan;
   if (/Bullish (EMA|SMA|WMA) Alignment \+ Close Above 9/.test(state.activeScan)) {
-    const fullyAligned = index => {
+    const averagesAligned = index => {
       const ma9 = maSeries['9'][index], ma21 = maSeries['21'][index];
       const ma50 = maSeries['50'][index], ma200 = maSeries['200'][index];
       return [ma9, ma21, ma50, ma200].every(Number.isFinite)
-        && ma9 > ma21 && ma21 > ma50 && ma50 > ma200
-        && candles[index].close > ma9;
+        && ma9 > ma21 && ma21 > ma50 && ma50 > ma200;
     };
-    // The selected stock qualifies now. Walk back through this same uninterrupted
-    // fully-aligned regime and mark its first qualifying candle—only after every
-    // 9/21/50/200 crossover has completed.
-    if (fullyAligned(candles.length - 1)) {
-      markerIndex = candles.length - 1;
-      while (markerIndex > 0 && fullyAligned(markerIndex - 1)) markerIndex -= 1;
-      markerLabel = `First candle after full ${maType} alignment`;
+    // Find where the current uninterrupted 9 > 21 > 50 > 200 alignment began.
+    // A later price dip below MA 9 must not restart the alignment clock.
+    if (averagesAligned(candles.length - 1)) {
+      let alignmentStart = candles.length - 1;
+      while (alignmentStart > 0 && averagesAligned(alignmentStart - 1)) alignmentStart -= 1;
+      markerIndex = alignmentStart;
+      for (let index = alignmentStart; index < candles.length; index += 1) {
+        if (candles[index].close > maSeries['9'][index]) {
+          markerIndex = index;
+          break;
+        }
+      }
+      markerLabel = `First close above all after full ${maType} alignment`;
     } else {
       markerLabel = `${maType} alignment current`;
     }
