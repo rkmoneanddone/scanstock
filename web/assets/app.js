@@ -157,30 +157,31 @@ function openDetails(symbol) {
   $('measurement-metrics').innerHTML = hasMeasurements ? measurements.map(item => `<div><span>${item.metric}</span><strong>${number(item.value)}</strong></div>`).join('') : '';
   $('detail-modal').hidden = false;
   document.body.classList.add('modal-open');
-  loadChart(symbol, state.activeTimeframeCode);
+  loadChart(row, state.activeTimeframeCode);
 }
 
-async function loadChart(symbol, timeframe) {
+async function loadChart(row, timeframe) {
   const slot = $('detail-chart-slot');
+  const symbol = row.symbol;
   const cacheKey = `${symbol}:${timeframe}`;
   slot.innerHTML = '<div class="chart-loading"><span class="spinner"></span><span>Loading chart…</span></div>';
-  $('chart-period').textContent = `${state.activeTimeframe} · latest 120 periods`;
+  $('chart-period').textContent = `${state.activeTimeframe} · loading history`;
   try {
     let data = state.chartCache.get(cacheKey);
     if (!data) {
-      const response = await fetch(`/api/chart/${encodeURIComponent(symbol)}?timeframe=${encodeURIComponent(timeframe)}&limit=120`);
+      const response = await fetch(`/api/chart/${encodeURIComponent(symbol)}?timeframe=${encodeURIComponent(timeframe)}&limit=250`);
       data = await response.json();
       if (!response.ok) throw new Error(data.detail || 'Chart request failed');
       state.chartCache.set(cacheKey, data);
     }
-    slot.innerHTML = candlestickSvg(data.candles);
+    slot.innerHTML = candlestickSvg(data.candles, row);
     $('chart-period').textContent = `${data.timeframe} · ${data.candles.length} periods`;
   } catch (error) {
     slot.innerHTML = `<div class="chart-error">${error.message || 'Chart could not be loaded.'}</div>`;
   }
 }
 
-function candlestickSvg(candles) {
+function candlestickSvg(candles, row) {
   if (!candles.length) return '<div class="chart-error">No chart data available.</div>';
   const width = 920, height = 330, left = 58, right = 14, top = 16, priceBottom = 242, volumeTop = 258, bottom = 306;
   const innerWidth = width - left - right, priceHeight = priceBottom - top, volumeHeight = bottom - volumeTop;
@@ -201,9 +202,45 @@ function candlestickSvg(candles) {
     const date = new Date(candle.timestamp).toLocaleDateString('en-IN');
     return `<g><title>${date} · O ${number(candle.open)} · H ${number(candle.high)} · L ${number(candle.low)} · C ${number(candle.close)} · Vol ${number(candle.volume,0)}</title><line class="candle-wick" stroke="${tone}" x1="${candleX}" y1="${highY}" x2="${candleX}" y2="${lowY}"/><rect fill="${tone}" x="${candleX-bodyWidth/2}" y="${bodyY}" width="${bodyWidth}" height="${bodyHeight}"/><rect fill="${tone}" opacity=".36" x="${candleX-bodyWidth/2}" y="${bottom-volumeHeightValue}" width="${bodyWidth}" height="${volumeHeightValue}"/></g>`;
   }).join('');
+  const emaColors = {9:'#2563eb',21:'#f59e0b',50:'#8b5cf6',200:'#475569'};
+  const closes = candles.map(candle => candle.close);
+  const overlays = Object.entries(emaColors).map(([period, color]) => {
+    const values = emaSeries(closes, Number(period));
+    const points = values.map((value, index) => value == null ? null : `${x(index)},${y(value)}`).filter(Boolean);
+    return points.length > 1 ? `<polyline class="ema-line" stroke="${color}" points="${points.join(' ')}"/>` : '';
+  }).join('');
+  const evidence = [...(row.details.vcp || []), ...(row.details.measurements || [])];
+  const evidenceValue = label => evidence.find(item => item.metric === label)?.value;
+  const levels = [
+    ['VCP Pivot Price', evidenceValue('VCP Pivot Price'), '#0d9488'],
+    ['Pivot 1', evidenceValue('First Pivot'), '#7c3aed'],
+    ['Pivot 2', evidenceValue('Second Pivot'), '#7c3aed'],
+    ['Neckline', evidenceValue('Pattern Neckline'), '#dc2626'],
+  ].filter(([, value]) => Number.isFinite(value) && value >= lowest && value <= highest);
+  const annotations = levels.map(([label, value, color]) => `<g class="chart-level"><line stroke="${color}" x1="${left}" y1="${y(value)}" x2="${width-right}" y2="${y(value)}"/><text fill="${color}" x="${width-right-3}" y="${y(value)-4}" text-anchor="end">${label} ${number(value)}</text></g>`).join('');
+  const latestX = x(candles.length-1), latestY = y(candles[candles.length-1].high);
+  const scanMarker = `<g class="scan-marker"><path d="M ${latestX} ${Math.max(top+5,latestY-4)} l -5 -8 h 10 z"/><text x="${Math.min(width-right-4,latestX+9)}" y="${Math.max(top+12,latestY-14)}" text-anchor="end">${escapeXml(state.activeScan)}</text></g>`;
   const firstDate = new Date(candles[0].timestamp).toLocaleDateString('en-IN');
   const lastDate = new Date(candles[candles.length-1].timestamp).toLocaleDateString('en-IN');
-  return `<svg class="stock-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="Candlestick and volume chart"><g class="chart-grid">${grid}<line x1="${left}" y1="${priceBottom}" x2="${width-right}" y2="${priceBottom}"/></g>${marks}<g class="chart-dates"><text x="${left}" y="${height-7}">${firstDate}</text><text x="${width-right}" y="${height-7}" text-anchor="end">${lastDate}</text><text x="${left-7}" y="${volumeTop+12}" text-anchor="end">VOL</text></g></svg>`;
+  const legend = Object.entries(emaColors).map(([period,color], index) => `<g transform="translate(${left+index*82},${top+2})"><line stroke="${color}" stroke-width="2" x1="0" y1="0" x2="16" y2="0"/><text x="20" y="4">EMA ${period}</text></g>`).join('');
+  return `<svg class="stock-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="Candlestick and volume chart"><g class="chart-grid">${grid}<line x1="${left}" y1="${priceBottom}" x2="${width-right}" y2="${priceBottom}"/></g>${marks}${overlays}${annotations}${scanMarker}<g class="chart-legend">${legend}</g><g class="chart-dates"><text x="${left}" y="${height-7}">${firstDate}</text><text x="${width-right}" y="${height-7}" text-anchor="end">${lastDate}</text><text x="${left-7}" y="${volumeTop+12}" text-anchor="end">VOL</text></g></svg>`;
+}
+
+function emaSeries(values, period) {
+  const result = Array(values.length).fill(null);
+  if (values.length < period) return result;
+  let ema = values.slice(0, period).reduce((sum, value) => sum + value, 0) / period;
+  result[period-1] = ema;
+  const multiplier = 2 / (period + 1);
+  for (let index = period; index < values.length; index += 1) {
+    ema = (values[index] - ema) * multiplier + ema;
+    result[index] = ema;
+  }
+  return result;
+}
+
+function escapeXml(value) {
+  return String(value).replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[character]));
 }
 
 function closeDetails() { $('detail-modal').hidden = true; document.body.classList.remove('modal-open'); }
