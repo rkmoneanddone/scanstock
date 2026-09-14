@@ -134,9 +134,11 @@ function openDetails(symbol) {
   $('detail-title').textContent = row.symbol;
   $('detail-meta').textContent = `${state.activeScan} · ${row.details.timeframe} · ${new Date(row.timestamp).toLocaleDateString('en-IN')}`;
   $('detail-checks').innerHTML = row.details.checks.map(check => `<div class="detail-check ${check.passed ? 'passed' : 'failed'}"><span>${check.metric}</span><span>${number(check.actual)} ${check.operator} ${check.comparison === 'Fixed value' ? '' : check.comparison + ' '}${number(check.target)}</span><strong>${check.passed ? 'Passed' : 'Not passed'}</strong></div>`).join('');
-  const hasVcp = Array.isArray(row.details.vcp);
-  $('vcp-details').hidden = !hasVcp;
-  $('vcp-metrics').innerHTML = hasVcp ? row.details.vcp.map(item => `<div><span>${item.metric}</span><strong>${number(item.value)}</strong></div>`).join('') : '';
+  const measurements = Array.isArray(row.details.vcp) ? row.details.vcp : row.details.measurements;
+  const hasMeasurements = Array.isArray(measurements) && measurements.length > 0;
+  $('measurement-details').hidden = !hasMeasurements;
+  $('measurement-title').textContent = Array.isArray(row.details.vcp) ? 'VCP measurements' : 'Scanner measurements';
+  $('measurement-metrics').innerHTML = hasMeasurements ? measurements.map(item => `<div><span>${item.metric}</span><strong>${number(item.value)}</strong></div>`).join('') : '';
   $('detail-modal').hidden = false;
   document.body.classList.add('modal-open');
 }
