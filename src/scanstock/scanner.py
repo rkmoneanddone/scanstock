@@ -39,6 +39,11 @@ FIELD_CATALOG = {
     "pattern_neckline": "Pattern Neckline", "pattern_separation": "Pivot Separation",
     "all_time_high_breakout": "All-Time High Breakout", "previous_all_time_high": "Previous All-Time High",
     "distance_from_previous_ath_pct": "Distance From Previous All-Time High %",
+    "ath_approach_first": "Approaching ATH — First Visit", "ath_approach_second": "Approaching ATH — Second Visit",
+    "ath_approach_count": "ATH Approach Number", "ath_distance_below_pct": "Distance Below ATH %",
+    "ath_first_close_above": "First Close Above ATH", "ath_second_close_above": "Second Close Above ATH",
+    "ath_breakout_retest": "ATH Breakout Retest", "ath_breakout_reference": "ATH Breakout Reference",
+    "ath_retest_distance_pct": "Retest Distance From ATH %",
     "vcp_setup": "VCP Setup Detected", "vcp_breakout": "VCP Breakout Detected",
     "vcp_contractions": "VCP Contractions", "vcp_outer_range_pct": "VCP Outer Range %",
     "vcp_middle_range_pct": "VCP Middle Range %", "vcp_inner_range_pct": "VCP Inner Range %",
@@ -49,7 +54,7 @@ FIELD_CATALOG = {
 OPERATORS = {">": operator.gt, ">=": operator.ge, "<": operator.lt, "<=": operator.le, "=": operator.eq, "!=": operator.ne}
 TIMEFRAMES = {"1D": "Daily", "1W": "Weekly", "1M": "Monthly", "3M": "3 Months", "6M": "6 Months", "1Y": "Yearly"}
 DAILY_HISTORY_LIMITS = {"1D": 260, "1W": 1600, "1M": 6500, "3M": 6500, "6M": 6500, "1Y": 6500}
-METRIC_SCHEMA_VERSION = Decimal(3)
+METRIC_SCHEMA_VERSION = Decimal(4)
 
 
 @dataclass(frozen=True, slots=True)
@@ -187,6 +192,8 @@ class StrictScanner:
             "volume_up_price_down", "volume_down_price_up", "bearish_rsi_divergence",
             "bullish_rsi_divergence", "double_top", "double_bottom", "rsi_double_top", "rsi_double_bottom",
             "all_time_high_breakout",
+            "ath_approach_first", "ath_approach_second", "ath_first_close_above", "ath_second_close_above",
+            "ath_breakout_retest",
         }
         measurements = None
         if any(condition.field in pattern_fields for condition in conditions):
@@ -201,6 +208,12 @@ class StrictScanner:
                 keys += ["pattern_pivot_1", "pattern_pivot_2", "pattern_neckline", "pattern_separation"]
             if "all_time_high_breakout" in selected:
                 keys += ["previous_all_time_high", "distance_from_previous_ath_pct"]
+            if selected & {"ath_approach_first", "ath_approach_second"}:
+                keys += ["previous_all_time_high", "ath_distance_below_pct", "ath_approach_count"]
+            if selected & {"ath_first_close_above", "ath_second_close_above"}:
+                keys += ["ath_breakout_reference", "distance_from_previous_ath_pct"]
+            if "ath_breakout_retest" in selected:
+                keys += ["ath_breakout_reference", "ath_retest_distance_pct"]
             measurements = [{"metric": FIELD_CATALOG[key], "value": float(stock.metrics[key])}
                             for key in keys if key in stock.metrics]
         return {"timeframe": TIMEFRAMES[timeframe], "checks": checks, "vcp": vcp, "measurements": measurements}
@@ -232,14 +245,14 @@ class StrictScanner:
             missing_symbol_set = set(missing_symbols)
             evaluated = [EvaluatedStock(candle, metrics) for candle, metrics in saved.values()]
             for daily_candles in daily_series.values():
-                stock = MetricEngine.evaluate(aggregate_candles(daily_candles, timeframe))
+                aggregated = aggregate_candles(daily_candles, timeframe)
+                stock = MetricEngine.evaluate(aggregated)
                 if stock is not None:
                     previous_ath = self.repository.previous_all_time_high(stock.candle.symbol, timeframe)
-                    stock.metrics["previous_all_time_high"] = previous_ath or Decimal(0)
-                    stock.metrics["all_time_high_breakout"] = Decimal(int(previous_ath is not None and stock.candle.close > previous_ath))
-                    stock.metrics["distance_from_previous_ath_pct"] = (
-                        ((stock.candle.close / previous_ath) - 1) * 100 if previous_ath else Decimal(0)
-                    )
+                    breakout_reference = self.repository.previous_all_time_high(
+                        stock.candle.symbol, timeframe, aggregated[-2].timestamp
+                    ) if len(aggregated) >= 2 else None
+                    add_ath_interaction_metrics(aggregated, stock.metrics, previous_ath, breakout_reference)
                     evaluated.append(stock)
             missing = [(stock.candle, stock.metrics) for stock in evaluated if stock.candle.symbol in missing_symbol_set]
             self.repository.save_metric_snapshots(timeframe, missing)
@@ -265,6 +278,67 @@ class StrictScanner:
             return False
         right = metrics.get(condition.compare_field) if condition.compare_mode == "field" else condition.compare_value
         return right is not None and OPERATORS[condition.operator](metrics[condition.field], right)
+
+
+def add_ath_interaction_metrics(
+    candles: list[Candle], metrics: dict[str, Decimal], previous_ath: Decimal | None,
+    breakout_reference: Decimal | None,
+) -> None:
+    """Add deterministic ATH visit, breakout and immediate-retest signals."""
+    for key in (
+        "ath_approach_first", "ath_approach_second", "ath_first_close_above",
+        "ath_second_close_above", "ath_breakout_retest",
+    ):
+        metrics[key] = Decimal(0)
+    metrics.update({
+        "previous_all_time_high": previous_ath or Decimal(0),
+        "ath_breakout_reference": breakout_reference or Decimal(0),
+        "ath_approach_count": Decimal(0), "ath_distance_below_pct": Decimal(0),
+        "distance_from_previous_ath_pct": Decimal(0), "ath_retest_distance_pct": Decimal(0),
+    })
+    if not candles or previous_ath is None or previous_ath <= 0:
+        return
+
+    current = candles[-1]
+    metrics["ath_distance_below_pct"] = ((previous_ath - current.close) / previous_ath) * 100
+    metrics["distance_from_previous_ath_pct"] = ((current.close / previous_ath) - 1) * 100
+
+    # Count separate entries into the zone from 3% below ATH up to ATH itself.
+    formation_indexes = [index for index, candle in enumerate(candles[:-1]) if candle.high >= previous_ath]
+    start = max(len(candles) - 60, (formation_indexes[-1] + 1) if formation_indexes else 0)
+    in_zone = [previous_ath * Decimal("0.97") <= candle.close <= previous_ath for candle in candles[start:]]
+    visits = sum(1 for index, value in enumerate(in_zone) if value and (index == 0 or not in_zone[index - 1]))
+    metrics["ath_approach_count"] = Decimal(visits)
+    if in_zone and in_zone[-1]:
+        metrics["ath_approach_first"] = Decimal(int(visits == 1))
+        metrics["ath_approach_second"] = Decimal(int(visits == 2))
+
+    previous_close = candles[-2].close if len(candles) >= 2 else None
+    metrics["ath_first_close_above"] = Decimal(int(
+        previous_close is not None and previous_close <= previous_ath < current.close
+    ))
+
+    if breakout_reference is None or breakout_reference <= 0 or len(candles) < 2:
+        return
+    before_previous = candles[-3].close if len(candles) >= 3 else None
+    previous = candles[-2]
+    first_breakout_was_previous = (
+        previous.close > breakout_reference
+        and (before_previous is None or before_previous <= breakout_reference)
+    )
+    metrics["ath_second_close_above"] = Decimal(int(
+        first_breakout_was_previous and current.close > breakout_reference
+    ))
+
+    # Immediate post-breakout retest: latest candle trades within 2% of the old ATH,
+    # never closes below it, and follows the first confirmed close above that ATH.
+    distance = ((current.low - breakout_reference) / breakout_reference) * 100
+    metrics["ath_retest_distance_pct"] = distance
+    touched_level = current.low <= breakout_reference * Decimal("1.02")
+    held_as_support = current.close >= breakout_reference
+    metrics["ath_breakout_retest"] = Decimal(int(
+        first_breakout_was_previous and touched_level and held_as_support
+    ))
 
 
 def calculate_rsi(values: list[float], period: int = 14) -> Decimal | None:
