@@ -22,6 +22,19 @@ FIELD_CATALOG = {
     "previous_low20": "Previous 20-Period Low", "distance_52w_high_pct": "Distance From 52-Period High %",
     "distance_52w_low_pct": "Distance From 52-Period Low %", "doji": "Doji Pattern",
     "bullish_engulfing": "Bullish Engulfing", "bearish_engulfing": "Bearish Engulfing", "nr7": "Narrowest Range in 7 Days",
+    "morning_star": "Morning Star", "evening_star": "Evening Star",
+    "three_white_soldiers": "Three White Soldiers", "three_black_crows": "Three Black Crows",
+    "bullish_fvg": "Bullish Fair Value Gap", "bearish_fvg": "Bearish Fair Value Gap",
+    "fvg_gap_pct": "Fair Value Gap %", "volume_increasing": "Volume Increasing",
+    "volume_decreasing": "Volume Decreasing", "volume_trend_ratio": "Recent / Previous 5-Period Volume",
+    "price_trend_pct5": "5-Period Price Change %",
+    "volume_up_price_down": "Volume Increasing / Price Decreasing",
+    "volume_down_price_up": "Volume Decreasing / Price Increasing",
+    "bearish_rsi_divergence": "Negative RSI Divergence", "bullish_rsi_divergence": "Positive RSI Divergence",
+    "double_top": "Confirmed Double Top", "double_bottom": "Confirmed Double Bottom",
+    "rsi_double_top": "RSI Double Top", "rsi_double_bottom": "RSI Double Bottom",
+    "pattern_pivot_1": "First Pivot", "pattern_pivot_2": "Second Pivot",
+    "pattern_neckline": "Pattern Neckline", "pattern_separation": "Pivot Separation",
     "vcp_setup": "VCP Setup Detected", "vcp_breakout": "VCP Breakout Detected",
     "vcp_contractions": "VCP Contractions", "vcp_outer_range_pct": "VCP Outer Range %",
     "vcp_middle_range_pct": "VCP Middle Range %", "vcp_inner_range_pct": "VCP Inner Range %",
@@ -93,6 +106,9 @@ class MetricEngine:
         if len(candles) >= 7:
             ranges = [c.high - c.low for c in candles[-7:]]
             metrics["nr7"] = Decimal(1 if ranges[-1] == min(ranges) else 0)
+        add_candlestick_metrics(candles, metrics)
+        add_volume_trend_metrics(candles, metrics)
+        add_swing_pattern_metrics(candles, metrics)
         add_vcp_metrics(candles, metrics)
         return EvaluatedStock(current, metrics)
 
@@ -148,7 +164,19 @@ class StrictScanner:
                 "vcp_breakout_volume_ratio", "vcp_quality_score",
             )
             vcp = [{"metric": FIELD_CATALOG[key], "value": float(stock.metrics[key])} for key in keys if key in stock.metrics]
-        return {"timeframe": TIMEFRAMES[timeframe], "checks": checks, "vcp": vcp}
+        pattern_fields = {
+            "morning_star", "evening_star", "three_white_soldiers", "three_black_crows",
+            "bullish_fvg", "bearish_fvg", "volume_increasing", "volume_decreasing",
+            "volume_up_price_down", "volume_down_price_up", "bearish_rsi_divergence",
+            "bullish_rsi_divergence", "double_top", "double_bottom", "rsi_double_top", "rsi_double_bottom",
+        }
+        measurements = None
+        if any(condition.field in pattern_fields for condition in conditions):
+            keys = ("fvg_gap_pct", "volume_trend_ratio", "price_trend_pct5", "pattern_pivot_1",
+                    "pattern_pivot_2", "pattern_neckline", "pattern_separation")
+            measurements = [{"metric": FIELD_CATALOG[key], "value": float(stock.metrics[key])}
+                            for key in keys if key in stock.metrics]
+        return {"timeframe": TIMEFRAMES[timeframe], "checks": checks, "vcp": vcp, "measurements": measurements}
 
     def _evaluated(self, timeframe: str) -> tuple[EvaluatedStock, ...]:
         version = self.repository.data_version()
@@ -212,6 +240,127 @@ def moving_wma(values: list[float], period: int) -> Decimal:
     window = values[-period:]
     denominator = period * (period + 1) / 2
     return Decimal(str(sum(value * weight for weight, value in enumerate(window, 1)) / denominator))
+
+
+def add_candlestick_metrics(candles: list[Candle], metrics: dict[str, Decimal]) -> None:
+    for key in ("morning_star", "evening_star", "three_white_soldiers", "three_black_crows",
+                "bullish_fvg", "bearish_fvg"):
+        metrics[key] = Decimal(0)
+    metrics["fvg_gap_pct"] = Decimal(0)
+    if len(candles) < 3:
+        return
+    first, middle, last = candles[-3:]
+
+    def body(candle: Candle) -> Decimal:
+        return abs(candle.close - candle.open)
+
+    def body_ratio(candle: Candle) -> Decimal:
+        span = candle.high - candle.low
+        return body(candle) / span if span else Decimal(0)
+
+    first_midpoint = (first.open + first.close) / 2
+    small_middle = body(middle) <= body(first) * Decimal("0.5")
+    metrics["morning_star"] = Decimal(int(
+        first.close < first.open and body_ratio(first) >= Decimal("0.5") and small_middle
+        and last.close > last.open and last.close > first_midpoint
+    ))
+    metrics["evening_star"] = Decimal(int(
+        first.close > first.open and body_ratio(first) >= Decimal("0.5") and small_middle
+        and last.close < last.open and last.close < first_midpoint
+    ))
+
+    bullish = all(c.close > c.open and body_ratio(c) >= Decimal("0.5") for c in (first, middle, last))
+    bearish = all(c.close < c.open and body_ratio(c) >= Decimal("0.5") for c in (first, middle, last))
+    opens_inside = first.open <= middle.open <= first.close and middle.open <= last.open <= middle.close
+    bearish_opens_inside = first.close <= middle.open <= first.open and middle.close <= last.open <= middle.open
+    metrics["three_white_soldiers"] = Decimal(int(bullish and opens_inside and first.close < middle.close < last.close))
+    metrics["three_black_crows"] = Decimal(int(bearish and bearish_opens_inside and first.close > middle.close > last.close))
+
+    if last.low > first.high:
+        metrics["bullish_fvg"] = Decimal(1)
+        metrics["fvg_gap_pct"] = ((last.low - first.high) / first.high) * 100 if first.high else Decimal(0)
+    elif last.high < first.low:
+        metrics["bearish_fvg"] = Decimal(1)
+        metrics["fvg_gap_pct"] = ((first.low - last.high) / first.low) * 100 if first.low else Decimal(0)
+
+
+def add_volume_trend_metrics(candles: list[Candle], metrics: dict[str, Decimal]) -> None:
+    for key in ("volume_increasing", "volume_decreasing", "volume_up_price_down", "volume_down_price_up"):
+        metrics[key] = Decimal(0)
+    if len(candles) < 11:
+        return
+    previous_volume = fmean(c.volume for c in candles[-11:-6])
+    recent_volume = fmean(c.volume for c in candles[-5:])
+    ratio = Decimal(str(recent_volume / previous_volume)) if previous_volume else Decimal(0)
+    price_change = ((candles[-1].close / candles[-6].close) - 1) * 100 if candles[-6].close else Decimal(0)
+    increasing, decreasing = ratio >= Decimal("1.15"), ratio <= Decimal("0.85")
+    metrics.update({
+        "volume_trend_ratio": ratio, "price_trend_pct5": price_change,
+        "volume_increasing": Decimal(int(increasing)), "volume_decreasing": Decimal(int(decreasing)),
+        "volume_up_price_down": Decimal(int(increasing and price_change < 0)),
+        "volume_down_price_up": Decimal(int(decreasing and price_change > 0)),
+    })
+
+
+def add_swing_pattern_metrics(candles: list[Candle], metrics: dict[str, Decimal]) -> None:
+    keys = ("bearish_rsi_divergence", "bullish_rsi_divergence", "double_top", "double_bottom",
+            "rsi_double_top", "rsi_double_bottom")
+    metrics.update({key: Decimal(0) for key in keys})
+    if len(candles) < 35:
+        return
+    window = candles[-80:]
+    closes = [float(c.close) for c in window]
+    rsi_values = [calculate_rsi(closes[:index + 1]) for index in range(len(closes))]
+
+    def pivots(values: list[Decimal | None], high: bool) -> list[int]:
+        found = []
+        for index in range(2, len(values) - 2):
+            value = values[index]
+            neighbors = values[index - 2:index] + values[index + 1:index + 3]
+            if value is not None and all(item is not None and (value > item if high else value < item) for item in neighbors):
+                found.append(index)
+        return found
+
+    price_highs = pivots([c.high for c in window], True)
+    price_lows = pivots([c.low for c in window], False)
+    rsi_highs, rsi_lows = pivots(rsi_values, True), pivots(rsi_values, False)
+
+    def record(first: Decimal, second: Decimal, neckline: Decimal, separation: int) -> None:
+        metrics.update({"pattern_pivot_1": first, "pattern_pivot_2": second,
+                        "pattern_neckline": neckline, "pattern_separation": Decimal(separation)})
+
+    if len(price_highs) >= 2:
+        a, b = price_highs[-2:]
+        first, second = window[a].high, window[b].high
+        valley = min(c.low for c in window[a:b + 1])
+        close_enough = abs(second - first) / first <= Decimal("0.03") if first else False
+        meaningful_valley = (min(first, second) - valley) / min(first, second) >= Decimal("0.03") if min(first, second) else False
+        metrics["double_top"] = Decimal(int(close_enough and meaningful_valley and window[-1].close < valley))
+        rsi_a, rsi_b = rsi_values[a], rsi_values[b]
+        metrics["bearish_rsi_divergence"] = Decimal(int(rsi_a is not None and rsi_b is not None and second > first and rsi_b < rsi_a))
+        if metrics["double_top"] or metrics["bearish_rsi_divergence"]:
+            record(first, second, valley, b - a)
+    if len(price_lows) >= 2:
+        a, b = price_lows[-2:]
+        first, second = window[a].low, window[b].low
+        peak = max(c.high for c in window[a:b + 1])
+        close_enough = abs(second - first) / first <= Decimal("0.03") if first else False
+        meaningful_peak = (peak - max(first, second)) / max(first, second) >= Decimal("0.03") if max(first, second) else False
+        metrics["double_bottom"] = Decimal(int(close_enough and meaningful_peak and window[-1].close > peak))
+        rsi_a, rsi_b = rsi_values[a], rsi_values[b]
+        metrics["bullish_rsi_divergence"] = Decimal(int(rsi_a is not None and rsi_b is not None and second < first and rsi_b > rsi_a))
+        if metrics["double_bottom"] or metrics["bullish_rsi_divergence"]:
+            record(first, second, peak, b - a)
+    if len(rsi_highs) >= 2:
+        a, b = rsi_highs[-2:]
+        first, second = rsi_values[a], rsi_values[b]
+        valley = min(value for value in rsi_values[a:b + 1] if value is not None)
+        metrics["rsi_double_top"] = Decimal(int(abs(second - first) <= 5 and min(first, second) - valley >= 5 and rsi_values[-1] is not None and rsi_values[-1] < valley))
+    if len(rsi_lows) >= 2:
+        a, b = rsi_lows[-2:]
+        first, second = rsi_values[a], rsi_values[b]
+        peak = max(value for value in rsi_values[a:b + 1] if value is not None)
+        metrics["rsi_double_bottom"] = Decimal(int(abs(second - first) <= 5 and peak - max(first, second) >= 5 and rsi_values[-1] is not None and rsi_values[-1] > peak))
 
 
 def add_vcp_metrics(candles: list[Candle], metrics: dict[str, Decimal]) -> None:
