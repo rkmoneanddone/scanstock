@@ -220,6 +220,7 @@ function candlestickSvg(candles, row) {
     ['Pivot 2', evidenceValue('Second Pivot'), '#7c3aed'],
     ['Neckline', evidenceValue('Pattern Neckline'), '#dc2626'],
     ['Previous ATH', evidenceValue('Previous All-Time High'), '#e11d48'],
+    ['Retest ATH', evidenceValue('ATH Breakout Reference'), '#b91c1c'],
   ].filter(([, value]) => Number.isFinite(value) && value >= lowest && value <= highest);
   const annotations = levels.map(([label, value, color]) => `<g class="chart-level"><line stroke="${color}" x1="${left}" y1="${y(value)}" x2="${width-right}" y2="${y(value)}"/><text fill="${color}" x="${width-right-3}" y="${y(value)-4}" text-anchor="end">${label} ${number(value)}</text></g>`).join('');
   let markerIndex = candles.length - 1;
