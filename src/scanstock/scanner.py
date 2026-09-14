@@ -22,6 +22,12 @@ FIELD_CATALOG = {
     "previous_low20": "Previous 20-Period Low", "distance_52w_high_pct": "Distance From 52-Period High %",
     "distance_52w_low_pct": "Distance From 52-Period Low %", "doji": "Doji Pattern",
     "bullish_engulfing": "Bullish Engulfing", "bearish_engulfing": "Bearish Engulfing", "nr7": "Narrowest Range in 7 Days",
+    "vcp_setup": "VCP Setup Detected", "vcp_breakout": "VCP Breakout Detected",
+    "vcp_contractions": "VCP Contractions", "vcp_outer_range_pct": "VCP Outer Range %",
+    "vcp_middle_range_pct": "VCP Middle Range %", "vcp_inner_range_pct": "VCP Inner Range %",
+    "vcp_volume_dryup_ratio": "VCP Volume Dry-Up Ratio", "vcp_pivot": "VCP Pivot Price",
+    "vcp_distance_to_pivot_pct": "Distance to VCP Pivot %", "vcp_breakout_volume_ratio": "VCP Breakout Volume Ratio",
+    "vcp_quality_score": "VCP Quality Score",
 }
 OPERATORS = {">": operator.gt, ">=": operator.ge, "<": operator.lt, "<=": operator.le, "=": operator.eq, "!=": operator.ne}
 TIMEFRAMES = {"1D": "Daily", "1W": "Weekly", "1M": "Monthly", "3M": "3 Months", "6M": "6 Months", "1Y": "Yearly"}
@@ -86,6 +92,7 @@ class MetricEngine:
         if len(candles) >= 7:
             ranges = [c.high - c.low for c in candles[-7:]]
             metrics["nr7"] = Decimal(1 if ranges[-1] == min(ranges) else 0)
+        add_vcp_metrics(candles, metrics)
         return EvaluatedStock(current, metrics)
 
 
@@ -116,8 +123,32 @@ class StrictScanner:
                     "close": float(candle.close), "volume": candle.volume,
                     "change_pct": float(stock.metrics.get("change_pct", 0)),
                     "rsi14": float(stock.metrics["rsi14"]) if "rsi14" in stock.metrics else None,
+                    "details": self._details(stock, conditions, timeframe),
                 })
         return matches
+
+    @staticmethod
+    def _details(stock: EvaluatedStock, conditions: list[ScanCondition], timeframe: str) -> dict:
+        checks = []
+        for condition in conditions:
+            left = stock.metrics.get(condition.field)
+            right = stock.metrics.get(condition.compare_field) if condition.compare_mode == "field" else condition.compare_value
+            passed = left is not None and right is not None and OPERATORS[condition.operator](left, right)
+            checks.append({
+                "metric": FIELD_CATALOG[condition.field], "actual": float(left) if left is not None else None,
+                "operator": condition.operator,
+                "comparison": FIELD_CATALOG.get(condition.compare_field, "Fixed value"),
+                "target": float(right) if right is not None else None, "passed": passed,
+            })
+        vcp = None
+        if any(condition.field.startswith("vcp_") for condition in conditions):
+            keys = (
+                "vcp_contractions", "vcp_outer_range_pct", "vcp_middle_range_pct", "vcp_inner_range_pct",
+                "vcp_volume_dryup_ratio", "vcp_pivot", "vcp_distance_to_pivot_pct",
+                "vcp_breakout_volume_ratio", "vcp_quality_score",
+            )
+            vcp = [{"metric": FIELD_CATALOG[key], "value": float(stock.metrics[key])} for key in keys if key in stock.metrics]
+        return {"timeframe": TIMEFRAMES[timeframe], "checks": checks, "vcp": vcp}
 
     def _evaluated(self, timeframe: str) -> tuple[EvaluatedStock, ...]:
         version = self.repository.data_version()
@@ -183,6 +214,52 @@ def moving_wma(values: list[float], period: int) -> Decimal:
     window = values[-period:]
     denominator = period * (period + 1) / 2
     return Decimal(str(sum(value * weight for weight, value in enumerate(window, 1)) / denominator))
+
+
+def add_vcp_metrics(candles: list[Candle], metrics: dict[str, Decimal]) -> None:
+    defaults = {
+        "vcp_setup": 0, "vcp_breakout": 0, "vcp_contractions": 0,
+        "vcp_outer_range_pct": 0, "vcp_middle_range_pct": 0, "vcp_inner_range_pct": 0,
+        "vcp_volume_dryup_ratio": 0, "vcp_pivot": 0, "vcp_distance_to_pivot_pct": 0,
+        "vcp_breakout_volume_ratio": 0, "vcp_quality_score": 0,
+    }
+    metrics.update({key: Decimal(value) for key, value in defaults.items()})
+    if len(candles) < 62 or "sma50" not in metrics:
+        return
+
+    current, history = candles[-1], candles[:-1]
+
+    def range_pct(window: list[Candle]) -> Decimal:
+        high, low = max(c.high for c in window), min(c.low for c in window)
+        return ((high - low) / low) * 100 if low else Decimal(0)
+
+    outer, middle, inner = range_pct(history[-60:]), range_pct(history[-30:]), range_pct(history[-15:])
+    contractions = 1 + int(middle < outer) + int(inner < middle)
+    recent_volume = fmean(c.volume for c in history[-10:])
+    prior_volume = fmean(c.volume for c in history[-40:-10])
+    dryup = Decimal(str(recent_volume / prior_volume)) if prior_volume else Decimal(0)
+    average20 = fmean(c.volume for c in history[-20:])
+    breakout_volume = Decimal(str(current.volume / average20)) if average20 else Decimal(0)
+    pivot = max(c.high for c in history[-60:])
+    distance = ((pivot - current.close) / pivot) * 100 if pivot else Decimal(0)
+    trend = current.close > metrics["sma50"] and current.close > history[-60].close
+    contracting = contractions == 3 and middle <= Decimal(25) and inner <= Decimal(15)
+    volume_dry = dryup <= Decimal("0.8")
+    near_pivot = Decimal(0) <= distance <= Decimal(8)
+    setup = trend and contracting and volume_dry and near_pivot
+    breakout = trend and contracting and current.close > pivot and breakout_volume >= Decimal("1.5")
+    score = (
+        (25 if trend else 0) + (25 if contractions == 3 else 10 if contractions == 2 else 0)
+        + (20 if volume_dry else 0) + (15 if near_pivot else 0) + (15 if inner <= Decimal(10) else 0)
+    )
+    metrics.update({
+        "vcp_setup": Decimal(int(setup)), "vcp_breakout": Decimal(int(breakout)),
+        "vcp_contractions": Decimal(contractions), "vcp_outer_range_pct": outer,
+        "vcp_middle_range_pct": middle, "vcp_inner_range_pct": inner,
+        "vcp_volume_dryup_ratio": dryup, "vcp_pivot": pivot,
+        "vcp_distance_to_pivot_pct": distance, "vcp_breakout_volume_ratio": breakout_volume,
+        "vcp_quality_score": Decimal(score),
+    })
 
 
 def aggregate_candles(candles: list[Candle], timeframe: str) -> list[Candle]:

@@ -66,6 +66,7 @@
               <th><button class="sort numeric" data-key="change_pct">Change %</button></th>
               <th><button class="sort numeric" data-key="rsi14">RSI 14</button></th>
               <th><button class="sort numeric" data-key="volume">Volume</button></th>
+              <th class="details-column">Details</th>
             </tr></thead><tbody id="results-body"></tbody>
           </table>
         </div>
@@ -81,6 +82,16 @@
   </main>
   <div id="loading" class="loading" hidden role="status" aria-live="polite">
     <div class="loading-card"><span class="spinner"></span><strong>Scanning stocks…</strong><small id="loading-detail">Applying your filters</small></div>
+  </div>
+  <div id="detail-modal" class="detail-modal" hidden>
+    <section class="detail-dialog" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+      <button id="detail-close" class="detail-close" type="button" aria-label="Close details">×</button>
+      <span class="eyebrow">SCAN EVIDENCE</span><h2 id="detail-title">Stock details</h2>
+      <p id="detail-meta" class="detail-meta"></p>
+      <div id="detail-checks" class="detail-checks"></div>
+      <section id="vcp-details" hidden><h3>VCP measurements</h3><div id="vcp-metrics" class="detail-metrics"></div></section>
+      <div id="detail-chart-slot" hidden></div>
+    </section>
   </div>
   <script src="/assets/app.js"></script>
 </body>

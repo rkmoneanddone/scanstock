@@ -18,5 +18,7 @@
   {"category":"Candlestick Patterns","name":"Doji","description":"Body is no more than 10% of the candle range.","conditions":[{"field":"doji","operator":"=","compare_mode":"value","compare_value":1}]},
   {"category":"Candlestick Patterns","name":"Bullish Engulfing","description":"Latest bullish body engulfs the previous bearish body.","conditions":[{"field":"bullish_engulfing","operator":"=","compare_mode":"value","compare_value":1}]},
   {"category":"Candlestick Patterns","name":"Bearish Engulfing","description":"Latest bearish body engulfs the previous bullish body.","conditions":[{"field":"bearish_engulfing","operator":"=","compare_mode":"value","compare_value":1}]},
-  {"category":"Volatility","name":"NR7","description":"Latest candle has the narrowest range of seven sessions.","conditions":[{"field":"nr7","operator":"=","compare_mode":"value","compare_value":1}]}
+  {"category":"Volatility","name":"NR7","description":"Latest candle has the narrowest range of seven sessions.","conditions":[{"field":"nr7","operator":"=","compare_mode":"value","compare_value":1}]},
+  {"category":"VCP","name":"VCP Setup","description":"Trend, three tightening contractions, dry volume and price within 8% of its pivot.","conditions":[{"field":"vcp_setup","operator":"=","compare_mode":"value","compare_value":1}]},
+  {"category":"VCP","name":"VCP Breakout","description":"A valid contraction closes above its pivot with at least 1.5× average volume.","conditions":[{"field":"vcp_breakout","operator":"=","compare_mode":"value","compare_value":1}]}
 ]
