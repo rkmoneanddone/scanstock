@@ -6,7 +6,7 @@ from decimal import Decimal
 
 from dhanhq import DhanContext, dhanhq
 
-from scanstock.contracts import MarketDataUnavailableError
+from scanstock.contracts import MarketDataAuthenticationError, MarketDataUnavailableError
 from scanstock.domain import Candle, Instrument
 
 
@@ -33,6 +33,8 @@ class DhanMarketDataProvider:
                 break
             time.sleep(max(self._request_delay, min(2**attempt, 30)))
         remarks = response.get("remarks", {}) if isinstance(response, dict) else {}
+        if isinstance(remarks, dict) and remarks.get("error_code") == "DH-901":
+            raise MarketDataAuthenticationError("Dhan Client ID or access token is invalid or expired")
         if isinstance(remarks, dict) and remarks.get("error_code") == "DH-907":
             raise MarketDataUnavailableError(f"Dhan has no data for {start} -> {end}")
         if not isinstance(response, dict) or response.get("status") != "success":

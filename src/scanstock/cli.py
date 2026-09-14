@@ -7,6 +7,7 @@ from pathlib import Path
 
 from .config import load_instruments
 from .container import provider, repository, settings
+from .contracts import MarketDataAuthenticationError
 from .services import DailyHistorySyncService
 
 
@@ -94,6 +95,8 @@ def _run() -> None:
 def main() -> None:
     try:
         _run()
+    except MarketDataAuthenticationError as exc:
+        print(f"\n[AUTH REQUIRED] {exc}. Update DHAN_API_TOKEN in .env, then run the same command again.")
     except KeyboardInterrupt:
         print("\n[PAUSED] Progress is saved. Run the same command later to resume.")
 

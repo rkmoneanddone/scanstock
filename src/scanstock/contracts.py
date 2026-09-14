@@ -11,6 +11,10 @@ class MarketDataUnavailableError(RuntimeError):
     """The provider has no candles for the requested date range."""
 
 
+class MarketDataAuthenticationError(RuntimeError):
+    """The provider rejected the configured client ID or access token."""
+
+
 class MarketDataProvider(Protocol):
     name: str
 

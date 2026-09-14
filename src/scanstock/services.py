@@ -4,7 +4,7 @@ import time
 from datetime import date, timedelta
 from typing import Iterable
 
-from .contracts import MarketDataProvider, MarketDataUnavailableError, MarketRepository
+from .contracts import MarketDataAuthenticationError, MarketDataProvider, MarketDataUnavailableError, MarketRepository
 from .domain import Instrument
 
 
@@ -43,6 +43,11 @@ class DailyHistorySyncService:
                         if mode == "FULL":
                             transaction.mark_backfill_complete(instrument.symbol, "1D", self.initial_start)
                     print(f"[OK] {instrument.symbol}: {rows} candles")
+                except MarketDataAuthenticationError as exc:
+                    with self.repository.transaction() as transaction:
+                        transaction.record_sync(instrument.symbol, "1D", "AUTH_FAILED", 0, str(exc))
+                    print(f"[STOPPED] {instrument.symbol}: {exc}")
+                    raise
                 except MarketDataUnavailableError as exc:
                     if mode == "BACKFILL":
                         with self.repository.transaction() as transaction:
