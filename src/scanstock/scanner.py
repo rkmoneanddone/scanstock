@@ -18,6 +18,8 @@ FIELD_CATALOG = {
     "wma9": "WMA (9)", "wma21": "WMA (21)", "wma50": "WMA (50)", "wma200": "WMA (200)",
     "ema9_cross_above_ema21": "EMA 9 Crossed Above EMA 21",
     "ema9_cross_below_ema21": "EMA 9 Crossed Below EMA 21",
+    "close_cross_above_ema9": "Close Crossed Above EMA 9", "close_cross_above_sma9": "Close Crossed Above SMA 9",
+    "close_cross_above_wma9": "Close Crossed Above WMA 9",
     "volume_ratio20": "Volume / 20-Period Average", "previous_high20": "Previous 20-Period High",
     "previous_low20": "Previous 20-Period Low", "distance_52w_high_pct": "Distance From 52-Period High %",
     "distance_52w_low_pct": "Distance From 52-Period Low %", "doji": "Doji Pattern",
@@ -47,7 +49,7 @@ FIELD_CATALOG = {
 OPERATORS = {">": operator.gt, ">=": operator.ge, "<": operator.lt, "<=": operator.le, "=": operator.eq, "!=": operator.ne}
 TIMEFRAMES = {"1D": "Daily", "1W": "Weekly", "1M": "Monthly", "3M": "3 Months", "6M": "6 Months", "1Y": "Yearly"}
 DAILY_HISTORY_LIMITS = {"1D": 260, "1W": 1600, "1M": 6500, "3M": 6500, "6M": 6500, "1Y": 6500}
-METRIC_SCHEMA_VERSION = Decimal(2)
+METRIC_SCHEMA_VERSION = Decimal(3)
 
 
 @dataclass(frozen=True, slots=True)
@@ -78,6 +80,18 @@ class MetricEngine:
             if len(closes) >= period:
                 metrics[f"ema{period}"] = moving_ema(closes, period)
                 metrics[f"wma{period}"] = moving_wma(closes, period)
+        if len(closes) >= 10:
+            prior_closes = closes[:-1]
+            previous_close_decimal = candles[-2].close
+            previous_ma9 = {
+                "ema": moving_ema(prior_closes, 9),
+                "sma": Decimal(str(fmean(prior_closes[-9:]))),
+                "wma": moving_wma(prior_closes, 9),
+            }
+            for method, previous_average in previous_ma9.items():
+                metrics[f"close_cross_above_{method}9"] = Decimal(int(
+                    previous_close_decimal <= previous_average and current.close > metrics[f"{method}9"]
+                ))
         if len(closes) >= 22:
             previous_ema9, previous_ema21 = moving_ema(closes[:-1], 9), moving_ema(closes[:-1], 21)
             current_ema9, current_ema21 = metrics["ema9"], metrics["ema21"]
