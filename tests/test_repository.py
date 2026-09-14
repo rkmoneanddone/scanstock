@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from decimal import Decimal
 
 from scanstock.domain import Candle, Instrument
@@ -30,3 +30,25 @@ def test_transaction_rolls_back(tmp_path):
     except RuntimeError:
         pass
     assert repo.status_rows() == []
+
+
+def test_sync_watermarks_and_history_bounds_are_independent(tmp_path):
+    repo = SQLiteMarketRepository(tmp_path / "sync.db")
+    repo.migrate()
+    with repo.transaction() as tx:
+        tx.upsert_instruments([Instrument("TEST", "1", "Test")])
+        tx.record_sync("TEST", "1D", "SUCCESS", 0, "forward", date(2026, 9, 15))
+        tx.mark_backfill_complete("TEST", "1D", date(1990, 1, 1))
+    assert repo.last_sync_through("TEST", "1D") == date(2026, 9, 15)
+    assert repo.is_backfill_complete("TEST", "1D")
+
+
+def test_migration_recognizes_legacy_successful_full_history(tmp_path):
+    repo = SQLiteMarketRepository(tmp_path / "legacy.db")
+    repo.migrate()
+    with repo.transaction() as tx:
+        tx.upsert_instruments([Instrument("TEST", "1", "Test")])
+        tx.record_sync("TEST", "1D", "SUCCESS", 100, "BACKFILL")
+    assert not repo.is_backfill_complete("TEST", "1D")
+    repo.migrate()
+    assert repo.is_backfill_complete("TEST", "1D")

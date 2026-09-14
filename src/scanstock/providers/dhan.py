@@ -6,6 +6,7 @@ from decimal import Decimal
 
 from dhanhq import DhanContext, dhanhq
 
+from scanstock.contracts import MarketDataUnavailableError
 from scanstock.domain import Candle, Instrument
 
 
@@ -31,6 +32,9 @@ class DhanMarketDataProvider:
             if not isinstance(remarks, dict) or remarks.get("error_code") != "DH-904":
                 break
             time.sleep(max(self._request_delay, min(2**attempt, 30)))
+        remarks = response.get("remarks", {}) if isinstance(response, dict) else {}
+        if isinstance(remarks, dict) and remarks.get("error_code") == "DH-907":
+            raise MarketDataUnavailableError(f"Dhan has no data for {start} -> {end}")
         if not isinstance(response, dict) or response.get("status") != "success":
             raise RuntimeError(f"Dhan request failed: {response}")
         data = response.get("data", {})

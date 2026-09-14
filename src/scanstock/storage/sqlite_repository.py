@@ -82,6 +82,13 @@ class SQLiteMarketRepository:
             updated_at TEXT NOT NULL,
             PRIMARY KEY (symbol, timeframe)
         );
+        CREATE TABLE IF NOT EXISTS history_bounds (
+            symbol TEXT NOT NULL REFERENCES instruments(symbol),
+            timeframe TEXT NOT NULL,
+            checked_from TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            PRIMARY KEY (symbol, timeframe)
+        );
         CREATE TABLE IF NOT EXISTS scan_definitions (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
@@ -105,6 +112,16 @@ class SQLiteMarketRepository:
             PRIMARY KEY (scan_run_id, symbol)
         );
         """)
+            self._connection.execute("""
+                INSERT OR IGNORE INTO history_bounds(symbol,timeframe,checked_from,updated_at)
+                SELECT symbol,timeframe,?,MAX(created_at) FROM sync_runs
+                WHERE (status='SUCCESS' AND (
+                         message='FULL' OR message='BACKFILL'
+                         OR message LIKE 'FULL through %' OR message LIKE 'BACKFILL through %'
+                       ))
+                   OR (status='FAILED' AND message LIKE 'BACKFILL:%DH-907%')
+                GROUP BY symbol,timeframe
+            """, (date(1990, 1, 1).isoformat(),))
             self._connection.commit()
 
     def upsert_instruments(self, instruments: Sequence[Instrument]) -> None:
@@ -149,6 +166,21 @@ class SQLiteMarketRepository:
                 "SELECT attempted_through FROM sync_watermarks WHERE symbol=? AND timeframe=?", (symbol, timeframe)
             ).fetchone()
         return date.fromisoformat(row[0]) if row else None
+
+    def is_backfill_complete(self, symbol: str, timeframe: str) -> bool:
+        with self._lock:
+            row = self._connection.execute(
+                "SELECT 1 FROM history_bounds WHERE symbol=? AND timeframe=?", (symbol, timeframe)
+            ).fetchone()
+        return row is not None
+
+    def mark_backfill_complete(self, symbol: str, timeframe: str, checked_from: date) -> None:
+        now = datetime.now(timezone.utc).isoformat()
+        self._connection.execute("""
+            INSERT INTO history_bounds(symbol,timeframe,checked_from,updated_at) VALUES(?,?,?,?)
+            ON CONFLICT(symbol,timeframe) DO UPDATE SET
+              checked_from=excluded.checked_from, updated_at=excluded.updated_at
+        """, (symbol, timeframe, checked_from.isoformat(), now))
 
     def latest_candles(self, timeframe: str) -> list[Candle]:
         with self._lock:
@@ -201,8 +233,10 @@ class SQLiteMarketRepository:
     def status_rows(self) -> list[tuple]:
         with self._lock:
             return self._connection.execute("""
-                SELECT i.symbol, COUNT(c.timestamp), MIN(c.timestamp), MAX(c.timestamp), w.attempted_through
+                SELECT i.symbol, COUNT(c.timestamp), MIN(c.timestamp), MAX(c.timestamp),
+                       w.attempted_through, b.checked_from
                 FROM instruments i LEFT JOIN candles c ON c.symbol=i.symbol AND c.timeframe='1D'
                 LEFT JOIN sync_watermarks w ON w.symbol=i.symbol AND w.timeframe='1D'
-                WHERE i.active=1 GROUP BY i.symbol,w.attempted_through ORDER BY i.symbol
+                LEFT JOIN history_bounds b ON b.symbol=i.symbol AND b.timeframe='1D'
+                WHERE i.active=1 GROUP BY i.symbol,w.attempted_through,b.checked_from ORDER BY i.symbol
             """).fetchall()
