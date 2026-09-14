@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ScanStock</title><link rel="stylesheet" href="/assets/app.css?v=20260914-12">
+  <title>ScanStock</title><link rel="stylesheet" href="/assets/app.css?v=20260914-15">
 </head>
 <body>
   <header class="topbar">
@@ -12,7 +12,7 @@
   <main>
     <section class="intro">
       <div><h1>Stock Scanner</h1><p>Scan the latest completed candle using transparent OHLCV rules.</p></div>
-      <span class="badge">Local database</span>
+      <div class="market-update-controls"><span id="market-update-status" class="market-update-status">Market data ready</span><button id="market-update" class="button market-update-button" type="button">Update Market Data</button><span class="badge">Local database</span></div>
     </section>
 
     <section class="panel presets-panel" aria-labelledby="presets-title">
@@ -93,6 +93,6 @@
       <section id="measurement-details" hidden><h3 id="measurement-title">Scanner measurements</h3><div id="measurement-metrics" class="detail-metrics"></div></section>
     </section>
   </div>
-  <script src="/assets/app.js?v=20260914-14"></script>
+  <script src="/assets/app.js?v=20260914-15"></script>
 </body>
 </html>
