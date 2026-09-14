@@ -99,6 +99,24 @@ def test_metric_snapshots_persist_and_are_invalidated_by_new_candles(tmp_path):
     assert repo.metric_snapshots("1D") == {}
 
 
+def test_all_time_high_breakout_uses_history_before_latest_period(tmp_path):
+    repo = SQLiteMarketRepository(tmp_path / "ath.db")
+    repo.migrate()
+    start = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    candles = [
+        Candle("ATH", "1D", start, Decimal("10"), Decimal("12"), Decimal("9"), Decimal("11"), 100, "fake"),
+        Candle("ATH", "1D", start + timedelta(days=1), Decimal("11"), Decimal("12"), Decimal("10"), Decimal("11.5"), 100, "fake"),
+        Candle("ATH", "1D", start + timedelta(days=2), Decimal("12"), Decimal("14"), Decimal("11"), Decimal("13"), 200, "fake"),
+    ]
+    with repo.transaction() as tx:
+        tx.upsert_instruments([Instrument("ATH", "1", "ATH")])
+        tx.upsert_candles(candles)
+    condition = [ScanCondition("all_time_high_breakout", "=", "value", compare_value=Decimal(1))]
+    matches = StrictScanner(repo).run("1D", condition)
+    assert [row["symbol"] for row in matches] == ["ATH"]
+    assert matches[0]["details"]["measurements"][0]["metric"] == "Previous All-Time High"
+
+
 def test_vcp_setup_exposes_contractions_volume_and_pivot_evidence():
     start = datetime(2025, 1, 1, tzinfo=timezone.utc)
     candles = []
