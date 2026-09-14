@@ -237,6 +237,21 @@ class SQLiteMarketRepository:
             series.setdefault(candle.symbol, []).append(candle)
         return series
 
+    def candles_for_symbol(self, symbol: str, timeframe: str, limit: int) -> list[Candle]:
+        """Return one active symbol's latest candles in chronological order."""
+        with self._lock:
+            rows = self._connection.execute("""
+                SELECT c.symbol,c.timeframe,c.timestamp,c.open,c.high,c.low,c.close,c.volume,c.provider
+                FROM candles c JOIN instruments i ON i.symbol=c.symbol AND i.active=1
+                WHERE c.symbol=? AND c.timeframe=?
+                ORDER BY c.timestamp DESC LIMIT ?
+            """, (symbol.upper(), timeframe, limit)).fetchall()
+        return [Candle(
+            symbol=row[0], timeframe=row[1], timestamp=datetime.fromisoformat(row[2]),
+            open=Decimal(str(row[3])), high=Decimal(str(row[4])), low=Decimal(str(row[5])),
+            close=Decimal(str(row[6])), volume=int(row[7]), provider=row[8],
+        ) for row in reversed(rows)]
+
     def record_sync(self, symbol: str, timeframe: str, status: str, rows: int, message: str = "", attempted_through: date | None = None) -> None:
         now = datetime.now(timezone.utc).isoformat()
         self._connection.execute(
