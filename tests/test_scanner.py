@@ -78,6 +78,27 @@ def test_scanner_cache_invalidates_when_candles_change(tmp_path):
     assert [row["symbol"] for row in scanner.run("1D", condition)] == ["ONE", "TWO"]
 
 
+def test_metric_snapshots_persist_and_are_invalidated_by_new_candles(tmp_path):
+    repo = SQLiteMarketRepository(tmp_path / "metrics.db")
+    repo.migrate()
+    start = datetime(2025, 1, 1, tzinfo=timezone.utc)
+    candles = [
+        Candle("ONE", "1D", start + timedelta(days=index), Decimal("10"), Decimal("12"),
+               Decimal("9"), Decimal("11"), 100, "fake") for index in range(30)
+    ]
+    with repo.transaction() as tx:
+        tx.upsert_instruments([Instrument("ONE", "1", "One")])
+        tx.upsert_candles(candles)
+    condition = [ScanCondition("close", ">", "field", compare_field="open")]
+    StrictScanner(repo).run("1D", condition)
+    assert set(repo.metric_snapshots("1D")) == {"ONE"}
+    assert StrictScanner(repo).run("1D", condition)[0]["symbol"] == "ONE"
+    with repo.transaction() as tx:
+        tx.upsert_candles([Candle("ONE", "1D", start + timedelta(days=31), Decimal("12"), Decimal("13"),
+                                  Decimal("9"), Decimal("10"), 150, "fake")])
+    assert repo.metric_snapshots("1D") == {}
+
+
 def test_vcp_setup_exposes_contractions_volume_and_pivot_evidence():
     start = datetime(2025, 1, 1, tzinfo=timezone.utc)
     candles = []
