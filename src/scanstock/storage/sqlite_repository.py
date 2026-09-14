@@ -306,14 +306,17 @@ class SQLiteMarketRepository:
                 ) for row in reversed(rows)]
         return series
 
-    def previous_all_time_high(self, symbol: str, timeframe: str) -> Decimal | None:
+    def previous_all_time_high(self, symbol: str, timeframe: str, reference_timestamp: datetime | None = None) -> Decimal | None:
         with self._lock:
-            row = self._connection.execute(
-                "SELECT MAX(timestamp) FROM candles WHERE symbol=? AND timeframe='1D'", (symbol,)
-            ).fetchone()
-            if not row or not row[0]:
-                return None
-            latest_market_date = datetime.fromisoformat(row[0]).astimezone(self._market_timezone).date()
+            if reference_timestamp is None:
+                row = self._connection.execute(
+                    "SELECT MAX(timestamp) FROM candles WHERE symbol=? AND timeframe='1D'", (symbol,)
+                ).fetchone()
+                if not row or not row[0]:
+                    return None
+                latest_market_date = datetime.fromisoformat(row[0]).astimezone(self._market_timezone).date()
+            else:
+                latest_market_date = reference_timestamp.astimezone(self._market_timezone).date()
             if timeframe == "1W":
                 cutoff_date = latest_market_date - timedelta(days=latest_market_date.weekday())
             elif timeframe == "1M":
