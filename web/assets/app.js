@@ -224,15 +224,27 @@ function candlestickSvg(candles, row) {
   let markerIndex = candles.length - 1;
   let markerLabel = state.activeScan;
   if (/Bullish (EMA|SMA|WMA) Alignment \+ Close Above 9/.test(state.activeScan)) {
-    for (let index = candles.length - 1; index > 0; index -= 1) {
-      const averages = ['9','21','50','200'].map(period => maSeries[period][index]);
-      const previous9 = maSeries['9'][index - 1];
-      const aligned = averages.every(Number.isFinite) && averages[0] > averages[1] && averages[1] > averages[2] && averages[2] > averages[3];
-      if (aligned && Number.isFinite(previous9) && candles[index - 1].close <= previous9 && candles[index].close > averages[0]) {
-        markerIndex = index;
-        markerLabel = `${maType} 9 crossover + first close`;
-        break;
-      }
+    const candidates = [];
+    const searchStart = Math.max(1, candles.length - 160);
+    for (let index = searchStart; index < candles.length - 5; index += 1) {
+      const current9 = maSeries['9'][index], previous9 = maSeries['9'][index - 1];
+      const current21 = maSeries['21'][index], current50 = maSeries['50'][index];
+      const crossed = Number.isFinite(previous9) && Number.isFinite(current9)
+        && candles[index - 1].close <= previous9 && candles[index].close > current9;
+      const shortTermBullish = Number.isFinite(current21) && current9 >= current21;
+      const fiftyNotFalling = !Number.isFinite(current50) || index < 5
+        || !Number.isFinite(maSeries['50'][index - 5]) || current50 >= maSeries['50'][index - 5] * .995;
+      if (!crossed || !shortTermBullish || !fiftyNotFalling) continue;
+      const futureHigh = Math.max(...candles.slice(index + 1).map(candle => candle.high));
+      const followThrough = (futureHigh / candles[index].close - 1) * 100;
+      if (followThrough >= 8) candidates.push({index, followThrough});
+    }
+    if (candidates.length) {
+      candidates.sort((a, b) => b.followThrough - a.followThrough || b.index - a.index);
+      markerIndex = candidates[0].index;
+      markerLabel = `${maType} 9 move started`;
+    } else {
+      markerLabel = `${maType} alignment current`;
     }
   }
   const markerX = x(markerIndex), markerY = y(candles[markerIndex].low);
