@@ -187,12 +187,21 @@ class StrictScanner:
             cached = self._evaluated_by_timeframe.get(timeframe)
             if cached is not None:
                 return cached
+            saved = self.repository.metric_snapshots(timeframe)
+            if len(saved) == self.repository.loaded_symbol_count("1D"):
+                result = tuple(EvaluatedStock(candle, metrics) for candle, metrics in saved.values())
+                self._evaluated_by_timeframe[timeframe] = result
+                return result
             daily_series = self.repository.candle_series("1D", DAILY_HISTORY_LIMITS[timeframe])
             evaluated = []
             for daily_candles in daily_series.values():
-                stock = MetricEngine.evaluate(aggregate_candles(daily_candles, timeframe))
+                symbol = daily_candles[-1].symbol
+                existing = saved.get(symbol)
+                stock = EvaluatedStock(*existing) if existing is not None else MetricEngine.evaluate(aggregate_candles(daily_candles, timeframe))
                 if stock is not None:
                     evaluated.append(stock)
+            missing = [(stock.candle, stock.metrics) for stock in evaluated if stock.candle.symbol not in saved]
+            self.repository.save_metric_snapshots(timeframe, missing)
             result = tuple(evaluated)
             self._evaluated_by_timeframe[timeframe] = result
             return result
