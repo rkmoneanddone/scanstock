@@ -5,8 +5,8 @@ Local-first NSE stock screening foundation. V1 stores Daily OHLC in SQLite, down
 ## V1 scope
 
 - No Firebase, Supabase, login, subscription, trading or AI prediction.
-- 20 configured NSE equities.
-- Full Daily history from 2016 onward.
+- 1,789 unique NSE equity instruments from the current Dhan/NSE master.
+- Full available Daily history, with progressive forward updates.
 - Resumable incremental updates with atomic per-stock transactions.
 - SQLite now; PostgreSQL/Supabase can later be added as a repository adapter.
 - Strict structured conditions will be built above the stored data.
@@ -37,9 +37,17 @@ scanstock status
 pytest
 ```
 
-The UI opens at `http://127.0.0.1:8765` and currently supports one strict Daily condition. This completes the smallest end-to-end flow before multi-condition groups are added.
+The UI opens at `http://127.0.0.1:8765` and supports ready-made scanners, configurable multi-condition scans, multiple timeframes, VCP evidence and pageable results.
 
 The first sync starts at the configured `initial_from_date`. Subsequent runs prepend missing older history and append new candles without deleting existing rows.
+
+To populate the entire configured NSE universe progressively, run:
+
+```powershell
+.\scripts\sync_all_stocks.ps1
+```
+
+It processes only stocks requiring work, in batches of 100, keeps a three-second interval between Dhan calls, waits ten minutes between batches, and resumes safely after interruption.
 
 ## Structure
 

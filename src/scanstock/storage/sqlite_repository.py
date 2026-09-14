@@ -30,7 +30,7 @@ class SQLiteMarketRepository:
                 self._connection.execute("BEGIN")
                 yield self
                 self._connection.commit()
-            except Exception:
+            except BaseException:
                 self._connection.rollback()
                 raise
 
@@ -210,13 +210,23 @@ class SQLiteMarketRepository:
             close=Decimal(str(row[6])), volume=int(row[7]), provider=row[8],
         ) for row in rows]
 
-    def candle_series(self, timeframe: str) -> dict[str, list[Candle]]:
+    def candle_series(self, timeframe: str, limit_per_symbol: int | None = None) -> dict[str, list[Candle]]:
         with self._lock:
-            rows = self._connection.execute("""
-                SELECT c.symbol,c.timeframe,c.timestamp,c.open,c.high,c.low,c.close,c.volume,c.provider
-                FROM candles c JOIN instruments i ON i.symbol=c.symbol AND i.active=1
-                WHERE c.timeframe=? ORDER BY c.symbol,c.timestamp
-            """, (timeframe,)).fetchall()
+            if limit_per_symbol is None:
+                rows = self._connection.execute("""
+                    SELECT c.symbol,c.timeframe,c.timestamp,c.open,c.high,c.low,c.close,c.volume,c.provider
+                    FROM candles c JOIN instruments i ON i.symbol=c.symbol AND i.active=1
+                    WHERE c.timeframe=? ORDER BY c.symbol,c.timestamp
+                """, (timeframe,)).fetchall()
+            else:
+                rows = self._connection.execute("""
+                    SELECT symbol,timeframe,timestamp,open,high,low,close,volume,provider FROM (
+                        SELECT c.symbol,c.timeframe,c.timestamp,c.open,c.high,c.low,c.close,c.volume,c.provider,
+                               ROW_NUMBER() OVER (PARTITION BY c.symbol ORDER BY c.timestamp DESC) AS position
+                        FROM candles c JOIN instruments i ON i.symbol=c.symbol AND i.active=1
+                        WHERE c.timeframe=?
+                    ) WHERE position<=? ORDER BY symbol,timestamp
+                """, (timeframe, limit_per_symbol)).fetchall()
         series: dict[str, list[Candle]] = {}
         for row in rows:
             candle = Candle(

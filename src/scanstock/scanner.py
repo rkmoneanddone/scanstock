@@ -31,6 +31,7 @@ FIELD_CATALOG = {
 }
 OPERATORS = {">": operator.gt, ">=": operator.ge, "<": operator.lt, "<=": operator.le, "=": operator.eq, "!=": operator.ne}
 TIMEFRAMES = {"1D": "Daily", "1W": "Weekly", "1M": "Monthly", "3M": "3 Months", "6M": "6 Months", "1Y": "Yearly"}
+DAILY_HISTORY_LIMITS = {"1D": 600, "1W": 1600, "1M": 6500, "3M": 6500, "6M": 6500, "1Y": 6500}
 
 
 @dataclass(frozen=True, slots=True)
@@ -101,7 +102,6 @@ class StrictScanner:
         self.repository = repository
         self._cache_lock = threading.RLock()
         self._cache_version: tuple[int, int] | None = None
-        self._daily_series: dict[str, list[Candle]] | None = None
         self._evaluated_by_timeframe: dict[str, tuple[EvaluatedStock, ...]] = {}
 
     def run(self, timeframe: str, conditions: list[ScanCondition], match_mode: str = "all") -> list[dict]:
@@ -155,15 +155,13 @@ class StrictScanner:
         with self._cache_lock:
             if version != self._cache_version:
                 self._cache_version = version
-                self._daily_series = None
                 self._evaluated_by_timeframe.clear()
             cached = self._evaluated_by_timeframe.get(timeframe)
             if cached is not None:
                 return cached
-            if self._daily_series is None:
-                self._daily_series = self.repository.candle_series("1D")
+            daily_series = self.repository.candle_series("1D", DAILY_HISTORY_LIMITS[timeframe])
             evaluated = []
-            for daily_candles in self._daily_series.values():
+            for daily_candles in daily_series.values():
                 stock = MetricEngine.evaluate(aggregate_candles(daily_candles, timeframe))
                 if stock is not None:
                     evaluated.append(stock)

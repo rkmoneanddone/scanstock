@@ -52,3 +52,18 @@ def test_migration_recognizes_legacy_successful_full_history(tmp_path):
     assert not repo.is_backfill_complete("TEST", "1D")
     repo.migrate()
     assert repo.is_backfill_complete("TEST", "1D")
+
+
+def test_candle_series_can_limit_each_symbol_to_recent_history(tmp_path):
+    repo = SQLiteMarketRepository(tmp_path / "recent.db")
+    repo.migrate()
+    instrument = Instrument("TEST", "1", "Test")
+    candles = [
+        Candle("TEST", "1D", datetime(2026, 1, day, tzinfo=timezone.utc), Decimal("10"), Decimal("12"), Decimal("9"), Decimal("11"), 100, "fake")
+        for day in range(1, 6)
+    ]
+    with repo.transaction() as tx:
+        tx.upsert_instruments([instrument])
+        tx.upsert_candles(candles)
+    recent = repo.candle_series("1D", limit_per_symbol=2)["TEST"]
+    assert [candle.timestamp.day for candle in recent] == [4, 5]
