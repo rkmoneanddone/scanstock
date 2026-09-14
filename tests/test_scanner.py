@@ -145,6 +145,7 @@ def test_ath_breakout_retest_requires_five_holds_advance_and_return():
     ]
     stock = MetricEngine.evaluate(candles)
     assert stock is not None
+    stock.metrics["sma50"] = Decimal("90")
     add_ath_interaction_metrics(candles, stock.metrics, Decimal("112"), Decimal("110"))
     assert stock.metrics["ath_breakout_retest"] == 1
     assert stock.metrics["ath_breakout_reference"] == Decimal("100")
