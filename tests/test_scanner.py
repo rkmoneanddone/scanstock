@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 from scanstock.domain import Candle, Instrument, ScanCondition
-from scanstock.scanner import MetricEngine, StrictScanner, aggregate_candles
+from scanstock.scanner import MetricEngine, StrictScanner, add_ath_interaction_metrics, aggregate_candles
 from scanstock.storage.sqlite_repository import SQLiteMarketRepository
 
 
@@ -129,6 +129,33 @@ def test_all_time_high_breakout_uses_history_before_latest_period(tmp_path):
     matches = StrictScanner(repo).run("1D", condition)
     assert [row["symbol"] for row in matches] == ["ATH"]
     assert matches[0]["details"]["measurements"][0]["metric"] == "Previous All-Time High"
+
+
+def test_ath_breakout_retest_requires_touch_and_hold_after_first_breakout():
+    start = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    candles = [
+        Candle("RETEST", "1D", start, Decimal("95"), Decimal("100"), Decimal("94"), Decimal("96"), 100, "fake"),
+        Candle("RETEST", "1D", start + timedelta(days=1), Decimal("99"), Decimal("104"), Decimal("98"), Decimal("103"), 150, "fake"),
+        Candle("RETEST", "1D", start + timedelta(days=2), Decimal("103"), Decimal("105"), Decimal("100.5"), Decimal("102"), 120, "fake"),
+    ]
+    stock = MetricEngine.evaluate(candles)
+    assert stock is not None
+    add_ath_interaction_metrics(candles, stock.metrics, Decimal("104"), Decimal("100"))
+    assert stock.metrics["ath_breakout_retest"] == 1
+    assert stock.metrics["ath_second_close_above"] == 1
+
+
+def test_ath_breakout_retest_rejects_close_below_old_ath():
+    start = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    candles = [
+        Candle("FAIL", "1D", start, Decimal("95"), Decimal("100"), Decimal("94"), Decimal("96"), 100, "fake"),
+        Candle("FAIL", "1D", start + timedelta(days=1), Decimal("99"), Decimal("104"), Decimal("98"), Decimal("103"), 150, "fake"),
+        Candle("FAIL", "1D", start + timedelta(days=2), Decimal("102"), Decimal("103"), Decimal("97"), Decimal("99"), 120, "fake"),
+    ]
+    stock = MetricEngine.evaluate(candles)
+    assert stock is not None
+    add_ath_interaction_metrics(candles, stock.metrics, Decimal("104"), Decimal("100"))
+    assert stock.metrics["ath_breakout_retest"] == 0
 
 
 def test_vcp_setup_exposes_contractions_volume_and_pivot_evidence():
