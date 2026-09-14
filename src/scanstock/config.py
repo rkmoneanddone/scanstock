@@ -36,6 +36,19 @@ def load_settings(root: Path) -> Settings:
 
 
 def load_instruments(root: Path) -> dict[str, Instrument]:
-    rows = json.loads((root / "config" / "instruments.json").read_text(encoding="utf-8"))
-    return {row["symbol"]: Instrument(**row) for row in rows}
-
+    config_root = root / "config"
+    chunk_root = config_root / "instruments"
+    paths = sorted(chunk_root.glob("*.json")) if chunk_root.is_dir() else [config_root / "instruments.json"]
+    rows = []
+    for path in paths:
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"Invalid instrument configuration: {path.name}: {exc}") from exc
+        if not isinstance(payload, list):
+            raise ValueError(f"Instrument configuration must be a list: {path.name}")
+        rows.extend(payload)
+    instruments = {row["symbol"]: Instrument(**row) for row in rows}
+    if len(instruments) != len(rows):
+        raise ValueError("Duplicate symbols found in instrument configuration")
+    return instruments

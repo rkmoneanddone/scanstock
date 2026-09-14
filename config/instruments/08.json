@@ -1,0 +1,1402 @@
+[
+  {
+    "symbol": "SAILIFE",
+    "security_id": "27839",
+    "display_name": "Sai Life Sciences",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SAKAR",
+    "security_id": "9539",
+    "display_name": "Sakar Healthcare",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SAKHTISUG",
+    "security_id": "2969",
+    "display_name": "Sakthi Sugars",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SAKSOFT",
+    "security_id": "11794",
+    "display_name": "Saksoft",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SALASAR",
+    "security_id": "21362",
+    "display_name": "Salasar Techno Engineering",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SALONA",
+    "security_id": "17351",
+    "display_name": "Salona Cotspin",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SALSTEEL",
+    "security_id": "11634",
+    "display_name": "SAL Steel",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SALZERELEC",
+    "security_id": "11399",
+    "display_name": "Salzer Electronics",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SAMBHAAV",
+    "security_id": "4127",
+    "display_name": "Sambhaav Media",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SAMHI",
+    "security_id": "18614",
+    "display_name": "Samhi Hotels",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SAMMAANCAP",
+    "security_id": "30125",
+    "display_name": "Sammaan Capital",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SAMPANN",
+    "security_id": "27303",
+    "display_name": "Sampann Utpadan",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SANATHAN",
+    "security_id": "28805",
+    "display_name": "Sanathan Textiles",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SANDESH",
+    "security_id": "2988",
+    "display_name": "Sandesh",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SANDHAR",
+    "security_id": "2397",
+    "display_name": "Sandhar Technologies",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SANDUMA",
+    "security_id": "18359",
+    "display_name": "Sandur Manganese & Iron Ores",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SANGAMIND",
+    "security_id": "4184",
+    "display_name": "Sangam",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SANGHIIND",
+    "security_id": "2997",
+    "display_name": "Sanghi Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SANGHVIMOV",
+    "security_id": "14058",
+    "display_name": "Sanghvi Movers",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SANGINITA",
+    "security_id": "11032",
+    "display_name": "Sanginita Chemicals",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SANOFI",
+    "security_id": "1442",
+    "display_name": "Sanofi",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SANOFICONR",
+    "security_id": "25222",
+    "display_name": "Sanofi Consumer Healthcare",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SANSERA",
+    "security_id": "5751",
+    "display_name": "Sansera Engineering",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SANSTAR",
+    "security_id": "24582",
+    "display_name": "Sanstar",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SAPPHIRE",
+    "security_id": "6718",
+    "display_name": "Sapphire Foods",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SARDAEN",
+    "security_id": "17758",
+    "display_name": "Sarda Energy & Minerals",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SAREGAMA",
+    "security_id": "4892",
+    "display_name": "Saregama India",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SARVESHWAR",
+    "security_id": "12913",
+    "display_name": "Sarveshwar Foods",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SASKEN",
+    "security_id": "11983",
+    "display_name": "Sasken Technologies",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SASTASUNDR",
+    "security_id": "20063",
+    "display_name": "Sastasundar Ventures",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SATIA",
+    "security_id": "11045",
+    "display_name": "Satia Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SATIN",
+    "security_id": "10453",
+    "display_name": "Satin Creditcare",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SATINDLTD",
+    "security_id": "12015",
+    "display_name": "Sat Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SAURASHCEM",
+    "security_id": "3018",
+    "display_name": "Saurashtra Cement",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SBC",
+    "security_id": "6792",
+    "display_name": "SBC Exports",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SBCL",
+    "security_id": "4656",
+    "display_name": "Shivalik Bimetal Controls",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SBFC",
+    "security_id": "18026",
+    "display_name": "SBFC Finance",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SCHAEFFLER",
+    "security_id": "1011",
+    "display_name": "Schaeffler India",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SCHAND",
+    "security_id": "20698",
+    "display_name": "S Chand & Company",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SCI",
+    "security_id": "3048",
+    "display_name": "Shipping Corporation of India",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SCILAL",
+    "security_id": "23127",
+    "display_name": "SCI Land & Assets",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SCODATUBES",
+    "security_id": "757478",
+    "display_name": "Scoda Tubes",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SCPL",
+    "security_id": "12072",
+    "display_name": "Sheetal Cool Products",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SDBL",
+    "security_id": "1338",
+    "display_name": "Som Distilleries & Breweries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SEAMECLTD",
+    "security_id": "2616",
+    "display_name": "Seamec",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SELAN",
+    "security_id": "13598",
+    "display_name": "Selan Exploration Technology",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SEMAC",
+    "security_id": "11961",
+    "display_name": "Semac Consultants",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SENCO",
+    "security_id": "17271",
+    "display_name": "Senco Gold",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SENORES",
+    "security_id": "28888",
+    "display_name": "Senores Pharmaceuticals",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SEPC",
+    "security_id": "15308",
+    "display_name": "SEPC",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SEQUENT",
+    "security_id": "14296",
+    "display_name": "Sequent Scientific",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SERVOTECH",
+    "security_id": "5507",
+    "display_name": "Servotech Renewable  Power",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SESHAPAPER",
+    "security_id": "3066",
+    "display_name": "Seshasayee Paper & Boards",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SFL",
+    "security_id": "19184",
+    "display_name": "Sheela Foam",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SGIL",
+    "security_id": "5114",
+    "display_name": "Synergy Green Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SGL",
+    "security_id": "13367",
+    "display_name": "STL Global",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHAH",
+    "security_id": "20296",
+    "display_name": "Shah Metacorp",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHAHALLOYS",
+    "security_id": "11856",
+    "display_name": "Shah Alloys",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHAILY",
+    "security_id": "8727",
+    "display_name": "Shaily Engineering Plastics",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHAKTIPUMP",
+    "security_id": "25574",
+    "display_name": "Shakti Pumps",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHALBY",
+    "security_id": "714",
+    "display_name": "Shalby",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHALPAINTS",
+    "security_id": "15342",
+    "display_name": "Shalimar Paints",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHANKARA",
+    "security_id": "20321",
+    "display_name": "Shankara Building Products",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHANTIGEAR",
+    "security_id": "3078",
+    "display_name": "Shanthi Gears",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHARDACROP",
+    "security_id": "4992",
+    "display_name": "Sharda Cropchem",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHARDAMOTR",
+    "security_id": "10530",
+    "display_name": "Sharda Motor",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHAREINDIA",
+    "security_id": "104",
+    "display_name": "Share India Securities",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHIVALIK",
+    "security_id": "7016",
+    "display_name": "Shivalik Rasayan",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHIVAMAUTO",
+    "security_id": "13756",
+    "display_name": "Shivam Autotech",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHIVAMILLS",
+    "security_id": "1497",
+    "display_name": "Shiva Mills",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHIVATEX",
+    "security_id": "804",
+    "display_name": "Shiva Texyarn",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHK",
+    "security_id": "11212",
+    "display_name": "SH Kelkar & Company",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHOPERSTOP",
+    "security_id": "11813",
+    "display_name": "Shoppers Stop",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHRADHA",
+    "security_id": "708",
+    "display_name": "Shradha Infraprojects",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHREDIGCEM",
+    "security_id": "3099",
+    "display_name": "Shree Digvijay Cement Company",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHREEPUSHK",
+    "security_id": "10588",
+    "display_name": "Shree Pushkar Chemicals",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHREERAMA",
+    "security_id": "7627",
+    "display_name": "Shree Rama Multi-Tech",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHRENIK",
+    "security_id": "11149",
+    "display_name": "Shrenik",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHRIPISTON",
+    "security_id": "17186",
+    "display_name": "Shriram Pistons & Rings",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHRIRAMPPS",
+    "security_id": "7200",
+    "display_name": "Shriram Properties",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHYAMMETL",
+    "security_id": "4693",
+    "display_name": "Shyam Metalics & Energy",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SHYAMTEL",
+    "security_id": "13740",
+    "display_name": "Shyam Telecom",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SIGACHI",
+    "security_id": "6663",
+    "display_name": "Sigachi Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SIGNATURE",
+    "security_id": "18743",
+    "display_name": "Signatureglobal",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SIGNPOST",
+    "security_id": "22656",
+    "display_name": "Signpost India",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SIKKO",
+    "security_id": "6218",
+    "display_name": "SIKKO Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SIL",
+    "security_id": "11297",
+    "display_name": "Standard Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SILINV",
+    "security_id": "4105",
+    "display_name": "SIL Investments",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SILLYMONKS",
+    "security_id": "19097",
+    "display_name": "Silly Monks Entertainment",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SILVERTUC",
+    "security_id": "9422",
+    "display_name": "Silver Touch Technologies",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SIMPLEXINF",
+    "security_id": "3162",
+    "display_name": "Simplex Infrastructures",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SINCLAIR",
+    "security_id": "23480",
+    "display_name": "Sinclairs Hotels",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SINDHUTRAD",
+    "security_id": "16859",
+    "display_name": "Sindhu Trade Links",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SINTERCOM",
+    "security_id": "381",
+    "display_name": "Sintercom",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SIRCA",
+    "security_id": "11050",
+    "display_name": "Sirca Paints",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SIS",
+    "security_id": "21501",
+    "display_name": "SIS",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SIYSIL",
+    "security_id": "14096",
+    "display_name": "Siyaram Silk Mills",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SJS",
+    "security_id": "6643",
+    "display_name": "SJS Enterprises",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SJVN",
+    "security_id": "18883",
+    "display_name": "SJVN",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SKFINDIA",
+    "security_id": "3186",
+    "display_name": "SKF India",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SKIPPER",
+    "security_id": "9428",
+    "display_name": "Skipper",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SKYGOLD",
+    "security_id": "13631",
+    "display_name": "Sky Gold And Diamonds",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SMARTLINK",
+    "security_id": "9889",
+    "display_name": "Smartlink Holdings",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SMCGLOBAL",
+    "security_id": "2320",
+    "display_name": "SMC Global Securities",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SMLISUZU",
+    "security_id": "3387",
+    "display_name": "SML Isuzu",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SMLT",
+    "security_id": "6843",
+    "display_name": "Sarthak Metals",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SMSLIFE",
+    "security_id": "21551",
+    "display_name": "SMS Lifesciences",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SMSPHARMA",
+    "security_id": "14329",
+    "display_name": "SMS Pharmaceuticals",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SNOWMAN",
+    "security_id": "4843",
+    "display_name": "Snowman Logistics",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SOBHA",
+    "security_id": "13826",
+    "display_name": "Sobha",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SOFTTECH",
+    "security_id": "8266",
+    "display_name": "SoftTech Engineers",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SOLARA",
+    "security_id": "3672",
+    "display_name": "Solara Active Pharma Sciences",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SOMANYCERA",
+    "security_id": "3880",
+    "display_name": "Somany Ceramics",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SOMATEX",
+    "security_id": "4201",
+    "display_name": "Soma Textiles & Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SOMICONVEY",
+    "security_id": "17794",
+    "display_name": "Somi Conveyor Beltings",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SONAMLTD",
+    "security_id": "8806",
+    "display_name": "Sonam",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SONATSOFTW",
+    "security_id": "6596",
+    "display_name": "Sonata Software",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SOTL",
+    "security_id": "3021",
+    "display_name": "Savita Oil Technologies",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SOUTHBANK",
+    "security_id": "5948",
+    "display_name": "South Indian Bank",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SOUTHWEST",
+    "security_id": "9678",
+    "display_name": "South West Pinnacle",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SPAL",
+    "security_id": "18252",
+    "display_name": "SP Apparels",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SPANDANA",
+    "security_id": "11435",
+    "display_name": "Spandana Sphoorty Financial",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SPARC",
+    "security_id": "14788",
+    "display_name": "Sun Pharma Advanced Research Co",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SPECIALITY",
+    "security_id": "27107",
+    "display_name": "Speciality Restaurants",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SPECTRUM",
+    "security_id": "30455",
+    "display_name": "Spectrum Electrical Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SPENCERS",
+    "security_id": "8163",
+    "display_name": "Spencers Retail",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SPIC",
+    "security_id": "3252",
+    "display_name": "Southern Petrochemical Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SPLPETRO",
+    "security_id": "9617",
+    "display_name": "Supreme Petrochemicals",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SPMLINFRA",
+    "security_id": "3321",
+    "display_name": "SPML Infra",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SPORTKING",
+    "security_id": "10733",
+    "display_name": "Sportking",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SRD",
+    "security_id": "25737",
+    "display_name": "Shankar Lal Rampal Dye Chem",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SREEL",
+    "security_id": "31837",
+    "display_name": "Sreeleathers",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SRF",
+    "security_id": "3273",
+    "display_name": "SRF",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SRGHFL",
+    "security_id": "18119",
+    "display_name": "SRG Housing Finance",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SRHHYPOLTD",
+    "security_id": "14582",
+    "display_name": "Sree Rayalaseema Hi-Strength Hypo",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SRM",
+    "security_id": "23402",
+    "display_name": "SRM Contractors",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SSDL",
+    "security_id": "24856",
+    "display_name": "Saraswati Saree Depot",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SSWL",
+    "security_id": "11829",
+    "display_name": "Steel Strips Wheels",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "STANLEY",
+    "security_id": "24226",
+    "display_name": "Stanley Lifestyles",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "STAR",
+    "security_id": "7374",
+    "display_name": "Strides Pharma Science",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "STARCEMENT",
+    "security_id": "21091",
+    "display_name": "Star Cement",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "STARHEALTH",
+    "security_id": "7083",
+    "display_name": "Star Health Insurance",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "STARPAPER",
+    "security_id": "3291",
+    "display_name": "Star Paper Mills",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "STARTECK",
+    "security_id": "9305",
+    "display_name": "Starteck Finance",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "STCINDIA",
+    "security_id": "10948",
+    "display_name": "State Trading Corporation of India",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "STEELCAS",
+    "security_id": "6803",
+    "display_name": "Steelcast",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "STEELCITY",
+    "security_id": "10406",
+    "display_name": "Steel City Securities",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "STEELXIND",
+    "security_id": "21339",
+    "display_name": "Steel Exchange India",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "STEL",
+    "security_id": "21484",
+    "display_name": "STEL Holdings",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "STERTOOLS",
+    "security_id": "4299",
+    "display_name": "Sterling Tools",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "STLTECH",
+    "security_id": "9309",
+    "display_name": "Sterlite Technologies",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "STOVEKRAFT",
+    "security_id": "2107",
+    "display_name": "Stove Kraft",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "STYLAMIND",
+    "security_id": "5186",
+    "display_name": "Stylam Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "STYLEBAAZA",
+    "security_id": "25114",
+    "display_name": "Baazar Style Retail",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "STYRENIX",
+    "security_id": "19",
+    "display_name": "Styrenix Performance Materials",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SUBROS",
+    "security_id": "3324",
+    "display_name": "Subros",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SUDARSCHEM",
+    "security_id": "3327",
+    "display_name": "Sudarshan Chemical Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SUKHJITS",
+    "security_id": "11804",
+    "display_name": "Sukhjit Starch & Chemicals",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SULA",
+    "security_id": "13218",
+    "display_name": "Sula Vineyards",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SUMICHEM",
+    "security_id": "17105",
+    "display_name": "Sumitomo Chemical",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SUMIT",
+    "security_id": "11140",
+    "display_name": "Sumit Woods",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SUMMITSEC",
+    "security_id": "21275",
+    "display_name": "Summit Securities",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SUNCLAY",
+    "security_id": "20956",
+    "display_name": "Sundaram Clayton",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SUNDARAM",
+    "security_id": "18931",
+    "display_name": "Sundaram Multi Pap",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SUNDARMFIN",
+    "security_id": "3339",
+    "display_name": "Sundaram Finance",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SUNDARMHLD",
+    "security_id": "2183",
+    "display_name": "Sundaram Finance Holdings",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SUNDRMBRAK",
+    "security_id": "4179",
+    "display_name": "Sundaram Brake Linings",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SUNDRMFAST",
+    "security_id": "3345",
+    "display_name": "Sundram Fasteners",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SUNDROP",
+    "security_id": "1663",
+    "display_name": "Sundrop Brands",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SUNFLAG",
+    "security_id": "3348",
+    "display_name": "Sunflag Iron & Steel Company",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SUNTECK",
+    "security_id": "17641",
+    "display_name": "Sunteck Realty",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SUNTV",
+    "security_id": "13404",
+    "display_name": "Sun TV Network",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SUPERHOUSE",
+    "security_id": "20616",
+    "display_name": "Superhouse",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SUPERSPIN",
+    "security_id": "3357",
+    "display_name": "Super Spinning Mills",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SUPRAJIT",
+    "security_id": "11689",
+    "display_name": "Suprajit Engineering",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SUPREME",
+    "security_id": "29439",
+    "display_name": "Supreme Holdings & Hospitality",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SUPRIYA",
+    "security_id": "7390",
+    "display_name": "Supriya Lifescience",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SURAJEST",
+    "security_id": "20822",
+    "display_name": "Suraj Estate Developers",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SURAJLTD",
+    "security_id": "24966",
+    "display_name": "Suraj",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SURAKSHA",
+    "security_id": "27334",
+    "display_name": "Suraksha Diagnostic",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SURANASOL",
+    "security_id": "21077",
+    "display_name": "Surana Solar",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SURANAT&P",
+    "security_id": "10700",
+    "display_name": "Surana Telecom & Power",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SURYALAXMI",
+    "security_id": "11852",
+    "display_name": "Suryalakshmi Cotton Mills",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SURYAROSNI",
+    "security_id": "3375",
+    "display_name": "Surya Roshni",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SURYODAY",
+    "security_id": "2970",
+    "display_name": "Suryoday Small Finance Bank",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SWANENERGY",
+    "security_id": "27095",
+    "display_name": "Swan Energy",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SWARAJENG",
+    "security_id": "3384",
+    "display_name": "Swaraj Engines",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SWIGGY",
+    "security_id": "27066",
+    "display_name": "Swiggy",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SWSOLAR",
+    "security_id": "12489",
+    "display_name": "Sterling & Wilson Renewable Energy",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SYMPHONY",
+    "security_id": "24190",
+    "display_name": "Symphony",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SYNGENE",
+    "security_id": "10243",
+    "display_name": "Syngene International",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "SYRMA",
+    "security_id": "10793",
+    "display_name": "Syrma SGS",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TAINWALCHM",
+    "security_id": "3396",
+    "display_name": "Tainwala Chemicals & Plastics",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TAJGVK",
+    "security_id": "9354",
+    "display_name": "Taj GVK Hotels & Resorts",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TALBROAUTO",
+    "security_id": "13648",
+    "display_name": "Talbros Automotive Components",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TANLA",
+    "security_id": "13976",
+    "display_name": "Tanla Platforms",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TARC",
+    "security_id": "1581",
+    "display_name": "TARC",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TARIL",
+    "security_id": "15174",
+    "display_name": "Transformers & Rectifiers",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TARMAT",
+    "security_id": "14771",
+    "display_name": "Tarmat",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TARSONS",
+    "security_id": "6943",
+    "display_name": "Tarsons Products",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  }
+]

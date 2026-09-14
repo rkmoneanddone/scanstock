@@ -1,0 +1,1325 @@
+[
+  {
+    "symbol": "TASTYBITE",
+    "security_id": "20092",
+    "display_name": "Tasty Bite Eatables",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TATAINVEST",
+    "security_id": "1621",
+    "display_name": "Tata Investment Corporation",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TATATECH",
+    "security_id": "20293",
+    "display_name": "Tata Technologies",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TATVA",
+    "security_id": "5162",
+    "display_name": "Tatva Chintan Pharma",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TBOTEK",
+    "security_id": "23740",
+    "display_name": "TBO Tek",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TBZ",
+    "security_id": "27037",
+    "display_name": "Tribhovandas Bhimji Zaveri",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TCI",
+    "security_id": "10580",
+    "display_name": "Transport Corporation of India",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TCIEXP",
+    "security_id": "19223",
+    "display_name": "TCI Express",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TCIFINANCE",
+    "security_id": "4771",
+    "display_name": "TCI Finance",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TCPLPACK",
+    "security_id": "184",
+    "display_name": "TCPL Packaging",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TDPOWERSYS",
+    "security_id": "25178",
+    "display_name": "TD Power Systems",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TEAMLEASE",
+    "security_id": "12716",
+    "display_name": "Teamlease Services",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TECHNOE",
+    "security_id": "6445",
+    "display_name": "Techno Electric & Engineering",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TEGA",
+    "security_id": "7105",
+    "display_name": "Tega Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TEJASNET",
+    "security_id": "21131",
+    "display_name": "Tejas Networks",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TEXINFRA",
+    "security_id": "11549",
+    "display_name": "Texmaco Infrastructure & Holdings",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TEXMOPIPES",
+    "security_id": "18214",
+    "display_name": "Texmo Pipes & Products",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TEXRAIL",
+    "security_id": "21828",
+    "display_name": "Texmaco Rail & Engineering",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TFCILTD",
+    "security_id": "3466",
+    "display_name": "Tourism Finance Corporation of India",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TGBHOTELS",
+    "security_id": "14607",
+    "display_name": "TGB Banquets & Hotels",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "THANGAMAYL",
+    "security_id": "18118",
+    "display_name": "Thangamayil Jewellery",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "THEINVEST",
+    "security_id": "21427",
+    "display_name": "Investment Trust of India",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "THEJO",
+    "security_id": "19279",
+    "display_name": "Thejo Engineering",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "THELEELA",
+    "security_id": "757014",
+    "display_name": "Schloss Bangalore",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "THEMISMED",
+    "security_id": "14485",
+    "display_name": "Themis Medicare",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "THERMAX",
+    "security_id": "3475",
+    "display_name": "Thermax",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "THOMASCOOK",
+    "security_id": "3481",
+    "display_name": "Thomas Cook",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "THOMASCOTT",
+    "security_id": "31017",
+    "display_name": "Thomas Scott",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "THYROCARE",
+    "security_id": "17032",
+    "display_name": "Thyrocare Technologies",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TI",
+    "security_id": "19196",
+    "display_name": "Tilaknagar Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TIIL",
+    "security_id": "14223",
+    "display_name": "Technocraft Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TIINDIA",
+    "security_id": "312",
+    "display_name": "Tube Investment",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TIMESGTY",
+    "security_id": "10717",
+    "display_name": "Times Guaranty",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TIMETECHNO",
+    "security_id": "14707",
+    "display_name": "Time Technoplast",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TIMKEN",
+    "security_id": "14198",
+    "display_name": "Timken",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TINNARUBR",
+    "security_id": "756020",
+    "display_name": "Tinna Rubber & Infrastructure",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TIPSFILMS",
+    "security_id": "11374",
+    "display_name": "Tips Films",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TIPSMUSIC",
+    "security_id": "9117",
+    "display_name": "Tips Music",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TIRUMALCHM",
+    "security_id": "3496",
+    "display_name": "Thirumalai Chemicals",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TITAGARH",
+    "security_id": "15414",
+    "display_name": "Titagarh Rail Systems",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TMB",
+    "security_id": "10945",
+    "display_name": "Tamilnad Mercantile Bank",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TNPETRO",
+    "security_id": "3509",
+    "display_name": "Tamilnadu Petroproducts",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TNPL",
+    "security_id": "3980",
+    "display_name": "Tamil Nadu Newsprint & Papers",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TNTELE",
+    "security_id": "3512",
+    "display_name": "Tamilnadu Telecommunications",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TOKYOPLAST",
+    "security_id": "3837",
+    "display_name": "Tokyo Plast International",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TOLINS",
+    "security_id": "25262",
+    "display_name": "Tolins Tyres",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TOTAL",
+    "security_id": "22423",
+    "display_name": "Total Transport Systems",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TOUCHWOOD",
+    "security_id": "16908",
+    "display_name": "Touchwood Entertainment",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TPLPLASTEH",
+    "security_id": "9219",
+    "display_name": "TPL Plastech",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TRACXN",
+    "security_id": "11582",
+    "display_name": "Tracxn Technologies",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TRANSRAILL",
+    "security_id": "28714",
+    "display_name": "Transrail Lighting",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TRANSWORLD",
+    "security_id": "3129",
+    "display_name": "Transworld Shipping Lines",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TREJHARA",
+    "security_id": "7518",
+    "display_name": "Trejhara Solutions",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TREL",
+    "security_id": "17795",
+    "display_name": "Transindia Real Estate",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TRF",
+    "security_id": "17987",
+    "display_name": "TRF",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TRIDENT",
+    "security_id": "9685",
+    "display_name": "Trident",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TRIGYN",
+    "security_id": "5428",
+    "display_name": "Trigyn Technologies",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TRITURBINE",
+    "security_id": "25584",
+    "display_name": "Triveni Turbines",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TRIVENI",
+    "security_id": "13081",
+    "display_name": "Triveni Engineering & Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TTKHLTCARE",
+    "security_id": "11369",
+    "display_name": "TTK Healthcare",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TTKPRESTIG",
+    "security_id": "3546",
+    "display_name": "TTK Prestige",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TVSHLTD",
+    "security_id": "29008",
+    "display_name": "TVS Holdings",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TVSSCS",
+    "security_id": "18151",
+    "display_name": "TVS Supply Chain Solutions",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TVSSRICHAK",
+    "security_id": "14245",
+    "display_name": "TVS Srichakra",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "TVTODAY",
+    "security_id": "11275",
+    "display_name": "TV Today Network",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UCAL",
+    "security_id": "3570",
+    "display_name": "UCAL",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UCOBANK",
+    "security_id": "11223",
+    "display_name": "UCO Bank",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UDAICEMENT",
+    "security_id": "7276",
+    "display_name": "Udaipur Cement Works",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UDS",
+    "security_id": "19113",
+    "display_name": "Updater Services",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UFLEX",
+    "security_id": "1053",
+    "display_name": "UFLEX",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UFO",
+    "security_id": "9039",
+    "display_name": "UFO Moviez",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UGARSUGAR",
+    "security_id": "19578",
+    "display_name": "Ugar Sugar Works",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UGROCAP",
+    "security_id": "5313",
+    "display_name": "UGRO Capital",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UJJIVANSFB",
+    "security_id": "15228",
+    "display_name": "Ujjivan Small Finance Bank",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UMAEXPORTS",
+    "security_id": "8842",
+    "display_name": "Uma Exports",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UMANGDAIRY",
+    "security_id": "11387",
+    "display_name": "Umang Dairies",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UMESLTD",
+    "security_id": "19142",
+    "display_name": "Usha Martin Education & Solutions",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UMIYA-MRO",
+    "security_id": "8998",
+    "display_name": "MRO-TEK Reality",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UNICHEMLAB",
+    "security_id": "3579",
+    "display_name": "Unichem Laboratories",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UNIDT",
+    "security_id": "201",
+    "display_name": "United Drilling Tools",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UNIECOM",
+    "security_id": "24809",
+    "display_name": "Unicommerce e-Solutions",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UNIENTER",
+    "security_id": "11293",
+    "display_name": "Uniphos Enterprises",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UNIPARTS",
+    "security_id": "13057",
+    "display_name": "Uniparts",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UNITEDPOLY",
+    "security_id": "7560",
+    "display_name": "UNITED POLYFAB GUJ. LTD.",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UNITEDTEA",
+    "security_id": "17999",
+    "display_name": "United Nilgiri Tea",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UNIVASTU",
+    "security_id": "18977",
+    "display_name": "Univastu",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UNIVCABLES",
+    "security_id": "3607",
+    "display_name": "Universal Cables",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UNIVPHOTO",
+    "security_id": "17659",
+    "display_name": "Universus Photo Imagings",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UNOMINDA",
+    "security_id": "14154",
+    "display_name": "UNO Minda",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "URJA",
+    "security_id": "20203",
+    "display_name": "Urja Global",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "USHAMART",
+    "security_id": "8840",
+    "display_name": "Usha Martin",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "USK",
+    "security_id": "14871",
+    "display_name": "Udayshivkumar Infra",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UTIAMC",
+    "security_id": "527",
+    "display_name": "UTI AMC",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UTKARSHBNK",
+    "security_id": "17358",
+    "display_name": "Utkarsh Small Finance Bank",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UTTAMSUGAR",
+    "security_id": "13376",
+    "display_name": "Uttam Sugar Mills",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "UYFINCORP",
+    "security_id": "25626",
+    "display_name": "UY Fincorp",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "V2RETAIL",
+    "security_id": "14766",
+    "display_name": "V2 Retail",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VADILALIND",
+    "security_id": "24196",
+    "display_name": "Vadilal Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VAIBHAVGBL",
+    "security_id": "11364",
+    "display_name": "Vaibhav Global",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VAISHALI",
+    "security_id": "16589",
+    "display_name": "Vaishali Pharma",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VALIANTLAB",
+    "security_id": "19218",
+    "display_name": "Valiant Laboratories",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VARDHACRLC",
+    "security_id": "11220",
+    "display_name": "Vardhaman Acrylics",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VARDMNPOLY",
+    "security_id": "3646",
+    "display_name": "Vardhman Polytex",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VARROC",
+    "security_id": "3857",
+    "display_name": "Varroc Engineering",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VASCONEQ",
+    "security_id": "18110",
+    "display_name": "Vascon Engineers",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VASWANI",
+    "security_id": "25340",
+    "display_name": "Vaswani Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VEEDOL",
+    "security_id": "14019",
+    "display_name": "Veedol Corporation",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VENKEYS",
+    "security_id": "3757",
+    "display_name": "Venkys",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VENTIVE",
+    "security_id": "28847",
+    "display_name": "Ventive Hospitality",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VENUSPIPES",
+    "security_id": "9592",
+    "display_name": "Venus Pipes & Tubes",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VERANDA",
+    "security_id": "8890",
+    "display_name": "Veranda Learning Solutions",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VESUVIUS",
+    "security_id": "3676",
+    "display_name": "VESUVIUS INDIA LTD",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VETO",
+    "security_id": "8652",
+    "display_name": "Veto Switchgear Cable",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VGUARD",
+    "security_id": "15362",
+    "display_name": "V-Guard Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VHL",
+    "security_id": "11892",
+    "display_name": "Vardhman Holdings",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VIDHIING",
+    "security_id": "13536",
+    "display_name": "Vidhi Specialty Food Ingredients",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VIJAYA",
+    "security_id": "5585",
+    "display_name": "Vijaya Diagnostic Centre",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VIJIFIN",
+    "security_id": "17691",
+    "display_name": "Viji Finance",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VIKASECO",
+    "security_id": "25756",
+    "display_name": "Vikas Ecotech",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VIKASLIFE",
+    "security_id": "9931",
+    "display_name": "Vikas Lifecare",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VIMTALABS",
+    "security_id": "13101",
+    "display_name": "Vimta Labs",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VINATIORGA",
+    "security_id": "17364",
+    "display_name": "Vinati Organics",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VINCOFE",
+    "security_id": "25835",
+    "display_name": "Vintage Coffee & Beverages",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VINDHYATEL",
+    "security_id": "3694",
+    "display_name": "Vindhya Telelinks",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VIPCLOTHNG",
+    "security_id": "14843",
+    "display_name": "VIP Clothing",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VIPIND",
+    "security_id": "3703",
+    "display_name": "VIP Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VIRINCHI",
+    "security_id": "15295",
+    "display_name": "Virinchi",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VISAKAIND",
+    "security_id": "4221",
+    "display_name": "Visaka Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VISHNU",
+    "security_id": "6908",
+    "display_name": "Vishnu Chemicals",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VISHWARAJ",
+    "security_id": "13702",
+    "display_name": "Vishwaraj Sugar Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VIVIDHA",
+    "security_id": "29877",
+    "display_name": "Visagar Polytex",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VLSFINANCE",
+    "security_id": "3715",
+    "display_name": "VLS Finance",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VMART",
+    "security_id": "29284",
+    "display_name": "V Mart Retail",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VMM",
+    "security_id": "27969",
+    "display_name": "Vishal Mega Mart",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VOLTAMP",
+    "security_id": "13577",
+    "display_name": "Voltamp Transformers",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VPRPL",
+    "security_id": "18341",
+    "display_name": "Vishnu Prakash R Punglia",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VRAJ",
+    "security_id": "24321",
+    "display_name": "Vraj Iron and Steel",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VRLLOG",
+    "security_id": "8696",
+    "display_name": "VRL Logistics",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VSSL",
+    "security_id": "27067",
+    "display_name": "Vardhman Special Steels",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VSTIND",
+    "security_id": "3724",
+    "display_name": "VST Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VSTL",
+    "security_id": "22730",
+    "display_name": "Vibhor Steel Tubes",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VSTTILLERS",
+    "security_id": "24292",
+    "display_name": "VST Tillers Tractors",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "VTL",
+    "security_id": "2073",
+    "display_name": "Vardhman Textiles",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WAAREEENER",
+    "security_id": "25907",
+    "display_name": "Waaree Energies",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WAAREERTL",
+    "security_id": "756038",
+    "display_name": "Waaree Renewable Technologies",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WABAG",
+    "security_id": "20188",
+    "display_name": "VA Tech Wabag",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WCIL",
+    "security_id": "25403",
+    "display_name": "Western Carriers",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WEALTH",
+    "security_id": "1923",
+    "display_name": "Wealth First Portfolio Managers",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WEBELSOLAR",
+    "security_id": "14602",
+    "display_name": "Websol Energy System",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WEIZMANIND",
+    "security_id": "3748",
+    "display_name": "Weizmann",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WEL",
+    "security_id": "7835",
+    "display_name": "Wonder Electricals",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WELCORP",
+    "security_id": "11821",
+    "display_name": "Welspun Corp",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WELENT",
+    "security_id": "11626",
+    "display_name": "Welspun Enterprises",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WELSPUNLIV",
+    "security_id": "11253",
+    "display_name": "Welspun Living",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WENDT",
+    "security_id": "4235",
+    "display_name": "Wendt",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WESTLIFE",
+    "security_id": "11580",
+    "display_name": "Westlife Foodworld",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WEWIN",
+    "security_id": "9862",
+    "display_name": "We Win",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WHEELS",
+    "security_id": "3766",
+    "display_name": "Wheels",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WHIRLPOOL",
+    "security_id": "18011",
+    "display_name": "Whirlpool",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WILLAMAGOR",
+    "security_id": "3772",
+    "display_name": "Williamson Magor",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WINDLAS",
+    "security_id": "5366",
+    "display_name": "Windlas Biotech",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WINDMACHIN",
+    "security_id": "24969",
+    "display_name": "Windsor Machines",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WIPL",
+    "security_id": "20481",
+    "display_name": "Western India Ply",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WOCKPHARMA",
+    "security_id": "7506",
+    "display_name": "Wockhardt",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WONDERLA",
+    "security_id": "3002",
+    "display_name": "Wonderla Holidays",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WORTH",
+    "security_id": "22277",
+    "display_name": "Worth Peripherals",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "WSTCSTPAPR",
+    "security_id": "3799",
+    "display_name": "West Coast Paper Mills",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "XCHANGING",
+    "security_id": "11705",
+    "display_name": "Xchanging Solutions",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "XELPMOC",
+    "security_id": "8477",
+    "display_name": "Xelpmoc Design & Tech",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "XPROINDIA",
+    "security_id": "11407",
+    "display_name": "Xpro",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "XTGLOBAL",
+    "security_id": "25235",
+    "display_name": "Xtglobal Infotech",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "YASHO",
+    "security_id": "18131",
+    "display_name": "Yasho Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "YATHARTH",
+    "security_id": "17738",
+    "display_name": "Yatharth Hospital",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "YATRA",
+    "security_id": "18760",
+    "display_name": "Yatra Online",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "YUKEN",
+    "security_id": "5501",
+    "display_name": "Yuken",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ZAGGLE",
+    "security_id": "18608",
+    "display_name": "Zaggle Prepaid Ocean Services",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ZEEL",
+    "security_id": "3812",
+    "display_name": "Zee Entertainment",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ZEEMEDIA",
+    "security_id": "14003",
+    "display_name": "Zee Media Corporation",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ZENITHEXPO",
+    "security_id": "4176",
+    "display_name": "Zenith Exports",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ZENITHSTL",
+    "security_id": "14562",
+    "display_name": "Zenith Steel Pipes & Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ZENSARTECH",
+    "security_id": "1076",
+    "display_name": "Zensar Technologies",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ZENTEC",
+    "security_id": "7508",
+    "display_name": "Zen Technologies",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ZFCVINDIA",
+    "security_id": "16915",
+    "display_name": "ZF Commercial",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ZIMLAB",
+    "security_id": "12384",
+    "display_name": "Zim Laboratories",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ZODIACLOTH",
+    "security_id": "3821",
+    "display_name": "Zodiac Clothing",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ZOTA",
+    "security_id": "11394",
+    "display_name": "Zota Healthcare",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ZUARI",
+    "security_id": "29050",
+    "display_name": "Zuari Agro Chemicals",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ZUARIIND",
+    "security_id": "3827",
+    "display_name": "Zuari Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ZYDUSWELL",
+    "security_id": "17635",
+    "display_name": "Zydus Wellness",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  }
+]

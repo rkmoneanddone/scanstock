@@ -1,0 +1,1402 @@
+[
+  {
+    "symbol": "ENTERO",
+    "security_id": "22717",
+    "display_name": "Entero Healthcare Solutions",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "EPACK",
+    "security_id": "22463",
+    "display_name": "Epack Durable",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "EPIGRAL",
+    "security_id": "5382",
+    "display_name": "Epigral",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "EPL",
+    "security_id": "981",
+    "display_name": "EPL",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "EQUITASBNK",
+    "security_id": "913",
+    "display_name": "Equitas Small Finance Bank",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ERIS",
+    "security_id": "21154",
+    "display_name": "Eris Lifesciences",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ESABINDIA",
+    "security_id": "955",
+    "display_name": "ESAB India",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ESAFSFB",
+    "security_id": "19878",
+    "display_name": "ESAF Small Finance Bank",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ESSENTIA",
+    "security_id": "30323",
+    "display_name": "Integra Essentia",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ESTER",
+    "security_id": "24265",
+    "display_name": "Ester Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ETHOSLTD",
+    "security_id": "9750",
+    "display_name": "Ethos",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "EUREKAFORB",
+    "security_id": "25162",
+    "display_name": "Eureka Forbes",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "EUROTEXIND",
+    "security_id": "999",
+    "display_name": "Eurotex Industries & Exports",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "EVEREADY",
+    "security_id": "11782",
+    "display_name": "Eveready Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "EXCEL",
+    "security_id": "17376",
+    "display_name": "Excel Realty N Infra",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "EXCELINDUS",
+    "security_id": "11471",
+    "display_name": "Excel Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "EXICOM",
+    "security_id": "22947",
+    "display_name": "Exicom Tele-Systems",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "EXPLEOSOL",
+    "security_id": "17486",
+    "display_name": "Expleo Solutions",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FACT",
+    "security_id": "1008",
+    "display_name": "Fertilisers & Chemical Travancore",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FAIRCHEMOR",
+    "security_id": "1614",
+    "display_name": "Fairchem Organics",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FAZE3Q",
+    "security_id": "12000",
+    "display_name": "Faze Three",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FCL",
+    "security_id": "6198",
+    "display_name": "Fineotex Chemical",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FCSSOFT",
+    "security_id": "11999",
+    "display_name": "FCS Software Solutions",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FDC",
+    "security_id": "4898",
+    "display_name": "FDC",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FEDFINA",
+    "security_id": "20322",
+    "display_name": "Fedbank Financial Services",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FIBERWEB",
+    "security_id": "8159",
+    "display_name": "Fiberweb",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FIEMIND",
+    "security_id": "13710",
+    "display_name": "Fiem Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FILATEX",
+    "security_id": "24532",
+    "display_name": "Filatex India",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FINCABLES",
+    "security_id": "1038",
+    "display_name": "Finolex Cables",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FINEORG",
+    "security_id": "3744",
+    "display_name": "Fine Organic Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FINOPB",
+    "security_id": "6579",
+    "display_name": "Fino Payments Bank",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FINPIPE",
+    "security_id": "1041",
+    "display_name": "Finolex Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FIRSTCRY",
+    "security_id": "24814",
+    "display_name": "Firstcry (Brainbees Solutions)",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FIVESTAR",
+    "security_id": "12032",
+    "display_name": "Five Star Business Finance",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FLAIR",
+    "security_id": "20372",
+    "display_name": "Flair Writing Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FLUOROCHEM",
+    "security_id": "13750",
+    "display_name": "Gujarat Fluorochemicals",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FMGOETZE",
+    "security_id": "1190",
+    "display_name": "Federal Mogul Goetze",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FOODSIN",
+    "security_id": "6673",
+    "display_name": "Foods & Inns",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FORCEMOT",
+    "security_id": "11573",
+    "display_name": "Force Motors",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FOSECOIND",
+    "security_id": "1073",
+    "display_name": "Foseco",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FSL",
+    "security_id": "14304",
+    "display_name": "Firstsource Solutions",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "FUSION",
+    "security_id": "11932",
+    "display_name": "Fusion Finance",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GABRIEL",
+    "security_id": "1085",
+    "display_name": "Gabriel",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GAEL",
+    "security_id": "8828",
+    "display_name": "Gujarat Ambuja Exports",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GALAPREC",
+    "security_id": "25134",
+    "display_name": "Gala Precision Engineering",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GALAXYSURF",
+    "security_id": "1315",
+    "display_name": "Galaxy Surfactants",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GALLANTT",
+    "security_id": "13337",
+    "display_name": "Gallantt Ispat",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GANDHAR",
+    "security_id": "20303",
+    "display_name": "Gandhar Oil Refinery",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GANDHITUBE",
+    "security_id": "14116",
+    "display_name": "Gandhi Special Tubes",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GANECOS",
+    "security_id": "6944",
+    "display_name": "Ganesha Ecosphere",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GANESHBE",
+    "security_id": "5614",
+    "display_name": "Ganesh Benzoplast",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GANESHHOUC",
+    "security_id": "14339",
+    "display_name": "Ganesh Housing Corporation",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GANGAFORGE",
+    "security_id": "4957",
+    "display_name": "Ganga Forging",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GANGESSECU",
+    "security_id": "21399",
+    "display_name": "Ganges Securities",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GARFIBRES",
+    "security_id": "1100",
+    "display_name": "Garware Technical Fibres",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GARUDA",
+    "security_id": "25800",
+    "display_name": "Garuda Construction & Engineering",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GATECHDVR",
+    "security_id": "17",
+    "display_name": "GACM Technologies DVR",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GATEWAY",
+    "security_id": "8510",
+    "display_name": "Gateway Distriparks",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GEECEE",
+    "security_id": "13658",
+    "display_name": "GeeCee Ventures",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GEEKAYWIRE",
+    "security_id": "17922",
+    "display_name": "Geekay Wires",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GENESYS",
+    "security_id": "10905",
+    "display_name": "Genesys International Corp",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GENUSPAPER",
+    "security_id": "6600",
+    "display_name": "Genus Paper & Boards",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GENUSPOWER",
+    "security_id": "11905",
+    "display_name": "Genus Power Infrastructures",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GEOJITFSL",
+    "security_id": "11896",
+    "display_name": "Geojit Financial Services",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GEPIL",
+    "security_id": "7862",
+    "display_name": "GE Power",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GESHIP",
+    "security_id": "13776",
+    "display_name": "Great Eastern Shipping Company",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GFLLIMITED",
+    "security_id": "1289",
+    "display_name": "GFL",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GHCL",
+    "security_id": "1127",
+    "display_name": "GHCL",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GHCLTEXTIL",
+    "security_id": "16696",
+    "display_name": "GHCL Textiles",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GICHSGFIN",
+    "security_id": "1139",
+    "display_name": "GIC Housing Finance",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GICRE",
+    "security_id": "277",
+    "display_name": "GIC of India",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GILLANDERS",
+    "security_id": "17839",
+    "display_name": "Gillanders Arbuthnot",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GILLETTE",
+    "security_id": "1576",
+    "display_name": "Gillette",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GIPCL",
+    "security_id": "1145",
+    "display_name": "Gujarat Industries Power Company",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GKWLIMITED",
+    "security_id": "17357",
+    "display_name": "GKW",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GLAND",
+    "security_id": "1186",
+    "display_name": "Gland Pharma",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GLAXO",
+    "security_id": "1153",
+    "display_name": "GlaxoSmithKline Pharmaceuticals",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GLOBAL",
+    "security_id": "1415",
+    "display_name": "Global Education",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GLOBALVECT",
+    "security_id": "13735",
+    "display_name": "Global Vectra Helicorp",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GLOBUSSPR",
+    "security_id": "17424",
+    "display_name": "Globus Spirits",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GLOSTERLTD",
+    "security_id": "23590",
+    "display_name": "Gloster",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GMBREW",
+    "security_id": "1168",
+    "display_name": "GM Breweries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GMDCLTD",
+    "security_id": "5204",
+    "display_name": "Gujarat Mineral Development Corporation",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GMMPFAUDLR",
+    "security_id": "1570",
+    "display_name": "GMM Pfaudler",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GMRP&UI",
+    "security_id": "8529",
+    "display_name": "GMR Power & Urban Infra",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GNA",
+    "security_id": "18571",
+    "display_name": "GNA Axles",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GOACARBON",
+    "security_id": "14687",
+    "display_name": "Goa Carbon",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GOCLCORP",
+    "security_id": "3963",
+    "display_name": "GOCL Corporation",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GOCOLORS",
+    "security_id": "6964",
+    "display_name": "Go Colors",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GODFRYPHLP",
+    "security_id": "1181",
+    "display_name": "Godfrey Phillips",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GODHA",
+    "security_id": "1607",
+    "display_name": "Godha Cabcon & Insulation",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GODIGIT",
+    "security_id": "23799",
+    "display_name": "Go Digit General Insurance",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GODREJAGRO",
+    "security_id": "144",
+    "display_name": "Godrej Agrovet",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GODREJIND",
+    "security_id": "10925",
+    "display_name": "Godrej Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GODREJPROP",
+    "security_id": "17875",
+    "display_name": "Godrej Properties",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GOKEX",
+    "security_id": "11778",
+    "display_name": "Gokaldas Exports",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GOKUL",
+    "security_id": "16705",
+    "display_name": "Gokul Refoils & Solvent",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GOKULAGRO",
+    "security_id": "14480",
+    "display_name": "Gokul Agro Resources",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GOLDIAM",
+    "security_id": "11971",
+    "display_name": "Goldiam International",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GOLDTECH",
+    "security_id": "9874",
+    "display_name": "Aion Tech Solutions",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GOODLUCK",
+    "security_id": "6125",
+    "display_name": "Goodluck",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GOPAL",
+    "security_id": "23066",
+    "display_name": "Gopal Snacks",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GOYALALUM",
+    "security_id": "11787",
+    "display_name": "Goyal Aluminiums",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GPIL",
+    "security_id": "13409",
+    "display_name": "Godawari Power & ISPAT",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GPPL",
+    "security_id": "19731",
+    "display_name": "Gujarat Pipavav Port",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GPTHEALTH",
+    "security_id": "22846",
+    "display_name": "GPT Healthcare",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GPTINFRA",
+    "security_id": "17685",
+    "display_name": "GPT Infraprojects",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GRANULES",
+    "security_id": "11872",
+    "display_name": "Granules",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GRAPHITE",
+    "security_id": "592",
+    "display_name": "Graphite",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GRAVITA",
+    "security_id": "20534",
+    "display_name": "Gravita",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GREAVESCOT",
+    "security_id": "1235",
+    "display_name": "Greaves Cotton",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GREENLAM",
+    "security_id": "6848",
+    "display_name": "Greenlam Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GREENPANEL",
+    "security_id": "13810",
+    "display_name": "Greenpanel Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GREENPLY",
+    "security_id": "3987",
+    "display_name": "Greenply Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GREENPOWER",
+    "security_id": "20110",
+    "display_name": "Orient Green Power",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GRINDWELL",
+    "security_id": "13560",
+    "display_name": "Grindwell Norton",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GRINFRA",
+    "security_id": "5054",
+    "display_name": "GR Infraprojects",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GRMOVER",
+    "security_id": "10871",
+    "display_name": "GRM Overseas",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GRPLTD",
+    "security_id": "6543",
+    "display_name": "GRP",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GRSE",
+    "security_id": "5475",
+    "display_name": "Garden Reach Shipbuilders",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GRWRHITECH",
+    "security_id": "7982",
+    "display_name": "Garware Hi-Tech Films",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GSFC",
+    "security_id": "1247",
+    "display_name": "Gujarat State Fertilizers & Chemicals",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GSLSU",
+    "security_id": "14599",
+    "display_name": "Global Surfaces",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GSPL",
+    "security_id": "13197",
+    "display_name": "Gujarat State Petronet",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GSS",
+    "security_id": "15347",
+    "display_name": "GSS Infotech",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GTL",
+    "security_id": "1162",
+    "display_name": "GTL",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GTLINFRA",
+    "security_id": "13745",
+    "display_name": "GTL Infrastructure",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GTPL",
+    "security_id": "21195",
+    "display_name": "GTPL Hathway",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GUFICBIO",
+    "security_id": "11606",
+    "display_name": "Gufic BioSciences",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GUJALKALI",
+    "security_id": "1267",
+    "display_name": "Gujarat Alkalies & Chemicals",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GUJAPOLLO",
+    "security_id": "14677",
+    "display_name": "Gujarat Apollo Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GUJGASLTD",
+    "security_id": "10599",
+    "display_name": "Gujarat Gas",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GUJTHEM",
+    "security_id": "29731",
+    "display_name": "Gujarat Themis Biosyn",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GULFOILLUB",
+    "security_id": "4391",
+    "display_name": "Gulf Oil Lubricants",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GULFPETRO",
+    "security_id": "11581",
+    "display_name": "GP Petroleums",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GULPOLY",
+    "security_id": "6286",
+    "display_name": "Gulshan Polyols",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GVPTECH",
+    "security_id": "10865",
+    "display_name": "GVP Infotech",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "GVT&D",
+    "security_id": "16783",
+    "display_name": "GE T&D",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HAPPSTMNDS",
+    "security_id": "48",
+    "display_name": "Happiest Minds Technologies",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HAPPYFORGE",
+    "security_id": "20854",
+    "display_name": "Happy Forgings",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HARIOMPIPE",
+    "security_id": "8968",
+    "display_name": "Hariom Pipe Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HARRMALAYA",
+    "security_id": "1313",
+    "display_name": "Harrisons Malayalam",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HARSHA",
+    "security_id": "11162",
+    "display_name": "Harsha Engineers",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HATHWAY",
+    "security_id": "18154",
+    "display_name": "Hathway Cable & Datacom",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HATSUN",
+    "security_id": "3892",
+    "display_name": "Hatsun Agro Product",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HAVISHA",
+    "security_id": "7457",
+    "display_name": "Sri Havisha Hospital",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HBLENGINE",
+    "security_id": "13966",
+    "display_name": "HBL Engineering",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HBSL",
+    "security_id": "4116",
+    "display_name": "HB Stockholdings",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HCG",
+    "security_id": "15555",
+    "display_name": "Healthcare Global Enterprises",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HEADSUP",
+    "security_id": "19205",
+    "display_name": "Heads UP Ventures",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HEG",
+    "security_id": "1336",
+    "display_name": "HEG",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HEIDELBERG",
+    "security_id": "2316",
+    "display_name": "Heidelberg Cement",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HEMIPROP",
+    "security_id": "701",
+    "display_name": "Hemisphere Properties",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HERITGFOOD",
+    "security_id": "4598",
+    "display_name": "Heritage Foods",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HESTERBIO",
+    "security_id": "7048",
+    "display_name": "Hester Biosciences",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HEUBACHIND",
+    "security_id": "715",
+    "display_name": "Heubach Colorants",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HEXATRADEX",
+    "security_id": "27008",
+    "display_name": "Hexa Tradex",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HEXT",
+    "security_id": "29666",
+    "display_name": "Hexaware Technologies",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HFCL",
+    "security_id": "21951",
+    "display_name": "HFCL",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HGINFRA",
+    "security_id": "1672",
+    "display_name": "HG Infra Engineering",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HGS",
+    "security_id": "14712",
+    "display_name": "Hinduja Global Solutions",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HIKAL",
+    "security_id": "9668",
+    "display_name": "Hikal",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HIMATSEIDE",
+    "security_id": "1360",
+    "display_name": "Himatsingka Seide",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HINDALCO",
+    "security_id": "1363",
+    "display_name": "Hindalco Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HINDCOMPOS",
+    "security_id": "1372",
+    "display_name": "Hindustan Composites",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HINDCON",
+    "security_id": "4920",
+    "display_name": "Hindcon Chemicals",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HINDCOPPER",
+    "security_id": "17939",
+    "display_name": "Hindustan Copper",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HINDOILEXP",
+    "security_id": "1403",
+    "display_name": "Hindustan Oil Exploration",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HINDWAREAP",
+    "security_id": "15883",
+    "display_name": "Hindware Home Innovation",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HINDZINC",
+    "security_id": "1424",
+    "display_name": "Hindustan Zinc",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HIRECT",
+    "security_id": "13890",
+    "display_name": "Hind Rectifiers",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HISARMETAL",
+    "security_id": "19322",
+    "display_name": "Hisar Metal Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HITECH",
+    "security_id": "2868",
+    "display_name": "Hi-Tech Pipes",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HITECHCORP",
+    "security_id": "15161",
+    "display_name": "Hitech Corporation",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HLEGLAS",
+    "security_id": "2289",
+    "display_name": "HLE Glascoat",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HLVLTD",
+    "security_id": "1448",
+    "display_name": "HLV",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HMAAGRO",
+    "security_id": "17053",
+    "display_name": "HMA Agro Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HMVL",
+    "security_id": "19211",
+    "display_name": "Hindustan Media Ventures",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HNDFDS",
+    "security_id": "12173",
+    "display_name": "Hindustan Foods",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HOMEFIRST",
+    "security_id": "2056",
+    "display_name": "Home First Finance Company",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HONASA",
+    "security_id": "19813",
+    "display_name": "Mamaearth",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HONAUT",
+    "security_id": "3417",
+    "display_name": "Honeywell Automation",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HONDAPOWER",
+    "security_id": "3138",
+    "display_name": "Honda India Power Products",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HPAL",
+    "security_id": "7376",
+    "display_name": "HP Adhesives",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HPIL",
+    "security_id": "11796",
+    "display_name": "Hindprakash Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HPL",
+    "security_id": "18679",
+    "display_name": "HPL Electric & Power",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HSCL",
+    "security_id": "14334",
+    "display_name": "Himadri Speciality Chemical",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HUBTOWN",
+    "security_id": "14203",
+    "display_name": "Hubtown",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HUHTAMAKI",
+    "security_id": "2562",
+    "display_name": "Huhtamaki PPL",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "HYUNDAI",
+    "security_id": "25844",
+    "display_name": "Hyundai Motor India",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ICEMAKE",
+    "security_id": "489",
+    "display_name": "Ice Make Refrigeration",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ICIL",
+    "security_id": "11987",
+    "display_name": "Indo Count Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "ICRA",
+    "security_id": "14523",
+    "display_name": "ICRA",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "IDBI",
+    "security_id": "1476",
+    "display_name": "IDBI Bank",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "IDEA",
+    "security_id": "14366",
+    "display_name": "Vodafone Idea",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "IDEAFORGE",
+    "security_id": "17140",
+    "display_name": "Ideaforge Technology",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "IEL",
+    "security_id": "13303",
+    "display_name": "Indiabulls Enterprises",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "IFBIND",
+    "security_id": "1485",
+    "display_name": "IFB Industries",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "IFCI",
+    "security_id": "1491",
+    "display_name": "IFCI",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  },
+  {
+    "symbol": "IFGLEXPOR",
+    "security_id": "436",
+    "display_name": "IFGL Refractories",
+    "exchange_segment": "NSE_EQ",
+    "instrument_type": "EQUITY"
+  }
+]
