@@ -67,3 +67,20 @@ def test_candle_series_can_limit_each_symbol_to_recent_history(tmp_path):
         tx.upsert_candles(candles)
     recent = repo.candle_series("1D", limit_per_symbol=2)["TEST"]
     assert [candle.timestamp.day for candle in recent] == [4, 5]
+
+
+def test_chart_query_returns_only_requested_symbol_in_time_order(tmp_path):
+    repo = SQLiteMarketRepository(tmp_path / "chart.db")
+    repo.migrate()
+    instruments = [Instrument("ONE", "1", "One"), Instrument("TWO", "2", "Two")]
+    candles = [
+        Candle(symbol, "1D", datetime(2026, 1, day, tzinfo=timezone.utc), Decimal("10"),
+               Decimal("12"), Decimal("9"), Decimal("11"), 100, "fake")
+        for symbol in ("ONE", "TWO") for day in range(1, 6)
+    ]
+    with repo.transaction() as tx:
+        tx.upsert_instruments(instruments)
+        tx.upsert_candles(candles)
+    recent = repo.candles_for_symbol("one", "1D", 3)
+    assert [candle.symbol for candle in recent] == ["ONE", "ONE", "ONE"]
+    assert [candle.timestamp.day for candle in recent] == [3, 4, 5]
