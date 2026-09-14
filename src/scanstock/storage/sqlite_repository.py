@@ -4,7 +4,7 @@ import json
 import sqlite3
 import threading
 from contextlib import contextmanager
-from datetime import date, datetime, timezone
+from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal
 from pathlib import Path
 from typing import Iterator, Sequence
@@ -306,6 +306,33 @@ class SQLiteMarketRepository:
                 ) for row in reversed(rows)]
         return series
 
+    def previous_all_time_high(self, symbol: str, timeframe: str) -> Decimal | None:
+        with self._lock:
+            row = self._connection.execute(
+                "SELECT MAX(timestamp) FROM candles WHERE symbol=? AND timeframe='1D'", (symbol,)
+            ).fetchone()
+            if not row or not row[0]:
+                return None
+            latest_market_date = datetime.fromisoformat(row[0]).astimezone(self._market_timezone).date()
+            if timeframe == "1W":
+                cutoff_date = latest_market_date - timedelta(days=latest_market_date.weekday())
+            elif timeframe == "1M":
+                cutoff_date = latest_market_date.replace(day=1)
+            elif timeframe == "3M":
+                cutoff_date = latest_market_date.replace(month=((latest_market_date.month - 1) // 3) * 3 + 1, day=1)
+            elif timeframe == "6M":
+                cutoff_date = latest_market_date.replace(month=1 if latest_market_date.month <= 6 else 7, day=1)
+            elif timeframe == "1Y":
+                cutoff_date = latest_market_date.replace(month=1, day=1)
+            else:
+                cutoff_date = latest_market_date
+            cutoff = datetime.combine(cutoff_date, time.min, self._market_timezone).astimezone(timezone.utc).isoformat()
+            high = self._connection.execute("""
+                SELECT MAX(CAST(high AS REAL)) FROM candles
+                WHERE symbol=? AND timeframe='1D' AND timestamp<?
+            """, (symbol, cutoff)).fetchone()[0]
+        return Decimal(str(high)) if high is not None else None
+
     def metric_snapshots(self, timeframe: str) -> dict[str, tuple[Candle, dict[str, Decimal]]]:
         with self._lock:
             rows = self._connection.execute("""
@@ -336,6 +363,13 @@ class SQLiteMarketRepository:
                   low=excluded.low,close=excluded.close,volume=excluded.volume,provider=excluded.provider,
                   metrics_json=excluded.metrics_json,updated_at=excluded.updated_at
             """, rows)
+            self._connection.commit()
+
+    def delete_metric_snapshots(self, symbols: Sequence[str]) -> None:
+        if not symbols:
+            return
+        with self._lock:
+            self._connection.executemany("DELETE FROM latest_metrics WHERE symbol=?", [(symbol,) for symbol in symbols])
             self._connection.commit()
 
     def record_sync(self, symbol: str, timeframe: str, status: str, rows: int, message: str = "", attempted_through: date | None = None) -> None:
