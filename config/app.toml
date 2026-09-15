@@ -8,7 +8,7 @@ exchange_segment = "NSE_EQ"
 instrument_type = "EQUITY"
 timeframe = "1D"
 initial_from_date = "1990-01-01"
-request_delay_seconds = 3.0
+request_delay_seconds = 2.0
 max_retries = 7
 
 [universe]

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import threading
-import time
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 from pathlib import Path
@@ -66,11 +65,6 @@ def _run_market_update() -> None:
             service.sync([instrument], end)
             with sync_lock:
                 sync_job["processed"] = index
-            if index % 100 == 0 and index < len(pending):
-                for remaining in range(600, 0, -1):
-                    with sync_lock:
-                        sync_job["message"] = f"Batch complete · next 100 stocks in {remaining // 60}:{remaining % 60:02d}"
-                    time.sleep(1)
         with sync_lock:
             sync_job["message"] = f"Market update complete · {len(pending)} stocks processed"
     except MarketDataAuthenticationError as exc:

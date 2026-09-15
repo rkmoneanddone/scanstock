@@ -13,7 +13,7 @@ from scanstock.domain import Candle, Instrument
 class DhanMarketDataProvider:
     name = "dhan"
 
-    def __init__(self, client_id: str, token: str, max_retries: int = 7, request_delay: float = 3.0) -> None:
+    def __init__(self, client_id: str, token: str, max_retries: int = 7, request_delay: float = 2.0) -> None:
         self._client = dhanhq(DhanContext(client_id, token))
         self._max_retries = max_retries
         self._request_delay = request_delay

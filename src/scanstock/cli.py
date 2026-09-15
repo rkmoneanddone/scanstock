@@ -44,7 +44,7 @@ def _run() -> None:
     sync.add_argument("--to-date", type=date.fromisoformat, default=date.today() + timedelta(days=1))
     batches = sub.add_parser("sync-batches")
     batches.add_argument("--batch-size", type=int, default=100)
-    batches.add_argument("--batch-pause-seconds", type=int, default=600)
+    batches.add_argument("--batch-pause-seconds", type=int, default=0)
     batches.add_argument("--to-date", type=date.fromisoformat, default=date.today() + timedelta(days=1))
     sub.add_parser("status")
     serve = sub.add_parser("serve")
@@ -76,9 +76,11 @@ def _run() -> None:
             batch = pending[offset:offset + args.batch_size]
             print(f"\n[BATCH {batch_number}/{total_batches}] {batch[0].symbol} -> {batch[-1].symbol}")
             service.sync(batch, args.to_date)
-            if offset + args.batch_size < len(pending):
-                minutes = args.batch_pause_seconds / 60
-                print(f"[PAUSE] Batch {batch_number} complete. Next batch starts in {minutes:g} minutes.")
+            if offset + args.batch_size < len(pending) and args.batch_pause_seconds:
+                print(
+                    f"[PAUSE] Batch {batch_number} complete. "
+                    f"Next batch starts in {args.batch_pause_seconds:g} seconds."
+                )
                 time.sleep(args.batch_pause_seconds)
         remaining = sum(needs_sync(repo, instrument.symbol, args.to_date) for instrument in instruments)
         print(f"\n[DONE] Batch run finished. {remaining} stocks still require data or a retry.")
