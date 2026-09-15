@@ -42,6 +42,8 @@ def _run() -> None:
     sync = sub.add_parser("sync-daily")
     sync.add_argument("--symbols", nargs="+")
     sync.add_argument("--to-date", type=date.fromisoformat, default=date.today() + timedelta(days=1))
+    sync_all = sub.add_parser("sync-all")
+    sync_all.add_argument("--to-date", type=date.fromisoformat, default=date.today() + timedelta(days=1))
     batches = sub.add_parser("sync-batches")
     batches.add_argument("--batch-size", type=int, default=100)
     batches.add_argument("--batch-pause-seconds", type=int, default=0)
@@ -63,6 +65,15 @@ def _run() -> None:
     elif args.command == "sync-daily":
         cfg = settings(ROOT)
         DailyHistorySyncService(provider(ROOT), repo, cfg.initial_from_date, cfg.request_delay_seconds).sync(instruments, args.to_date)
+    elif args.command == "sync-all":
+        cfg = settings(ROOT)
+        pending = [instrument for instrument in instruments if needs_sync(repo, instrument.symbol, args.to_date)]
+        print(f"[PLAN] {len(pending)} stocks need work in one continuous run")
+        DailyHistorySyncService(provider(ROOT), repo, cfg.initial_from_date, cfg.request_delay_seconds).sync(
+            pending, args.to_date
+        )
+        remaining = sum(needs_sync(repo, instrument.symbol, args.to_date) for instrument in instruments)
+        print(f"\n[DONE] Continuous run finished. {remaining} stocks still require data or a retry.")
     elif args.command == "sync-batches":
         if args.batch_size < 1 or args.batch_pause_seconds < 0:
             raise ValueError("Batch size must be positive and pause cannot be negative")

@@ -1,6 +1,6 @@
 from datetime import date
 
-from scanstock.contracts import MarketDataAuthenticationError, MarketDataUnavailableError
+from scanstock.contracts import MarketDataAuthenticationError, MarketDataRangeError, MarketDataUnavailableError
 from scanstock.domain import Instrument
 from scanstock.services import DailyHistorySyncService
 
@@ -13,6 +13,8 @@ class RecoveringProvider:
 
     def daily_history(self, instrument, start, end):
         self.starts.append(start)
+        if (end - start).days > 366 * 5:
+            raise MarketDataRangeError("range too broad")
         if end.year <= 1995:
             raise MarketDataUnavailableError("no data")
         return [object()]

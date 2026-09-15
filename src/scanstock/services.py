@@ -4,7 +4,13 @@ import time
 from datetime import date, timedelta
 from typing import Iterable
 
-from .contracts import MarketDataAuthenticationError, MarketDataProvider, MarketDataUnavailableError, MarketRepository
+from .contracts import (
+    MarketDataAuthenticationError,
+    MarketDataProvider,
+    MarketDataRangeError,
+    MarketDataUnavailableError,
+    MarketRepository,
+)
 from .domain import Instrument
 
 
@@ -67,7 +73,7 @@ class DailyHistorySyncService:
     def _fetch(self, instrument: Instrument, mode: str, start: date, end: date):
         try:
             return self.provider.daily_history(instrument, start, end)
-        except MarketDataUnavailableError:
+        except (MarketDataUnavailableError, MarketDataRangeError):
             if mode != "FULL":
                 raise
 
@@ -81,7 +87,7 @@ class DailyHistorySyncService:
             time.sleep(self.delay)
             try:
                 candles.extend(self.provider.daily_history(instrument, window_start, window_end))
-            except MarketDataUnavailableError:
+            except (MarketDataUnavailableError, MarketDataRangeError):
                 pass
             window_start = window_end
         if not candles:

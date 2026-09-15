@@ -47,7 +47,7 @@ To populate the entire configured NSE universe progressively, run:
 .\scripts\sync_all_stocks.ps1
 ```
 
-The first run processes every stock requiring history with a two-second interval between Dhan calls and no pause between batches. Later runs skip current stocks and request only each stock's missing dates. Progress is saved after every stock, so an interrupted run resumes safely.
+The first run processes every stock requiring history in one continuous run with a two-second interval between Dhan calls. If Dhan rejects one large full-history range, ScanStock automatically retries it in five-year windows. Later runs skip current stocks and request only each stock's missing dates. Progress is saved after every stock, so an interrupted run resumes safely.
 
 ## Structure
 

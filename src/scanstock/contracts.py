@@ -12,6 +12,10 @@ class MarketDataUnavailableError(RuntimeError):
     """The provider has no candles for the requested date range."""
 
 
+class MarketDataRangeError(RuntimeError):
+    """The provider rejected the requested date range as too broad or invalid."""
+
+
 class MarketDataAuthenticationError(RuntimeError):
     """The provider rejected the configured client ID or access token."""
 
