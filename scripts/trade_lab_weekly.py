@@ -114,9 +114,9 @@ HTML="""<!doctype html><html><head><meta charset="utf-8"><title>ScanStock Trade 
 <style>body{background:#0b1422;color:#e6edf7;font:14px system-ui;padding:20px}main{max-width:1400px;margin:auto}
 nav,.panels,.actions{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0}section{background:#142139;border:1px solid #35445b;border-radius:12px;padding:14px;flex:1;min-width:350px}
 svg{width:100%;height:320px}button,input{background:#203351;color:white;border:1px solid #52647d;border-radius:6px;padding:9px}
-button{cursor:pointer}button:disabled{opacity:.4}#result{background:#142139;padding:16px;border-radius:10px}small{color:#a6b5ca}
+#symbol-results{position:absolute;top:100%;left:0;z-index:10;width:340px;max-height:260px;overflow:auto;background:#192940;border:1px solid #52647d;border-radius:7px;box-shadow:0 12px 30px #0009}#symbol-results:empty{display:none}#symbol-results button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #35445b;border-radius:0;background:transparent}#symbol-results button:hover{background:#304966}.stock-wrap{position:relative;display:inline-flex;align-items:center;gap:6px}button{cursor:pointer}button:disabled{opacity:.4}#result{background:#142139;padding:16px;border-radius:10px}small{color:#a6b5ca}
 </style></head><body><main><h1>ScanStock | Historical Trade Lab</h1><small>Weekly + Daily · Existing stored data · No orders</small>
-<nav>Stock <input id="symbol" value="APOLLOHOSP" size="13">Start <input id="start" type="date" value="2026-01-01">
+<nav><span class="stock-wrap">Stock <input id="symbol" value="APOLLOHOSP" size="18" autocomplete="off" placeholder="Search symbol or company"><div id="symbol-results"></div></span>Start <input id="start" type="date" value="2026-01-01">
 Cutoff <input id="cutoff" type="date" value="2026-01-31">Replay end <input id="end" type="date" value="2026-02-28">
 <button id="propose">Propose Trade</button><button id="replay" disabled>Run February Replay</button></nav>
 <div class="panels"><section><h3>1W · Higher timeframe</h3><small id="ws"></small><svg id="w" viewBox="0 0 600 320"></svg></section>
@@ -145,14 +145,55 @@ $('buy').disabled=j.plan.decision!=='BUY SETUP';$('ignore').disabled=false}catch
 $('replay').onclick=async()=>{try{let j=await get('replay');show(j,true);$('result').innerHTML='<h3>'+j.plan.decision+' · '+j.replay.status+'</h3><pre>'+JSON.stringify({proposal:j.plan,replay:j.replay},null,2)+'</pre>'}catch(e){$('result').textContent=e.message}};
 $('buy').onclick=()=>{$('choice').textContent='BUY selected for simulation only; no order sent'};
 $('ignore').onclick=()=>{$('choice').textContent='IGNORED; no order sent'};
-['symbol','start','cutoff','end'].forEach(id=>$(id).onchange=()=>{proposal=null;$('replay').disabled=true;$('buy').disabled=true;$('ignore').disabled=true;load()});
-load();</script></main></body></html>"""
+let universe=[];
+async function searchStocks(){
+ const term=$('symbol').value.trim().toUpperCase();
+ const matches=universe.filter(x=>x.symbol.includes(term)||x.name.toUpperCase().includes(term)).slice(0,12);
+ const box=$('symbol-results');box.replaceChildren();
+ if(!term)return;
+ matches.forEach(item=>{
+   let b=document.createElement('button');b.type='button';
+   b.textContent=item.name&&item.name!==item.symbol?item.symbol+' · '+item.name:item.symbol;
+   b.onclick=()=>{$('symbol').value=item.symbol;box.replaceChildren();reset();};
+   box.appendChild(b);
+ });
+}
+async function loadUniverse(){
+ try{let r=await fetch('/api?mode=symbols');if(!r.ok)throw Error('Universe unavailable');
+ universe=(await r.json()).symbols;searchStocks();
+ }catch(e){$('choice').textContent='Stock lookup unavailable: '+e.message}
+}
+function reset(){proposal=null;$('replay').disabled=true;$('buy').disabled=true;$('ignore').disabled=true;load()}
+$('symbol').addEventListener('input',searchStocks);
+$('symbol').addEventListener('blur',()=>setTimeout(()=>{$('symbol-results').replaceChildren()},180));
+['symbol','start','cutoff','end'].forEach(id=>$(id).onchange=reset);
+loadUniverse();load();</script></main></body></html>"""
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if urlparse(self.path).path!="/api":body=HTML.encode();status=200;typ="text/html; charset=utf-8"
         else:
             try:
                 q={k:v[0] for k,v in parse_qs(urlparse(self.path).query).items()}
+                if q.get("mode")=="symbols":
+                    con=sqlite3.connect(DB.resolve().as_uri()+"?mode=ro",uri=True)
+                    try:
+                        # The stored candle universe is the authoritative list of selectable stocks.
+                        rows=con.execute("SELECT DISTINCT symbol FROM candles WHERE timeframe='1D' ORDER BY symbol").fetchall()
+                        symbols=[dict(symbol=row[0],name=row[0]) for row in rows]
+                        # Enrich with optional metadata only when an existing table has compatible columns.
+                        for table in ("instruments","stocks","stock_universe"):
+                            cols={row[1].lower():row[1] for row in con.execute("PRAGMA table_info("+table+")")}
+                            sym=next((cols[k] for k in ("symbol","trading_symbol","tradingsymbol") if k in cols),None)
+                            name=next((cols[k] for k in ("company_name","name","display_name") if k in cols),None)
+                            if sym and name:
+                                lookup=dict(con.execute('SELECT "'+sym+'","'+name+'" FROM "'+table+'" WHERE "'+sym+'" IS NOT NULL').fetchall())
+                                for item in symbols:item["name"]=str(lookup.get(item["symbol"]) or item["symbol"])
+                                break
+                    finally:con.close()
+                    body=json.dumps(dict(symbols=symbols)).encode()
+                    self.send_response(200);self.send_header("Content-Type","application/json")
+                    self.send_header("Content-Length",str(len(body)));self.end_headers();self.wfile.write(body)
+                    return
                 mode=q.get("mode");symbol=q.get("symbol","APOLLOHOSP").upper()
                 start=date.fromisoformat(q.get("start","2026-01-01")).isoformat()
                 cutoff=date.fromisoformat(q.get("cutoff","2026-01-31")).isoformat()
