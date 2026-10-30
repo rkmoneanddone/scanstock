@@ -177,7 +177,7 @@ def run_scan(request: ScanRequest) -> dict:
 
 
 @app.get("/api/trading/research/{symbol}")
-def trading_research(symbol: str, split_at: str = Query(default="2025-01-01", pattern=r"^\\d{4}-\\d{2}-\\d{2}$")) -> dict:
+def trading_research(symbol: str, split_at: str = Query(default="2025-01-01", pattern=r"^\d{4}-\d{2}-\d{2}$")) -> dict:
     """Historical RSI/EMA research only. No orders, no paper engine, no external APIs."""
     import re
     from .trading.learning import Bar, D
