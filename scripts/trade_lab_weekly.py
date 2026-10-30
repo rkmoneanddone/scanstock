@@ -98,27 +98,39 @@ def confirmed_swing_low(d, left=2, right=2, lookback=45):
             return dict(date=d[i]["t"],price=low,confirmation_date=d[i+right]["t"])
     return None
 
-def structural_targets(daily, weekly_bars, entry, left=2, right=2):
-    """Confirmed pre-signal swing highs and major highs, deduped by 0.5% zones."""
+def structural_targets(daily, weekly_bars, entry, risk=None, left=2, right=2):
+    """Significant, recent, pre-signal resistance; never the three nearest old pivots.
+
+    Use last ~1 trading year of daily and 2 years of completed weekly bars.
+    A target must clear both the recent 20-day high and 1.5R (when risk given).
+    """
+    if not daily:
+        return []
+    recent=daily[-252:]
+    near_high=max(b["h"] for b in daily[-20:])
+    floor=max(entry*1.005, near_high*0.995)
+    if risk is not None:
+        floor=max(floor,entry+1.5*risk)
     found=[]
-    for source,bars in (("daily",daily),("weekly",weekly_bars)):
+    for source,bars in (("daily",recent),("weekly",weekly_bars[-104:])):
         for i in range(left,len(bars)-right):
             level=bars[i]["h"]
-            if level<=entry*1.005:continue
+            if level<floor:continue
             if all(level>bars[j]["h"] for j in range(i-left,i)) and all(level>=bars[j]["h"] for j in range(i+1,i+right+1)):
                 found.append(dict(price=round(level,2),source=source,date=bars[i]["t"],kind="confirmed swing high"))
         if bars:
             peak=max(bars,key=lambda x:x["h"])
-            if peak["h"]>entry*1.005:
-                found.append(dict(price=round(peak["h"],2),source=source,date=peak["t"],kind="historical high"))
+            if peak["h"]>=floor:
+                found.append(dict(price=round(peak["h"],2),source=source,date=peak["t"],kind="period high"))
     found.sort(key=lambda x:x["price"])
     levels=[]
     for item in found:
-        if not levels or item["price"]>levels[-1]["price"]*1.005:
+        if not levels or item["price"]>levels[-1]["price"]*1.01:
             levels.append(item)
         elif item["source"]=="weekly" and levels[-1]["source"]!="weekly":
             levels[-1]=item
     return levels
+
 
 def propose(d,w):
     if len(d)<60 or len(w)<12:
@@ -156,13 +168,14 @@ def propose(d,w):
         return dict(decision="NO TRADE",reason="Confirmed swing low does not provide valid positive-risk long entry.")
     risk=entry-stop
     # Structural levels must exist at signal time. Never backfit to the replay.
-    levels=structural_targets(d,w,entry)
+    levels=structural_targets(d,w,entry,risk=risk)
     tp1=levels[0]["price"] if len(levels)>0 else None
     tp2=levels[1]["price"] if len(levels)>1 else None
     tp3=levels[2]["price"] if len(levels)>2 else None
     triggered=bool(candidates)
-    return dict(decision="BUY SETUP" if triggered else "WATCH",
-        setup=setup,signals=candidates,reason=("Potential long setup; entry requires a subsequent breakout above the cutoff candle." if triggered else "No confirmed bullish trigger at cutoff; conditional breakout watch only, not an immediate BUY."),
+    viable=bool(levels)
+    return dict(decision="BUY SETUP" if triggered and viable else "WATCH",
+        setup=setup,signals=candidates,reason=("Potential long setup; entry requires a subsequent breakout above the cutoff candle." if triggered and viable else "No qualifying structural target at or beyond recent resistance and 1.5R; or no confirmed bullish trigger. WATCH only."),
         entry=entry,sl=stop,tp1=tp1,tp2=tp2,tp3=tp3,
         target_evidence=levels[:3],
         target_rr=[round((p["price"]-entry)/risk,2) for p in levels[:3]],
@@ -171,7 +184,7 @@ def propose(d,w):
         stop_method="Confirmed 2-left/2-right pivot low minus ₹0.05",
         rsi14=round(momentum,1),ema9=round(e9,2),ema21=round(e21,2),ema50=round(e50,2),
         support=round(support,2),resistance=round(resistance,2),
-        target_method="Confirmed historical daily/weekly swing highs and historical highs; missing levels remain unset",
+        target_method="Recent 252 daily / 104 completed weekly bars; confirmed highs above recent 20-day resistance and >=1.5R; no fabricated targets",
         risk_reward_tp1=round((tp1-entry)/risk,2) if tp1 else None)
 
 def discover_setups(daily, start, cutoff, max_age=10):
