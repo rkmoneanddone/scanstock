@@ -1,5 +1,6 @@
 """Causal, price-structure exits for daily OHLCV research. No order authority."""
 from decimal import Decimal
+from statistics import median
 from .learning import D
 
 def structural_levels(bars, signal_index, entry, lookback=120, swing_span=2, min_rr=1):
@@ -19,16 +20,35 @@ def structural_levels(bars, signal_index, entry, lookback=120, swing_span=2, min
     if stop is None or stop<=0:
         return None,"NO_CONFIRMED_SUPPORT"
     risk=entry-stop
+    # Do not move a structural stop to manufacture acceptable risk.
+    # Reject stops smaller than market noise, tick-size or modeled round-trip fees.
+    true_ranges=[]
+    for k in range(max(1,len(history)-15),len(history)):
+        bar=history[k];previous=history[k-1].close
+        true_ranges.append(max(bar.high-bar.low,abs(bar.high-previous),abs(bar.low-previous)))
+    atr14=sum(true_ranges,Decimal(0))/D(len(true_ranges)) if true_ranges else D(0)
+    min_distance=max(entry*D("0.005"),atr14*D("0.5"),entry*D("0.002")*D("2"))
+    if risk<min_distance:
+        return None,"STOP_TOO_TIGHT"
     if risk<=0:
         return None,"INVALID_RISK"
     resistances=sorted(set(p for p in highs if p>entry))
     if resistances:
         target=resistances[0]; target_type="PREVIOUS_SWING_HIGH"
     else:
-        # Historical range projection: high + (high-low)*0.618.
-        # Uses only completed bars, with deterministic anchors.
-        hi=max(b.high for b in history)
-        lo=min(b.low for b in history)
+        # Fib 1.618 extension from the most recent confirmed upswing.
+        # Both anchors are confirmed pivots inside the historical window.
+        confirmed_highs=[(k,history[k].high) for k in range(swing_span,len(history)-swing_span)
+                         if all(history[k].high>b.high for b in
+                                history[k-swing_span:k]+history[k+1:k+swing_span+1])]
+        confirmed_lows=[(k,history[k].low) for k in range(swing_span,len(history)-swing_span)
+                        if all(history[k].low<b.low for b in
+                               history[k-swing_span:k]+history[k+1:k+swing_span+1])]
+        swings=[(lk,lp,hk,hp) for hk,hp in confirmed_highs for lk,lp in confirmed_lows
+                if lk<hk and hp>lp]
+        if not swings:
+            return None,"NO_CONFIRMED_FIB_SWING"
+        lk,lo,hk,hi=max(swings,key=lambda x:(x[2],x[0]))
         target=hi+(hi-lo)*D("0.618")
         target_type="FIB_1_618_RANGE_EXTENSION"
         if target<=entry:
