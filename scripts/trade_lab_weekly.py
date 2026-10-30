@@ -73,6 +73,18 @@ def rsi(closes, period=14):
         avg_l = (avg_l * (period-1) + l) / period
     return 100 if avg_l == 0 else 100 - 100/(1 + avg_g/avg_l)
 
+def confirmed_swing_low(d, left=2, right=2, lookback=45):
+    """Most recent confirmed pivot low, using only bars available at signal time."""
+    start=max(left,len(d)-lookback)
+    for i in range(len(d)-right-1,start-1,-1):
+        low=d[i]["l"]
+        if all(low<d[j]["l"] for j in range(i-left,i)) and all(low<=d[j]["l"] for j in range(i+1,i+right+1)):
+            # A broken pivot is not a valid current support reference.
+            if min(b["l"] for b in d[i+1:]) < low:
+                continue
+            return dict(date=d[i]["t"],price=low,confirmation_date=d[i+right]["t"])
+    return None
+
 def propose(d,w):
     if len(d)<60 or len(w)<12:
         return dict(decision="INSUFFICIENT DATA",reason=f"Need 60 daily and 12 completed weekly bars; found {len(d)} and {len(w)}.")
@@ -97,9 +109,16 @@ def propose(d,w):
     # Provide a watchlist hypothesis even when no immediate trigger exists.
     setup=candidates[0] if candidates else "Support reversal watch"
     entry=round(current["h"]+0.05,2)
-    stop=round(min(x["l"] for x in d[-10:])-0.05,2)
+    swing=confirmed_swing_low(d)
+    if swing is None:
+        return dict(decision="WATCH",setup=setup,signals=candidates,
+                    reason="No unbroken, confirmed daily swing low available for a structural stop. No BUY until structure confirms.",
+                    entry=entry,sl=None,tp1=None,tp2=None,
+                    stop_method="Confirmed 2-left/2-right pivot low, not rolling minimum")
+    # One tick below confirmed structural support; no post-signal data involved.
+    stop=round(swing["price"]-0.05,2)
     if stop>=entry or stop<=0:
-        return dict(decision="NO TRADE",reason="No valid positive-risk long entry.")
+        return dict(decision="NO TRADE",reason="Confirmed swing low does not provide valid positive-risk long entry.")
     risk=entry-stop
     # R-based targets are projections, explicitly not historical resistance.
     tp1=round(entry+1.5*risk,2)
@@ -107,7 +126,7 @@ def propose(d,w):
     triggered=bool(candidates)
     return dict(decision="BUY SETUP" if triggered else "WATCH",
         setup=setup,signals=candidates,reason=("Potential long setup; entry requires a subsequent breakout above the cutoff candle." if triggered else "No confirmed bullish trigger at cutoff; conditional breakout watch only, not an immediate BUY."),
-        entry=entry,sl=stop,tp1=tp1,tp2=tp2,
+        entry=entry,sl=stop,tp1=tp1,tp2=tp2,\n        swing_low_date=swing["date"],swing_low_price=swing["price"],\n        swing_confirmation_date=swing["confirmation_date"],\n        stop_method="Confirmed 2-left/2-right pivot low minus ₹0.05",
         rsi14=round(momentum,1),ema9=round(e9,2),ema21=round(e21,2),ema50=round(e50,2),
         support=round(support,2),resistance=round(resistance,2),
         target_method="Projected 1.5R / 2.5R; not verified resistance",risk_reward_tp1=1.5)
