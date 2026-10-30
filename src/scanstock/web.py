@@ -174,3 +174,37 @@ def run_scan(request: ScanRequest) -> dict:
         return {"match_count": len(matches), "matches": matches}
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/api/trading/research/{symbol}")
+def trading_research(symbol: str, split_at: str = Query(default="2025-01-01", pattern=r"^\\d{4}-\\d{2}-\\d{2}$")) -> dict:
+    """Historical RSI/EMA research only. No orders, no paper engine, no external APIs."""
+    import re
+    from .trading.learning import Bar, D
+    from .trading.rsi_retest import detect_rsi_retests
+    from .trading.historical import walkforward
+
+    symbol = symbol.strip().upper()
+    if not re.fullmatch(r"[A-Z0-9&.-]{1,24}", symbol):
+        raise HTTPException(status_code=422, detail="Invalid stock symbol")
+    try:
+        date.fromisoformat(split_at)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="Invalid split date") from exc
+    daily = repository(ROOT).candles_for_symbol(symbol, "1D", 12000)
+    if len(daily) < 250:
+        raise HTTPException(status_code=404, detail="At least 250 daily candles are required")
+    bars = [Bar(c.timestamp.isoformat(), c.open, c.high, c.low, c.close, c.volume) for c in daily]
+    records = detect_rsi_retests(symbol, bars)
+    for record in records:
+        if record.get("status") != "COMPLETE":
+            continue
+        entry, exit_price, stop = (D(record[k]) for k in ("entry", "exit_price", "stop"))
+        record["r_multiple"] = str((exit_price-entry-(entry+exit_price)*D("10")/D(10000))/(entry-stop))
+    return {
+        "symbol": symbol, "timeframe": "1D", "strategy": "RSI_MA_RETEST_1D",
+        "split_at": split_at, "fee_bps_per_side": 10,
+        "paper_only": True, "auto_trading_enabled": False,
+        "summary": walkforward(records, split_at),
+        "recent_trades": records[-30:][::-1],
+    }
