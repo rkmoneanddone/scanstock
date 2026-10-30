@@ -1,6 +1,5 @@
 """Causal, price-structure exits for daily OHLCV research. No order authority."""
 from decimal import Decimal
-from statistics import median
 from .learning import D
 
 def structural_levels(bars, signal_index, entry, lookback=120, swing_span=2, min_rr=1):
