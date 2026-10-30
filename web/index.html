@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ScanStock</title><link rel="stylesheet" href="/assets/app.css?v=20260914-15">
+  <link rel="stylesheet" href="/assets/trading.css?v=1">
 </head>
 <body>
   <header class="topbar">
@@ -79,6 +80,27 @@
         </div>
       </div>
     </section>
+
+    <section class="panel trading-panel" aria-labelledby="trading-title">
+      <div class="panel-heading">
+        <div><span class="eyebrow">TRADING COMMAND CENTER · RESEARCH ONLY</span><h2 id="trading-title">Strategy Intelligence</h2></div>
+        <span class="badge">Auto trading OFF</span>
+      </div>
+      <p class="hint">Backtest completed daily candles from the existing ScanStock database. No orders are placed.</p>
+      <form id="trading-research-form" class="trading-toolbar">
+        <label>Stock symbol <input id="trading-symbol" value="MOREPENLAB" maxlength="24" required autocomplete="off"></label>
+        <label>Unseen data starts <input id="trading-split" type="date" value="2025-01-01" required></label>
+        <button class="button primary" type="submit" id="trading-run">Run RSI / EMA backtest</button>
+      </form>
+      <div id="trading-message" class="hint" role="status" aria-live="polite">Select a stock to inspect historical strategy results.</div>
+      <div id="trading-results" hidden>
+        <div class="trading-stats" id="trading-stats"></div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Signal date</th><th>Status</th><th>Entry</th><th>Stop</th><th>Target</th><th>Outcome</th><th>Net R</th></tr></thead>
+          <tbody id="trading-trades"></tbody></table>
+        </div>
+      </div>
+    </section>
   </main>
   <div id="loading" class="loading" hidden role="status" aria-live="polite">
     <div class="loading-card"><span class="spinner"></span><strong>Scanning stocks…</strong><small id="loading-detail">Applying your filters</small></div>
@@ -94,5 +116,6 @@
     </section>
   </div>
   <script src="/assets/app.js?v=20260914-15"></script>
+  <script src="/assets/trading.js?v=1" defer></script>
 </body>
 </html>
