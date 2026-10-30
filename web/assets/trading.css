@@ -1,0 +1,10 @@
+.trading-panel { margin-top: 24px; }
+.trading-toolbar { display: flex; gap: 14px; flex-wrap: wrap; align-items: end; margin: 20px 0 12px; }
+.trading-toolbar label { display: grid; gap: 6px; font-size: 13px; font-weight: 600; }
+.trading-toolbar input { min-height: 40px; padding: 8px 12px; border: 1px solid #9ca3af; border-radius: 8px; background: transparent; color: inherit; }
+.trading-stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(230px,1fr)); gap: 12px; margin: 18px 0; }
+.trading-stat { display: grid; gap: 6px; border: 1px solid #64748b55; border-radius: 12px; padding: 16px; }
+.trading-stat span { font-size: 12px; opacity: .8; text-transform: uppercase; letter-spacing: .06em; }
+.trading-stat strong { font-size: 23px; }
+.trading-stat small { line-height: 1.5; }
+.trading-panel .table-wrap { overflow-x: auto; }
