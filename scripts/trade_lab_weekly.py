@@ -98,6 +98,28 @@ def confirmed_swing_low(d, left=2, right=2, lookback=45):
             return dict(date=d[i]["t"],price=low,confirmation_date=d[i+right]["t"])
     return None
 
+def structural_targets(daily, weekly_bars, entry, left=2, right=2):
+    """Confirmed pre-signal swing highs and major highs, deduped by 0.5% zones."""
+    found=[]
+    for source,bars in (("daily",daily),("weekly",weekly_bars)):
+        for i in range(left,len(bars)-right):
+            level=bars[i]["h"]
+            if level<=entry*1.005:continue
+            if all(level>bars[j]["h"] for j in range(i-left,i)) and all(level>=bars[j]["h"] for j in range(i+1,i+right+1)):
+                found.append(dict(price=round(level,2),source=source,date=bars[i]["t"],kind="confirmed swing high"))
+        if bars:
+            peak=max(bars,key=lambda x:x["h"])
+            if peak["h"]>entry*1.005:
+                found.append(dict(price=round(peak["h"],2),source=source,date=peak["t"],kind="historical high"))
+    found.sort(key=lambda x:x["price"])
+    levels=[]
+    for item in found:
+        if not levels or item["price"]>levels[-1]["price"]*1.005:
+            levels.append(item)
+        elif item["source"]=="weekly" and levels[-1]["source"]!="weekly":
+            levels[-1]=item
+    return levels
+
 def propose(d,w):
     if len(d)<60 or len(w)<12:
         return dict(decision="INSUFFICIENT DATA",reason=f"Need 60 daily and 12 completed weekly bars; found {len(d)} and {len(w)}.")
@@ -133,19 +155,21 @@ def propose(d,w):
     if stop>=entry or stop<=0:
         return dict(decision="NO TRADE",reason="Confirmed swing low does not provide valid positive-risk long entry.")
     risk=entry-stop
-    # R-based targets are projections, explicitly not historical resistance.
-    tp1=round(entry+1.5*risk,2)
-    tp2=round(entry+2.5*risk,2)
+    # Structural levels must exist at signal time. Never backfit to the replay.
+    levels=structural_targets(d,w,entry)
+    tp1=levels[0]["price"] if len(levels)>0 else None
+    tp2=levels[1]["price"] if len(levels)>1 else None
+    tp3=levels[2]["price"] if len(levels)>2 else None
     triggered=bool(candidates)
     return dict(decision="BUY SETUP" if triggered else "WATCH",
         setup=setup,signals=candidates,reason=("Potential long setup; entry requires a subsequent breakout above the cutoff candle." if triggered else "No confirmed bullish trigger at cutoff; conditional breakout watch only, not an immediate BUY."),
-        entry=entry,sl=stop,tp1=tp1,tp2=tp2,
+        entry=entry,sl=stop,tp1=tp1,tp2=tp2,tp3=tp3,\n        target_evidence=levels[:3],\n        target_rr=[round((p["price"]-entry)/risk,2) for p in levels[:3]],
         swing_low_date=swing["date"],swing_low_price=swing["price"],
         swing_confirmation_date=swing["confirmation_date"],
         stop_method="Confirmed 2-left/2-right pivot low minus ₹0.05",
         rsi14=round(momentum,1),ema9=round(e9,2),ema21=round(e21,2),ema50=round(e50,2),
         support=round(support,2),resistance=round(resistance,2),
-        target_method="Projected 1.5R / 2.5R; not verified resistance",risk_reward_tp1=1.5)
+        target_method="Confirmed historical daily/weekly swing highs and historical highs; missing levels remain unset",\n        risk_reward_tp1=round((tp1-entry)/risk,2) if tp1 else None)
 
 def discover_setups(daily, start, cutoff, max_age=10):
     """One causal signal per opportunity, with frozen levels and a tracked lifecycle."""
@@ -191,53 +215,65 @@ def select_case(cases):
     return next((c for c in reversed(cases) if c["status"] in ("PENDING","TRIGGERED","TP1 HIT")),cases[-1])
 
 def replay(plan,bars):
-    """Causal daily OHLC replay: ambiguous intrabar ordering never counts as a win."""
+    """Partial structural exits, trailing remainder; no intrabar hindsight."""
     if plan["decision"]!="BUY SETUP":
         return dict(status="NOT ELIGIBLE",events=[],note="No eligible BUY setup.")
-    entry,sl,tp1,tp2=(plan[k] for k in ("entry","sl","tp1","tp2"))
+    entry,sl=plan["entry"],plan["sl"]
+    targets=[plan.get(k) for k in ("tp1","tp2","tp3")]
+    targets=[t for t in targets if t is not None]
     events=[]
     fill=None
     remaining=1.0
     realized=0.0
+    next_target=0
+    active_stop=sl
+    history=[]
+    # If only one resistance exists, book 25% at it; trail the remainder.
+    weights=[.25,.25,.25] if len(targets)>=3 else ([.33,.33] if len(targets)==2 else [.25])
     for b in bars:
         if not check_ohlc(b):
             return dict(status="DATA ERROR",events=events,note="Invalid OHLC at "+b["t"])
         if fill is None:
             if b["h"]<entry:continue
-            # If a gap opens above the trigger, buy at the open, not the cheaper trigger.
             fill=max(entry,b["o"])
             events.append(dict(kind="ENTRY",t=b["t"],price=fill))
             if b["l"]<=sl:
-                # Entry and stop both touched: daily OHLC cannot establish ordering.
                 return dict(status="AMBIGUOUS ENTRY BAR",events=events,
-                            note="Entry and SL touched in the same daily bar; intraday order unknown. No profit assigned.")
-            # Targets in entry bar are not assumed to occur after entry.
+                            note="Entry and SL both touched in same daily candle; sequence unknown.")
+            history.append(b)
             continue
-        # Stops are evaluated before targets when the same bar touches both.
-        if b["l"]<=sl:
-            price=min(sl,b["o"])
+        if b["l"]<=active_stop:
+            price=min(active_stop,b["o"])
             realized+=remaining*(price-fill)
-            events.append(dict(kind="SL",t=b["t"],price=price))
-            return dict(status="STOPPED",events=events,
-                        gross_pnl_per_share=round(realized,2),
-                        note="Gross before fees/slippage; conservative stop-first handling.")
-        if remaining==1.0 and b["h"]>=tp1:
-            price=max(tp1,b["o"])
-            realized+=.5*(price-fill)
-            remaining=.5
-            events.append(dict(kind="TP1",t=b["t"],price=price))
-            # TP2 may also be hit this bar, but intraday ordering is unknown.
-            continue
-        if remaining==.5 and b["h"]>=tp2:
-            price=max(tp2,b["o"])
-            realized+=.5*(price-fill)
-            events.append(dict(kind="TP2",t=b["t"],price=price))
-            return dict(status="TP2 HIT",events=events,
-                        gross_pnl_per_share=round(realized,2),
-                        note="Gross before fees/slippage; TP2 not credited on TP1 day.")
+            events.append(dict(kind="TRAIL STOP" if active_stop>sl else "SL",
+                               t=b["t"],price=price,portion=round(remaining,4)))
+            return dict(status="TRAIL STOPPED" if active_stop>sl else "STOPPED",
+                        events=events,gross_pnl_per_share=round(realized,2),
+                        note="Gross before costs; stop checked before targets.")
+        if next_target<len(targets) and b["h"]>=targets[next_target]:
+            price=max(targets[next_target],b["o"])
+            portion=min(weights[next_target],remaining)
+            realized+=portion*(price-fill)
+            remaining=round(remaining-portion,6)
+            events.append(dict(kind="TP"+str(next_target+1),t=b["t"],price=price,portion=portion))
+            next_target+=1
+            # Only one target per daily bar: do not assume intrabar order.
+        history.append(b)
+        # A new trailing stop is only effective from the NEXT daily bar.
+        # Trailing starts after TP1; pivots need 2 right-side candles to confirm.
+        if next_target>=1:
+            pivot=confirmed_swing_low(history,lookback=30)
+            if pivot is not None and pivot["price"]>active_stop:
+                proposed=round(pivot["price"]-.05,2)
+                if proposed>active_stop:
+                    active_stop=proposed
+                    events.append(dict(kind="TRAIL UPDATED",t=b["t"],price=active_stop,
+                                       effective="next candle",swing_date=pivot["date"]))
     return dict(status="OPEN" if fill is not None else "NOT TRIGGERED",
                 events=events,gross_realized_pnl_per_share=round(realized,2),
-                note="Unrealized P&L and transaction costs excluded.")
+                remaining_position=round(remaining,4) if fill is not None else 0,
+                active_stop=active_stop if fill is not None else None,
+                note="Remainder stays open beyond TP3 until trailing stop. Costs and unrealized P&L excluded.")
 
 HTML="""<!doctype html><html><head><meta charset="utf-8"><title>ScanStock Trade Lab</title>
 <style>body{background:#0b1422;color:#e6edf7;font:14px system-ui;padding:20px}main{max-width:1400px;margin:auto}
@@ -258,11 +294,11 @@ let r=await fetch('/api?'+q),j=await r.json();if(!r.ok)throw Error(j.error);retu
 function draw(id,bars,p={}){
 let svg=$(id);svg.replaceChildren();const el=(n,a)=>{let x=document.createElementNS('http://www.w3.org/2000/svg',n);Object.entries(a).forEach(([k,v])=>x.setAttribute(k,v));svg.appendChild(x);return x};
 if(!bars.length){el('text',{x:20,y:150,fill:'#ffb869'}).textContent='No candles in selected period';return}
-let values=bars.flatMap(b=>[b.l,b.h]).concat(['entry','sl','tp1','tp2'].map(k=>p[k]).filter(Number.isFinite));
+let values=bars.flatMap(b=>[b.l,b.h]).concat(['entry','sl','tp1','tp2','tp3'].map(k=>p[k]).filter(Number.isFinite));
 let low=Math.min(...values),high=Math.max(...values),scale=high-low||1,y=v=>290-(v-low)/scale*260,width=580/bars.length;
 bars.forEach((b,i)=>{let x=10+(i+.5)*width,c=b.c>=b.o?'#3dc891':'#f06c7b';
 el('line',{x1:x,y1:y(b.h),x2:x,y2:y(b.l),stroke:c});el('rect',{x:x-Math.max(1,width*.28),y:Math.min(y(b.o),y(b.c)),width:Math.max(2,width*.56),height:Math.max(1,Math.abs(y(b.o)-y(b.c))),fill:c})});
-['entry','sl','tp1','tp2'].forEach(k=>{if(!Number.isFinite(p[k]))return;let c=k==='sl'?'#f66':k==='entry'?'#6aa9ff':'#60e7b0';
+['entry','sl','tp1','tp2','tp3'].forEach(k=>{if(!Number.isFinite(p[k]))return;let c=k==='sl'?'#f66':k==='entry'?'#6aa9ff':'#60e7b0';
 el('line',{x1:5,y1:y(p[k]),x2:590,y2:y(p[k]),stroke:c,'stroke-dasharray':'5 4'});
 el('text',{x:510,y:y(p[k])-5,fill:c,'font-size':11}).textContent=k.toUpperCase()+' '+p[k]})}
 function show(j,withPlan=false){draw('w',j.weekly,withPlan?j.plan:{});draw('d',j.daily,withPlan?j.plan:{});
