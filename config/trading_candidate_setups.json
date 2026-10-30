@@ -1,0 +1,52 @@
+{
+  "status": "RESEARCH_CANDIDATES_NOT_VALIDATED",
+  "timeframe": "1D",
+  "selection_policy": "Maximum 5; only promote on full-universe unseen evidence, costs, liquidity and independent walk-forward; never call sure-shot",
+  "setups": [
+    {
+      "id": "ATH_RETEST",
+      "name": "Confirmed ATH breakout and retest",
+      "origin": "ScanStock existing scanner",
+      "scanner_field": "ath_breakout_retest",
+      "source": "config/scanners.json",
+      "note": "5+ closes above prior ATH, >=5% advance, retest within 2% while holding ATH and 50-period average; audit historical causality"
+    },
+    {
+      "id": "VCP_BREAKOUT",
+      "name": "VCP breakout with volume",
+      "origin": "ScanStock existing scanner",
+      "scanner_field": "vcp_breakout",
+      "reference_url": "https://chartink.com/screener/vcp-breakout-fires-on-the-breakout-day-itself",
+      "note": "Chartink reference additionally uses SMA50>SMA150>SMA200, close cross above prior 20-high, volume >1.5x 50-volume SMA and daily/weekly/monthly RSI; not identical to ScanStock VCP and not yet implemented as an exact copy"
+    },
+    {
+      "id": "EMA21_PULLBACK",
+      "name": "EMA21 trend pullback bounce",
+      "origin": "Chartink community description",
+      "reference_url": "https://chartink.com/%40sridevi-gujju-reddy",
+      "note": "21EMA>50SMA>200SMA; low tags 21EMA within 1%; bullish close above previous high; RSI14 45..65; volume >20-day average. Exact individual scanner rule page not independently verified."
+    },
+    {
+      "id": "HIGH20_VOLUME",
+      "name": "20-day closing breakout with volume",
+      "origin": "Chartink public scanner",
+      "reference_url": "https://chartink.com/screener/daily-breakout-stocks",
+      "note": "Close > maximum of previous 20 daily closes; volume > previous-day 20-volume SMA. Distinct from existing ScanStock previous-high20 breakout."
+    },
+    {
+      "id": "RSI_DIVERGENCE",
+      "name": "Bullish RSI divergence",
+      "origin": "Chartink public scanner",
+      "reference_url": "https://chartink.com/screener/rsi-bull-divergence",
+      "note": "Current daily low < low two weeks ago, RSI14 > RSI14 two weeks ago, market cap >500; only OHLCV portion available without market cap; exact Chartink implementation requires fundamentals or explicit proxy exclusion."
+    }
+  ],
+  "promotion_requirements": [
+    "Causal per-candle evaluation; no lookahead or incomplete higher-timeframe candles",
+    "Entry on next bar with gap-aware stops and stop-first same-bar resolution",
+    "Compare all candidates on same 1714-stock historical universe with fees/slippage",
+    "Report training/unseen count, net R, drawdown, stock breadth and market regime",
+    "Avoid selecting top strategies from unseen period then calling that period an unbiased test",
+    "Paper trading remains disabled until independent risk gate is tested"
+  ]
+}
