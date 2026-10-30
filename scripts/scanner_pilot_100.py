@@ -57,7 +57,7 @@ def signals(bars):
     found = {name: [] for name in RULES}
     for i in range(200, len(bars)-1):
         close = closes[i]
-        if close > max(closes[i-20:i]) and volumes[i] > fmean(volumes[i-20:i]):
+        if close > max(closes[i-20:i]) and volumes[i] > fmean(volumes[i-21:i-1]):
             found["CHARTINK_20_CLOSE_VOLUME"].append(i)
         high20 = max(float(b.high) for b in bars[i-20:i])
         previous_high20 = max(float(b.high) for b in bars[i-21:i-1])
