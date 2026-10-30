@@ -171,7 +171,8 @@ def propose(d,w):
         stop_method="Confirmed 2-left/2-right pivot low minus ₹0.05",
         rsi14=round(momentum,1),ema9=round(e9,2),ema21=round(e21,2),ema50=round(e50,2),
         support=round(support,2),resistance=round(resistance,2),
-        target_method="Confirmed historical daily/weekly swing highs and historical highs; missing levels remain unset",\n        risk_reward_tp1=round((tp1-entry)/risk,2) if tp1 else None)
+        target_method="Confirmed historical daily/weekly swing highs and historical highs; missing levels remain unset",
+        risk_reward_tp1=round((tp1-entry)/risk,2) if tp1 else None)
 
 def discover_setups(daily, start, cutoff, max_age=10):
     """One causal signal per opportunity, with frozen levels and a tracked lifecycle."""
