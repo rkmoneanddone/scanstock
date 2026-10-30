@@ -36,8 +36,10 @@ def candles(symbol, tf, through):
 
 def propose(daily, hourly):
     # Deliberately simple baseline: transparent, deterministic, never an LLM guess.
+    if len(hourly) == 0:
+        return dict(decision="DATA MISSING", reason="No stored 1H candles for this symbol through cutoff. Download 1H history before proposing a trade.")
     if len(daily) < 60 or len(hourly) < 25:
-        return dict(decision="NO TRADE", reason="Need at least 60 daily and 25 hourly candles before cutoff.")
+        return dict(decision="INSUFFICIENT HISTORY", reason=f"Need 60 daily and 25 hourly candles; found {len(daily)} daily and {len(hourly)} hourly before cutoff.")
     d = daily[-1]
     ma21 = sum(x["c"] for x in daily[-21:]) / 21
     ma50 = sum(x["c"] for x in daily[-50:]) / 50
@@ -131,8 +133,8 @@ svg{width:100%;height:320px}.result{background:#111e31;border:1px solid #34445d;
 <label>Cutoff <input type="date" id="cutoff" value="2026-01-31"></label>
 <label>Replay end <input type="date" id="end" value="2026-02-28"></label>
 <button class="primary" id="propose">Propose Trade</button><button id="replay" disabled>Run Replay</button></nav>
-<div class="panels"><section class="pane"><h3>1D • Higher timeframe</h3><svg id="daily" viewBox="0 0 620 320"></svg></section>
-<section class="pane"><h3>1H • Lower timeframe</h3><svg id="hourly" viewBox="0 0 620 320"></svg></section></div>
+<div class="panels"><section class="pane"><h3>1D • Higher timeframe</h3><small id="daily-status">Loading…</small><svg id="daily" viewBox="0 0 620 320"></svg></section>
+<section class="pane"><h3>1H • Lower timeframe</h3><small id="hourly-status">Loading…</small><svg id="hourly" viewBox="0 0 620 320"></svg></section></div>
 <div class="result" id="result">Choose a cutoff and click Propose Trade. Only candles through the cutoff are analysed.</div>
 <div class="bottom"><button id="buy" disabled>BUY (simulation only)</button><button id="ignore" disabled>IGNORE</button><small id="choice">Live trading disabled</small></div>
 </main><script>
@@ -140,7 +142,7 @@ let plan=null, approved=false;
 const $=id=>document.getElementById(id);
 async function api(params){let r=await fetch('/api?'+new URLSearchParams(params));let j=await r.json();if(!r.ok)throw Error(j.error||'Request failed');return j}
 function chart(id, bars, levels={}){
- let svg=$(id);svg.replaceChildren();if(!bars.length){svg.textContent='No candles available';return}
+ let svg=$(id);svg.replaceChildren();if(!bars.length){let t=document.createElementNS('http://www.w3.org/2000/svg','text');t.setAttribute('x','25');t.setAttribute('y','145');t.setAttribute('fill','#ffca70');t.textContent='No stored candles in selected period';svg.appendChild(t);return}
  let vals=bars.flatMap(b=>[b.h,b.l]).concat(Object.values(levels).filter(v=>typeof v==='number'));
  let lo=Math.min(...vals),hi=Math.max(...vals),range=hi-lo||1;
  const el=(name,attrs)=>{let n=document.createElementNS('http://www.w3.org/2000/svg',name);Object.entries(attrs).forEach(([k,v])=>n.setAttribute(k,v));svg.appendChild(n);return n};
@@ -155,9 +157,17 @@ function chart(id, bars, levels={}){
 function describe(p){return '<strong>'+p.decision+'</strong><p>'+p.reason+'</p>'+
 (p.entry?'<p>Entry: <b>'+p.entry+'</b> | SL: <b>'+p.sl+'</b> | TP1: <b>'+p.tp1+'</b> | TP2: <b>'+p.tp2+'</b> | Gross RR to TP1: '+p.gross_rr+'</p>':'')+
 '<small>Research-only baseline; no proven edge. No live trade authority.</small>'}
+async function loadCharts(){try{
+ let j=await api({mode:'charts',symbol:$('symbol').value,start:$('start').value,cutoff:$('cutoff').value});
+ chart('daily',j.daily);chart('hourly',j.hourly);
+ $('daily-status').textContent=j.diagnostics.daily;
+ $('hourly-status').textContent=j.diagnostics.hourly;
+ $('result').textContent='Charts loaded. Click Propose Trade to analyse only data available at cutoff.';
+}catch(e){$('result').textContent=e.message}}
 $('propose').onclick=async()=>{try{
  let j=await api({mode:'propose',symbol:$('symbol').value,start:$('start').value,cutoff:$('cutoff').value});
  plan=j.plan;approved=false;chart('daily',j.daily,plan);chart('hourly',j.hourly,plan);
+ $('daily-status').textContent=j.diagnostics.daily;$('hourly-status').textContent=j.diagnostics.hourly;
  $('result').innerHTML=describe(plan);$('replay').disabled=false;$('buy').disabled=plan.decision!=='BUY SETUP';$('ignore').disabled=false;$('choice').textContent='Awaiting simulation choice'
 }catch(e){$('result').textContent=e.message}};
 $('buy').onclick=()=>{approved=true;$('choice').textContent='BUY selected for historical simulation only'};
@@ -166,9 +176,12 @@ $('replay').onclick=async()=>{try{
  let j=await api({mode:'replay',symbol:$('symbol').value,start:$('start').value,cutoff:$('cutoff').value,end:$('end').value});
  // Server independently recomputes proposal; never trusts client-supplied prices.
  plan=j.plan;chart('daily',j.daily,plan);chart('hourly',j.hourly,plan);
+ $('daily-status').textContent=j.diagnostics.daily;$('hourly-status').textContent=j.diagnostics.hourly;
  $('result').innerHTML=describe(plan)+'<hr><h3>Forward replay: '+j.replay.status+'</h3><pre>'+JSON.stringify(j.replay,null,2)+'</pre>'+
  '<small>BUY/IGNORE is a local UI selection only. Replay always shows hypothetical outcome, even if ignored.</small>';
 }catch(e){$('result').textContent=e.message}};
+['symbol','start','cutoff','end'].forEach(id=>$(id).addEventListener('change',()=>{plan=null;approved=false;$('replay').disabled=true;$('buy').disabled=true;$('ignore').disabled=true;loadCharts()}));
+loadCharts();
 </script></body></html>"""
 
 class Handler(BaseHTTPRequestHandler):
@@ -185,7 +198,7 @@ class Handler(BaseHTTPRequestHandler):
                 cutoff = date.fromisoformat(q.get("cutoff","2026-01-31")).isoformat()
                 end = date.fromisoformat(q.get("end","2026-02-28")).isoformat()
                 if not start <= cutoff < end: raise ValueError("Require start <= cutoff < replay end")
-                if q.get("mode") not in ("propose","replay"): raise ValueError("Invalid mode")
+                if q.get("mode") not in ("charts","propose","replay"): raise ValueError("Invalid mode")
                 daily = candles(symbol,"1D",end if q["mode"]=="replay" else cutoff)
                 hourly = candles(symbol,"1H",end if q["mode"]=="replay" else cutoff)
                 before_d = [b for b in daily if b["t"] <= cutoff]
@@ -193,7 +206,9 @@ class Handler(BaseHTTPRequestHandler):
                 plan = propose(before_d,before_h)
                 shown_d = [b for b in daily if b["t"] >= start]
                 shown_h = [b for b in hourly if b["t"] >= start]
-                result = dict(plan=plan,daily=shown_d,hourly=shown_h)
+                result = dict(plan=plan,daily=shown_d,hourly=shown_h,
+                    diagnostics=dict(daily=f"{len(shown_d)} displayed daily bars; {len(before_d)} available through cutoff",
+                    hourly=(f"{len(shown_h)} displayed hourly bars; {len(before_h)} available through cutoff" if shown_h else "NO 1H DATA in selected period — check stored timeframe names and download historical 1H candles")))
                 if q["mode"]=="replay":
                     result["replay"]=replay(plan,[b for b in hourly if cutoff < b["t"] <= end])
                 payload = json.dumps(result).encode()
