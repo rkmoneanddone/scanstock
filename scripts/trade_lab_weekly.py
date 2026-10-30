@@ -211,8 +211,13 @@ function plusMonths(iso, months){
 $('start').addEventListener('change',()=>{
  const start=$('start').value;
  if(start){
-   $('cutoff').value=plusMonths(start,1);
-   $('end').value=plusMonths(start,2);
+   // Inclusive calendar-month windows: January 1 -> January 31 -> February 28.
+   // Use the end of the start month as the analysis cutoff, not February 1.
+   const [year,month]=start.split('-').map(Number);
+   const cutoff=new Date(Date.UTC(year,month,0));
+   const replayEnd=new Date(Date.UTC(year,month+1,0));
+   $('cutoff').value=cutoff.toISOString().slice(0,10);
+   $('end').value=replayEnd.toISOString().slice(0,10);
  }
  reset();
 });
