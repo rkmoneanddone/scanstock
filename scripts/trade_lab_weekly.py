@@ -113,44 +113,47 @@ def propose(d,w):
         target_method="Projected 1.5R / 2.5R; not verified resistance",risk_reward_tp1=1.5)
 
 def discover_setups(daily, start, cutoff, max_age=10):
-    """Scan every session in range; preserve signal-day levels and deduplicate overlapping opportunities."""
+    """One causal signal per opportunity, with frozen levels and a tracked lifecycle."""
     cases=[]
     active=None
     for idx,bar in enumerate(daily):
         day=bar["t"]
         if day>cutoff:break
         if active is not None:
-            plan=active["plan"]
-            # Manage the prior setup with later bars, never with its own signal bar.
-            if bar["l"]<=plan["sl"] and not active["entered"]:
-                active["status"]="INVALIDATED"
-                active["closed_on"]=day
-                active=None
-            elif bar["h"]>=plan["entry"] and not active["entered"]:
-                active["entered"]=True
-                active["status"]="TRIGGERED"
-                active["triggered_on"]=day
-                # Intraday order is unknown; if stop is touched in this bar, flag ambiguity.
-                if bar["l"]<=plan["sl"]:
+            p=active["plan"]
+            if active["status"]=="PENDING":
+                # A daily bar touching both entry and stop cannot establish order.
+                if bar["h"]>=p["entry"] and bar["l"]<=p["sl"]:
                     active["status"]="AMBIGUOUS"
-                    active["closed_on"]=day
-                    active=None
-            elif not active["entered"] and idx-active["index"]>=max_age:
-                active["status"]="EXPIRED"
+                elif bar["l"]<=p["sl"]:
+                    active["status"]="INVALIDATED"
+                elif bar["h"]>=p["entry"]:
+                    active["status"]="TRIGGERED"
+                    active["triggered_on"]=day
+                elif idx-active["index"]>=max_age:
+                    active["status"]="EXPIRED"
+            elif active["status"] in ("TRIGGERED","TP1 HIT"):
+                if bar["l"]<=p["sl"]:
+                    active["status"]="STOPPED"
+                elif bar["h"]>=p["tp2"]:
+                    active["status"]="TP2 HIT"
+                elif bar["h"]>=p["tp1"]:
+                    active["status"]="TP1 HIT"
+            if active["status"] in ("AMBIGUOUS","INVALIDATED","EXPIRED","STOPPED","TP2 HIT"):
                 active["closed_on"]=day
                 active=None
         if day<start or active is not None:continue
         history=daily[:idx+1]
         plan=propose(history,weekly(history,day))
         if plan["decision"]!="BUY SETUP":continue
-        active=dict(signal_date=day,plan=plan,index=idx,entered=False,status="PENDING",closed_on=None)
+        active=dict(signal_date=day,plan=plan,index=idx,status="PENDING",closed_on=None)
         cases.append(active)
-    return [{k:v for k,v in case.items() if k not in ("index","entered")} for case in cases]
+    return [{k:v for k,v in case.items() if k!="index"} for case in cases]
 
 def select_case(cases):
-    """Prefer latest non-expired signal; otherwise latest historical signal."""
+    """Prefer most recent still-live signal, otherwise latest closed signal."""
     if not cases:return None
-    return next((c for c in reversed(cases) if c["status"] in ("PENDING","TRIGGERED","AMBIGUOUS")),cases[-1])
+    return next((c for c in reversed(cases) if c["status"] in ("PENDING","TRIGGERED","TP1 HIT")),cases[-1])
 
 def replay(plan,bars):
     if plan["decision"]!="BUY SETUP":return dict(status="NOT ELIGIBLE",events=[],note="No eligible BUY setup in selected analysis window.")
@@ -189,8 +192,8 @@ Cutoff <input id="cutoff" type="date" value="2026-01-31">Replay end <input id="e
 <section><h3>1D · Lower timeframe</h3><small id="ds"></small><svg id="d" viewBox="0 0 600 320"></svg></section></div>
 <div id="result">Loading selected candles…</div><section><h3>Detected setups in selected range</h3><div id="setups">Click Propose Trade to discover historical signals.</div></section><div class="actions"><button id="buy" disabled>BUY (simulation)</button><button id="ignore" disabled>IGNORE</button><small id="choice">Dhan trading disabled</small></div>
 <script>
-const $=id=>document.getElementById(id);let proposal=null,requestVersion=0;
-async function get(mode){let q=new URLSearchParams({mode,symbol:$('symbol').value,start:$('start').value,cutoff:$('cutoff').value,end:$('end').value});
+const $=id=>document.getElementById(id);let proposal=null,requestVersion=0,selectedSignalDate=null;
+async function get(mode){let q=new URLSearchParams({mode,symbol:$('symbol').value,start:$('start').value,cutoff:$('cutoff').value,end:$('end').value});if(mode==='replay'&&selectedSignalDate)q.set('signal_date',selectedSignalDate);
 let r=await fetch('/api?'+q),j=await r.json();if(!r.ok)throw Error(j.error);return j}
 function draw(id,bars,p={}){
 let svg=$(id);svg.replaceChildren();const el=(n,a)=>{let x=document.createElementNS('http://www.w3.org/2000/svg',n);Object.entries(a).forEach(([k,v])=>x.setAttribute(k,v));svg.appendChild(x);return x};
@@ -212,10 +215,10 @@ function showSetups(j){
    btn.textContent=c.signal_date+' · '+c.plan.setup+' · '+c.status+' · Entry '+c.plan.entry;
    btn.style.margin='4px';
    btn.onclick=()=>{
-     proposal=c.plan;
+     proposal=c.plan;selectedSignalDate=c.signal_date;
      draw('w',j.weekly,c.plan);draw('d',j.daily,c.plan);
      $('result').textContent=JSON.stringify({signal_date:c.signal_date,status:c.status,plan:c.plan},null,2);
-     $('buy').disabled=c.status!=='PENDING'&&c.status!=='TRIGGERED';
+     $('buy').disabled=c.status!=='PENDING'&&c.status!=='TRIGGERED'&&c.status!=='TP1 HIT';
    };
    box.appendChild(btn);
  });
@@ -229,7 +232,7 @@ async function load(){
  show(j);$('result').textContent='Charts loaded. Propose Trade uses only candles through cutoff.';
  }catch(e){if(version===requestVersion)$('result').textContent=e.message}
 }
-$('propose').onclick=async()=>{try{let j=await get('propose');proposal=j.plan;show(j,true);showSetups(j);showSetups(j);
+$('propose').onclick=async()=>{try{let j=await get('propose');proposal=j.plan;selectedSignalDate=j.selected_signal_date;show(j,true);showSetups(j);
 $('result').innerHTML='<h3>'+j.plan.decision+' · '+(j.plan.setup||'')+'</h3><p>'+j.plan.reason+'</p><pre>'+JSON.stringify(j.plan,null,2)+'</pre>';$('replay').disabled=false;
 $('buy').disabled=j.plan.decision!=='BUY SETUP';$('ignore').disabled=false}catch(e){$('result').textContent=e.message}};
 $('replay').onclick=async()=>{try{let j=await get('replay');show(j,true);showSetups(j);$('result').innerHTML='<h3>'+j.plan.decision+' · '+j.replay.status+'</h3><pre>'+JSON.stringify({proposal:j.plan,replay:j.replay},null,2)+'</pre>'}catch(e){$('result').textContent=e.message}};
@@ -253,7 +256,7 @@ async function loadUniverse(){
  universe=(await r.json()).symbols;searchStocks();
  }catch(e){$('choice').textContent='Stock lookup unavailable: '+e.message}
 }
-function reset(){proposal=null;$('replay').disabled=true;$('buy').disabled=true;$('ignore').disabled=true;$('choice').textContent='Dhan trading disabled';load()}
+function reset(){proposal=null;selectedSignalDate=null;$('replay').disabled=true;$('buy').disabled=true;$('ignore').disabled=true;$('choice').textContent='Dhan trading disabled';load()}
 $('refresh').onclick=reset;
 $('symbol').addEventListener('input',searchStocks);
 $('symbol').addEventListener('blur',()=>setTimeout(()=>{$('symbol-results').replaceChildren()},180));
@@ -313,7 +316,9 @@ class Handler(BaseHTTPRequestHandler):
                 all_daily=load(symbol,end if mode=="replay" else cutoff)
                 known=[b for b in all_daily if b["t"]<=cutoff]
                 cases=discover_setups(known,start,cutoff)
-                selected=select_case(cases)
+                requested=q.get("signal_date") if mode=="replay" else None
+                selected=next((c for c in cases if c["signal_date"]==requested),None) if requested else select_case(cases)
+                if requested and selected is None:raise ValueError("Selected setup not found in analysis range")
                 plan=selected["plan"] if selected else dict(decision="NO TRADE",reason="No BUY setups detected within selected range.")
                 view_end=end if mode=="replay" else cutoff
                 result=dict(plan=plan,setups=cases,selected_signal_date=selected["signal_date"] if selected else None,
