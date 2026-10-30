@@ -32,6 +32,19 @@ def save_replay(symbol,cutoff,end,plan,outcome):
             con.commit()
         finally:con.close()
 
+def trading_session(day):
+    """Weekend-only guard. Exchange holidays require an authoritative calendar."""
+    return date.fromisoformat(day).weekday() < 5
+
+def audit_candles(rows):
+    """Expose excluded dates; never silently label weekend bars as real sessions."""
+    rejected=[b["t"] for b in rows if not trading_session(b["t"])]
+    return [b for b in rows if trading_session(b["t"])],rejected
+
+def check_ohlc(bar):
+    return (bar["l"]<=min(bar["o"],bar["c"])<=max(bar["o"],bar["c"])<=bar["h"]
+            and bar["l"]>0 and bar["v"]>=0)
+
 def load(symbol, end):
     if not symbol.replace("&","").replace("-","").isalnum() or len(symbol)>32: raise ValueError("Invalid symbol")
     con=sqlite3.connect(DB.resolve().as_uri()+"?mode=ro",uri=True)
@@ -178,29 +191,54 @@ def select_case(cases):
     return next((c for c in reversed(cases) if c["status"] in ("PENDING","TRIGGERED","TP1 HIT")),cases[-1])
 
 def replay(plan,bars):
-    if plan["decision"]!="BUY SETUP":return dict(status="NOT ELIGIBLE",events=[],note="No eligible BUY setup in selected analysis window.")
+    """Causal daily OHLC replay: ambiguous intrabar ordering never counts as a win."""
+    if plan["decision"]!="BUY SETUP":
+        return dict(status="NOT ELIGIBLE",events=[],note="No eligible BUY setup.")
     entry,sl,tp1,tp2=(plan[k] for k in ("entry","sl","tp1","tp2"))
-    events=[];fill=None;remaining=1;realized=0
+    events=[]
+    fill=None
+    remaining=1.0
+    realized=0.0
     for b in bars:
+        if not check_ohlc(b):
+            return dict(status="DATA ERROR",events=events,note="Invalid OHLC at "+b["t"])
         if fill is None:
             if b["h"]<entry:continue
-            fill=max(entry,b["o"]);events.append(dict(kind="ENTRY",t=b["t"],price=fill))
+            # If a gap opens above the trigger, buy at the open, not the cheaper trigger.
+            fill=max(entry,b["o"])
+            events.append(dict(kind="ENTRY",t=b["t"],price=fill))
             if b["l"]<=sl:
-                price=min(sl,b["o"]);events.append(dict(kind="SL",t=b["t"],price=price))
-                return dict(status="STOPPED",events=events,gross_pnl_per_share=round(price-fill,2))
-            # Do not assume a target occurred after an entry in the same daily bar.
+                # Entry and stop both touched: daily OHLC cannot establish ordering.
+                return dict(status="AMBIGUOUS ENTRY BAR",events=events,
+                            note="Entry and SL touched in the same daily bar; intraday order unknown. No profit assigned.")
+            # Targets in entry bar are not assumed to occur after entry.
             continue
+        # Stops are evaluated before targets when the same bar touches both.
         if b["l"]<=sl:
-            price=min(sl,b["o"]);realized+=remaining*(price-fill);events.append(dict(kind="SL",t=b["t"],price=price))
-            return dict(status="STOPPED",events=events,gross_pnl_per_share=round(realized,2))
-        if remaining==1 and b["h"]>=tp1:
-            price=max(tp1,b["o"]);realized+=.5*(price-fill);remaining=.5
-            events.append(dict(kind="TP1",t=b["t"],price=price));continue
+            price=min(sl,b["o"])
+            realized+=remaining*(price-fill)
+            events.append(dict(kind="SL",t=b["t"],price=price))
+            return dict(status="STOPPED",events=events,
+                        gross_pnl_per_share=round(realized,2),
+                        note="Gross before fees/slippage; conservative stop-first handling.")
+        if remaining==1.0 and b["h"]>=tp1:
+            price=max(tp1,b["o"])
+            realized+=.5*(price-fill)
+            remaining=.5
+            events.append(dict(kind="TP1",t=b["t"],price=price))
+            # TP2 may also be hit this bar, but intraday ordering is unknown.
+            continue
         if remaining==.5 and b["h"]>=tp2:
-            price=max(tp2,b["o"]);realized+=.5*(price-fill)
+            price=max(tp2,b["o"])
+            realized+=.5*(price-fill)
             events.append(dict(kind="TP2",t=b["t"],price=price))
-            return dict(status="TP2 HIT",events=events,gross_pnl_per_share=round(realized,2))
-    return dict(status="OPEN" if fill is not None else "NOT TRIGGERED",events=events,gross_realized_pnl_per_share=round(realized,2))
+            return dict(status="TP2 HIT",events=events,
+                        gross_pnl_per_share=round(realized,2),
+                        note="Gross before fees/slippage; TP2 not credited on TP1 day.")
+    return dict(status="OPEN" if fill is not None else "NOT TRIGGERED",
+                events=events,gross_realized_pnl_per_share=round(realized,2),
+                note="Unrealized P&L and transaction costs excluded.")
+
 HTML="""<!doctype html><html><head><meta charset="utf-8"><title>ScanStock Trade Lab</title>
 <style>body{background:#0b1422;color:#e6edf7;font:14px system-ui;padding:20px}main{max-width:1400px;margin:auto}
 nav,.panels,.actions{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0}section{background:#142139;border:1px solid #35445b;border-radius:12px;padding:14px;flex:1;min-width:350px}
@@ -251,7 +289,7 @@ async function load(){
  $('ws').textContent='Loading selected range…';$('ds').textContent='Loading selected range…';
  $('result').textContent='Loading candles for '+$('symbol').value+'…';
  try{let j=await get('charts');if(version!==requestVersion)return;
- show(j);$('result').textContent='Charts loaded. Propose Trade uses only candles through cutoff.';
+ show(j);$('result').textContent='Charts loaded. Weekend bars excluded: '+j.data_audit.weekend_bars_excluded+'. Exchange holidays not yet verified.';
  }catch(e){if(version===requestVersion)$('result').textContent=e.message}
 }
 $('propose').onclick=async()=>{try{let j=await get('propose');proposal=j.plan;selectedSignalDate=j.selected_signal_date;show(j,true);showSetups(j);
@@ -336,7 +374,11 @@ class Handler(BaseHTTPRequestHandler):
                 end=date.fromisoformat(q.get("end","2026-02-28")).isoformat()
                 if not start<=cutoff<end or mode not in ("charts","propose","replay"):raise ValueError("Invalid date range or mode")
                 all_daily=load(symbol,end if mode=="replay" else cutoff)
-                known=[b for b in all_daily if b["t"]<=cutoff]
+                valid_daily,rejected=audit_candles(all_daily)
+                invalid_ohlc=[b["t"] for b in valid_daily if not check_ohlc(b)]
+                if invalid_ohlc:
+                    raise ValueError("Invalid OHLC candles; first dates: "+", ".join(invalid_ohlc[:5]))
+                known=[b for b in valid_daily if b["t"]<=cutoff]
                 cases=discover_setups(known,start,cutoff)
                 requested=q.get("signal_date") if mode=="replay" else None
                 selected=next((c for c in cases if c["signal_date"]==requested),None) if requested else select_case(cases)
@@ -344,12 +386,14 @@ class Handler(BaseHTTPRequestHandler):
                 plan=selected["plan"] if selected else dict(decision="NO TRADE",reason="No BUY setups detected within selected range.")
                 view_end=end if mode=="replay" else cutoff
                 result=dict(plan=plan,setups=cases,selected_signal_date=selected["signal_date"] if selected else None,
-                            daily=[b for b in all_daily if b["t"]>=start],
-                            weekly=[b for b in weekly(all_daily,view_end) if b["t"]>=start])
+                            data_audit=dict(weekend_bars_excluded=len(rejected),excluded_dates=rejected[:12],
+                                            exchange_holidays_verified=False),
+                            daily=[b for b in valid_daily if b["t"]>=start],
+                            weekly=[b for b in weekly(valid_daily,view_end) if b["t"]>=start])
                 if mode=="replay":
                     # The proposal is frozen at its original signal date; replay begins the next session.
                     # Include the rest of the analysis window so advancing cutoff does not erase earlier signals.
-                    future=[b for b in all_daily if selected and selected["signal_date"]<b["t"]<=end]
+                    future=[b for b in valid_daily if selected and selected["signal_date"]<b["t"]<=end]
                     result["replay"]=replay(plan,future)
                     if selected:save_replay(symbol,selected["signal_date"],end,plan,result["replay"])
                 body=json.dumps(result).encode();status=200
