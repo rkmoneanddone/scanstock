@@ -28,21 +28,66 @@ def weekly(daily,cutoff):
         else:
             w=groups[key];w["h"]=max(w["h"],b["h"]);w["l"]=min(w["l"],b["l"]);w["c"]=b["c"];w["v"]+=b["v"]
     return list(groups.values())
+def ema(values, period):
+    alpha = 2 / (period + 1)
+    value = values[0]
+    for x in values[1:]:
+        value = alpha * x + (1 - alpha) * value
+    return value
+
+def rsi(closes, period=14):
+    changes = [closes[i] - closes[i-1] for i in range(1, len(closes))]
+    if len(changes) < period: return 50.0
+    gains = [max(0, x) for x in changes]
+    losses = [max(0, -x) for x in changes]
+    avg_g = sum(gains[:period]) / period
+    avg_l = sum(losses[:period]) / period
+    for g,l in zip(gains[period:], losses[period:]):
+        avg_g = (avg_g * (period-1) + g) / period
+        avg_l = (avg_l * (period-1) + l) / period
+    return 100 if avg_l == 0 else 100 - 100/(1 + avg_g/avg_l)
+
 def propose(d,w):
-    if len(d)<50 or len(w)<12:return dict(decision="INSUFFICIENT DATA",reason=f"Found {len(d)} daily and {len(w)} completed weekly bars; need 50 and 12.")
-    m21=sum(b["c"] for b in d[-21:])/21;m50=sum(b["c"] for b in d[-50:])/50
-    mw=sum(b["c"] for b in w[-10:])/10
-    if not(d[-1]["c"]>m21>m50 and w[-1]["c"]>mw):
-        return dict(decision="NO TRADE",reason="Daily SMA21/50 and weekly SMA10 trend filters do not align.")
-    entry=round(d[-1]["h"]+.05,2);sl=round(min(b["l"] for b in d[-10:])-.05,2)
-    risk=entry-sl
-    levels=sorted(set(round(b["h"],2) for b in d[-120:-1] if b["h"]>entry))
-    if risk<=entry*.005 or sl<=0 or len(levels)<2:return dict(decision="NO TRADE",reason="No suitable structural stop or two historical resistance targets.")
-    tp1,tp2=levels[:2]
-    if (tp1-entry)/risk<1.5:return dict(decision="NO TRADE",reason="Gross TP1 reward/risk below 1.5.")
-    return dict(decision="BUY SETUP",reason="Experimental weekly/daily trend alignment; not validated.",entry=entry,sl=sl,tp1=tp1,tp2=tp2)
+    if len(d)<60 or len(w)<12:
+        return dict(decision="INSUFFICIENT DATA",reason=f"Need 60 daily and 12 completed weekly bars; found {len(d)} and {len(w)}.")
+    closes=[x["c"] for x in d]
+    current=d[-1]
+    e9,e21,e50=(ema(closes[-max(100,n*3):],n) for n in (9,21,50))
+    momentum=rsi(closes)
+    last20=d[-20:]
+    support=min(x["l"] for x in last20)
+    resistance=max(x["h"] for x in last20)
+    recent=d[-5:]
+    # Pattern signals are hypotheses, not guaranteed profitable trades.
+    rebound = current["c"] > current["o"] and current["c"] > d[-2]["c"] and min(x["l"] for x in recent) <= support*1.015
+    recovery = current["c"] > e9 and d[-2]["c"] <= e9
+    breakout = current["c"] > max(x["h"] for x in d[-21:-1])
+    bullish_trend = current["c"] > e21 > e50 and w[-1]["c"] > sum(x["c"] for x in w[-10:])/10
+    candidates=[]
+    if rebound:candidates.append("Support rebound")
+    if recovery:candidates.append("EMA9 recovery")
+    if breakout:candidates.append("20-day breakout")
+    if bullish_trend:candidates.append("Weekly/daily trend")
+    # Provide a watchlist hypothesis even when no immediate trigger exists.
+    setup=candidates[0] if candidates else "Support reversal watch"
+    entry=round(current["h"]+0.05,2)
+    stop=round(min(x["l"] for x in d[-10:])-0.05,2)
+    if stop>=entry or stop<=0:
+        return dict(decision="NO TRADE",reason="No valid positive-risk long entry.")
+    risk=entry-stop
+    # R-based targets are projections, explicitly not historical resistance.
+    tp1=round(entry+1.5*risk,2)
+    tp2=round(entry+2.5*risk,2)
+    triggered=bool(candidates)
+    return dict(decision="BUY SETUP" if triggered else "WATCH",
+        setup=setup,signals=candidates,reason=("Potential long setup; entry requires a subsequent breakout above the cutoff candle." if triggered else "No confirmed bullish trigger at cutoff; conditional breakout watch only, not an immediate BUY."),
+        entry=entry,sl=stop,tp1=tp1,tp2=tp2,
+        rsi14=round(momentum,1),ema9=round(e9,2),ema21=round(e21,2),ema50=round(e50,2),
+        support=round(support,2),resistance=round(resistance,2),
+        target_method="Projected 1.5R / 2.5R; not verified resistance",risk_reward_tp1=1.5)
+
 def replay(plan,bars):
-    if plan["decision"]!="BUY SETUP":return dict(status="NO TRADE",events=[])
+    if plan["decision"]!="BUY SETUP":return dict(status="NOT ELIGIBLE",events=[],note="WATCH/NO TRADE proposals are not executed in replay.")
     entry,sl,tp1,tp2=(plan[k] for k in ("entry","sl","tp1","tp2"))
     events=[];fill=None;remaining=1;realized=0
     for b in bars:
@@ -95,9 +140,9 @@ function show(j,withPlan=false){draw('w',j.weekly,withPlan?j.plan:{});draw('d',j
 $('ws').textContent=j.weekly.length+' completed weekly candles';$('ds').textContent=j.daily.length+' daily candles'}
 async function load(){try{let j=await get('charts');show(j);$('result').textContent='Charts loaded. Propose Trade uses only candles through cutoff.'}catch(e){$('result').textContent=e.message}}
 $('propose').onclick=async()=>{try{let j=await get('propose');proposal=j.plan;show(j,true);
-$('result').textContent=JSON.stringify(j.plan,null,2);$('replay').disabled=false;
+$('result').innerHTML='<h3>'+j.plan.decision+' · '+(j.plan.setup||'')+'</h3><p>'+j.plan.reason+'</p><pre>'+JSON.stringify(j.plan,null,2)+'</pre>';$('replay').disabled=false;
 $('buy').disabled=j.plan.decision!=='BUY SETUP';$('ignore').disabled=false}catch(e){$('result').textContent=e.message}};
-$('replay').onclick=async()=>{try{let j=await get('replay');show(j,true);$('result').textContent=JSON.stringify({proposal:j.plan,replay:j.replay},null,2)}catch(e){$('result').textContent=e.message}};
+$('replay').onclick=async()=>{try{let j=await get('replay');show(j,true);$('result').innerHTML='<h3>'+j.plan.decision+' · '+j.replay.status+'</h3><pre>'+JSON.stringify({proposal:j.plan,replay:j.replay},null,2)+'</pre>'}catch(e){$('result').textContent=e.message}};
 $('buy').onclick=()=>{$('choice').textContent='BUY selected for simulation only; no order sent'};
 $('ignore').onclick=()=>{$('choice').textContent='IGNORED; no order sent'};
 ['symbol','start','cutoff','end'].forEach(id=>$(id).onchange=()=>{proposal=null;$('replay').disabled=true;$('buy').disabled=true;$('ignore').disabled=true;load()});
