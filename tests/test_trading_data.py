@@ -1,4 +1,5 @@
 import sqlite3
+from decimal import Decimal
 from pathlib import Path
 from scanstock.trading.scanstock_data import load_daily, symbols_with_daily
 
@@ -12,5 +13,5 @@ def test_readonly_daily_adapter(tmp_path):
     conn.close()
     assert symbols_with_daily(path)==['ABC']
     bars=load_daily(path,'abc')
-    assert len(bars)==2 and str(bars[0].close)=='11'
+    assert len(bars)==2 and bars[0].close==Decimal('11')
     assert not (tmp_path/"test.db-wal").exists()
