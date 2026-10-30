@@ -1,11 +1,37 @@
 """Standalone weekly/daily Trade Lab using existing daily SQLite data. No orders."""
-import json, sqlite3
+import json, sqlite3, threading
 from datetime import datetime, date, timedelta, timezone
 from pathlib import Path
+from datetime import datetime as utc_datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse,parse_qs
 DB=Path(__file__).resolve().parents[1]/"data"/"scanstock.db"
 IST=timezone(timedelta(hours=5,minutes=30))
+MEMORY_DB=DB.parent/"trade_lab_memory.db"
+MEMORY_LOCK=threading.Lock()
+def save_replay(symbol,cutoff,end,plan,outcome):
+    """Save both winning and losing replay cases, without altering market candles."""
+    payload=json.dumps(plan,sort_keys=True)
+    with MEMORY_LOCK:
+        con=sqlite3.connect(MEMORY_DB)
+        try:
+            con.execute("""CREATE TABLE IF NOT EXISTS trade_cases (
+                symbol TEXT NOT NULL, cutoff TEXT NOT NULL, replay_end TEXT NOT NULL,
+                setup TEXT NOT NULL, decision TEXT NOT NULL, proposal_json TEXT NOT NULL,
+                outcome_json TEXT NOT NULL, saved_at TEXT NOT NULL,
+                PRIMARY KEY(symbol,cutoff,replay_end))""")
+            con.execute("""INSERT INTO trade_cases
+                (symbol,cutoff,replay_end,setup,decision,proposal_json,outcome_json,saved_at)
+                VALUES (?,?,?,?,?,?,?,?)
+                ON CONFLICT(symbol,cutoff,replay_end) DO UPDATE SET
+                setup=excluded.setup,decision=excluded.decision,
+                proposal_json=excluded.proposal_json,outcome_json=excluded.outcome_json,
+                saved_at=excluded.saved_at""",
+                (symbol,cutoff,end,plan.get("setup",""),plan["decision"],payload,
+                 json.dumps(outcome,sort_keys=True),utc_datetime.now(timezone.utc).isoformat()))
+            con.commit()
+        finally:con.close()
+
 def load(symbol, end):
     if not symbol.replace("&","").replace("-","").isalnum() or len(symbol)>32: raise ValueError("Invalid symbol")
     con=sqlite3.connect(DB.resolve().as_uri()+"?mode=ro",uri=True)
@@ -114,16 +140,16 @@ HTML="""<!doctype html><html><head><meta charset="utf-8"><title>ScanStock Trade 
 <style>body{background:#0b1422;color:#e6edf7;font:14px system-ui;padding:20px}main{max-width:1400px;margin:auto}
 nav,.panels,.actions{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0}section{background:#142139;border:1px solid #35445b;border-radius:12px;padding:14px;flex:1;min-width:350px}
 svg{width:100%;height:320px}button,input{background:#203351;color:white;border:1px solid #52647d;border-radius:6px;padding:9px}
-#symbol-results{position:absolute;top:100%;left:0;z-index:10;width:340px;max-height:260px;overflow:auto;background:#192940;border:1px solid #52647d;border-radius:7px;box-shadow:0 12px 30px #0009}#symbol-results:empty{display:none}#symbol-results button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #35445b;border-radius:0;background:transparent}#symbol-results button:hover{background:#304966}.stock-wrap{position:relative;display:inline-flex;align-items:center;gap:6px}button{cursor:pointer}button:disabled{opacity:.4}#result{background:#142139;padding:16px;border-radius:10px}small{color:#a6b5ca}
+#symbol-results{position:absolute;top:100%;left:0;z-index:10;width:340px;max-height:260px;overflow:auto;background:#192940;border:1px solid #52647d;border-radius:7px;box-shadow:0 12px 30px #0009}#symbol-results:empty{display:none}#symbol-results button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #35445b;border-radius:0;background:transparent}#symbol-results button:hover{background:#304966}.stock-wrap{position:relative;display:inline-flex;align-items:center;gap:6px}#refresh{background:#275b8f}button{cursor:pointer}button:disabled{opacity:.4}#result{background:#142139;padding:16px;border-radius:10px}small{color:#a6b5ca}
 </style></head><body><main><h1>ScanStock | Historical Trade Lab</h1><small>Weekly + Daily · Existing stored data · No orders</small>
 <nav><span class="stock-wrap">Stock <input id="symbol" value="APOLLOHOSP" size="18" autocomplete="off" placeholder="Search symbol or company"><div id="symbol-results"></div></span>Start <input id="start" type="date" value="2026-01-01">
 Cutoff <input id="cutoff" type="date" value="2026-01-31">Replay end <input id="end" type="date" value="2026-02-28">
-<button id="propose">Propose Trade</button><button id="replay" disabled>Run February Replay</button></nav>
+<button id="refresh" type="button">↻ Refresh Charts</button><button id="propose">Propose Trade</button><button id="replay" disabled>Run February Replay</button></nav>
 <div class="panels"><section><h3>1W · Higher timeframe</h3><small id="ws"></small><svg id="w" viewBox="0 0 600 320"></svg></section>
 <section><h3>1D · Lower timeframe</h3><small id="ds"></small><svg id="d" viewBox="0 0 600 320"></svg></section></div>
 <div id="result">Loading January candles…</div><div class="actions"><button id="buy" disabled>BUY (simulation)</button><button id="ignore" disabled>IGNORE</button><small id="choice">Dhan trading disabled</small></div>
 <script>
-const $=id=>document.getElementById(id);let proposal=null;
+const $=id=>document.getElementById(id);let proposal=null,requestVersion=0;
 async function get(mode){let q=new URLSearchParams({mode,symbol:$('symbol').value,start:$('start').value,cutoff:$('cutoff').value,end:$('end').value});
 let r=await fetch('/api?'+q),j=await r.json();if(!r.ok)throw Error(j.error);return j}
 function draw(id,bars,p={}){
@@ -138,7 +164,15 @@ el('line',{x1:5,y1:y(p[k]),x2:590,y2:y(p[k]),stroke:c,'stroke-dasharray':'5 4'})
 el('text',{x:510,y:y(p[k])-5,fill:c,'font-size':11}).textContent=k.toUpperCase()+' '+p[k]})}
 function show(j,withPlan=false){draw('w',j.weekly,withPlan?j.plan:{});draw('d',j.daily,withPlan?j.plan:{});
 $('ws').textContent=j.weekly.length+' completed weekly candles';$('ds').textContent=j.daily.length+' daily candles'}
-async function load(){try{let j=await get('charts');show(j);$('result').textContent='Charts loaded. Propose Trade uses only candles through cutoff.'}catch(e){$('result').textContent=e.message}}
+async function load(){
+ const version=++requestVersion;
+ draw('w',[]);draw('d',[]);
+ $('ws').textContent='Loading selected range…';$('ds').textContent='Loading selected range…';
+ $('result').textContent='Loading candles for '+$('symbol').value+'…';
+ try{let j=await get('charts');if(version!==requestVersion)return;
+ show(j);$('result').textContent='Charts loaded. Propose Trade uses only candles through cutoff.';
+ }catch(e){if(version===requestVersion)$('result').textContent=e.message}
+}
 $('propose').onclick=async()=>{try{let j=await get('propose');proposal=j.plan;show(j,true);
 $('result').innerHTML='<h3>'+j.plan.decision+' · '+(j.plan.setup||'')+'</h3><p>'+j.plan.reason+'</p><pre>'+JSON.stringify(j.plan,null,2)+'</pre>';$('replay').disabled=false;
 $('buy').disabled=j.plan.decision!=='BUY SETUP';$('ignore').disabled=false}catch(e){$('result').textContent=e.message}};
@@ -154,7 +188,7 @@ async function searchStocks(){
  matches.forEach(item=>{
    let b=document.createElement('button');b.type='button';
    b.textContent=item.name&&item.name!==item.symbol?item.symbol+' · '+item.name:item.symbol;
-   b.onclick=()=>{$('symbol').value=item.symbol;box.replaceChildren();reset();};
+   b.onpointerdown=e=>{e.preventDefault();$('symbol').value=item.symbol;box.replaceChildren();reset();};
    box.appendChild(b);
  });
 }
@@ -163,7 +197,8 @@ async function loadUniverse(){
  universe=(await r.json()).symbols;searchStocks();
  }catch(e){$('choice').textContent='Stock lookup unavailable: '+e.message}
 }
-function reset(){proposal=null;$('replay').disabled=true;$('buy').disabled=true;$('ignore').disabled=true;load()}
+function reset(){proposal=null;$('replay').disabled=true;$('buy').disabled=true;$('ignore').disabled=true;$('choice').textContent='Dhan trading disabled';load()}
+$('refresh').onclick=reset;
 $('symbol').addEventListener('input',searchStocks);
 $('symbol').addEventListener('blur',()=>setTimeout(()=>{$('symbol-results').replaceChildren()},180));
 ['symbol','start','cutoff','end'].forEach(id=>$(id).onchange=reset);
@@ -205,7 +240,9 @@ class Handler(BaseHTTPRequestHandler):
                 view_end=end if mode=="replay" else cutoff
                 result=dict(plan=plan,daily=[b for b in all_daily if b["t"]>=start],
                             weekly=[b for b in weekly(all_daily,view_end) if b["t"]>=start])
-                if mode=="replay":result["replay"]=replay(plan,[b for b in all_daily if cutoff<b["t"]<=end])
+                if mode=="replay":
+                    result["replay"]=replay(plan,[b for b in all_daily if cutoff<b["t"]<=end])
+                    save_replay(symbol,cutoff,end,plan,result["replay"])
                 body=json.dumps(result).encode();status=200
             except (ValueError,sqlite3.Error,OSError) as e:
                 body=json.dumps(dict(error=str(e))).encode();status=400
