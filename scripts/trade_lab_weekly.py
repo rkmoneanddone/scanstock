@@ -201,7 +201,22 @@ function reset(){proposal=null;$('replay').disabled=true;$('buy').disabled=true;
 $('refresh').onclick=reset;
 $('symbol').addEventListener('input',searchStocks);
 $('symbol').addEventListener('blur',()=>setTimeout(()=>{$('symbol-results').replaceChildren()},180));
-['symbol','start','cutoff','end'].forEach(id=>$(id).onchange=reset);
+function plusMonths(iso, months){
+ const [year,month,day]=iso.split('-').map(Number);
+ if(!year||!month||!day)return iso;
+ const first=new Date(Date.UTC(year,month-1+months,1));
+ const lastDay=new Date(Date.UTC(first.getUTCFullYear(),first.getUTCMonth()+1,0)).getUTCDate();
+ return first.getUTCFullYear()+'-'+String(first.getUTCMonth()+1).padStart(2,'0')+'-'+String(Math.min(day,lastDay)).padStart(2,'0');
+}
+$('start').addEventListener('change',()=>{
+ const start=$('start').value;
+ if(start){
+   $('cutoff').value=plusMonths(start,1);
+   $('end').value=plusMonths(start,2);
+ }
+ reset();
+});
+['symbol','cutoff','end'].forEach(id=>$(id).onchange=reset);
 loadUniverse();load();</script></main></body></html>"""
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
