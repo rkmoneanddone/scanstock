@@ -191,14 +191,16 @@ def discover_setups(daily, start, cutoff, max_age=10):
                     active["triggered_on"]=day
                 elif idx-active["index"]>=max_age:
                     active["status"]="EXPIRED"
-            elif active["status"] in ("TRIGGERED","TP1 HIT"):
+            elif active["status"] in ("TRIGGERED","TP1 HIT","TP2 HIT","TP3 HIT"):
                 if bar["l"]<=p["sl"]:
                     active["status"]="STOPPED"
-                elif bar["h"]>=p["tp2"]:
+                elif p.get("tp3") is not None and bar["h"]>=p["tp3"]:
+                    active["status"]="TP3 HIT"
+                elif p.get("tp2") is not None and bar["h"]>=p["tp2"]:
                     active["status"]="TP2 HIT"
-                elif bar["h"]>=p["tp1"]:
+                elif p.get("tp1") is not None and bar["h"]>=p["tp1"]:
                     active["status"]="TP1 HIT"
-            if active["status"] in ("AMBIGUOUS","INVALIDATED","EXPIRED","STOPPED","TP2 HIT"):
+            if active["status"] in ("AMBIGUOUS","INVALIDATED","EXPIRED","STOPPED"):
                 active["closed_on"]=day
                 active=None
         if day<start or active is not None:continue
@@ -212,7 +214,7 @@ def discover_setups(daily, start, cutoff, max_age=10):
 def select_case(cases):
     """Prefer most recent still-live signal, otherwise latest closed signal."""
     if not cases:return None
-    return next((c for c in reversed(cases) if c["status"] in ("PENDING","TRIGGERED","TP1 HIT")),cases[-1])
+    return next((c for c in reversed(cases) if c["status"] in ("PENDING","TRIGGERED","TP1 HIT","TP2 HIT","TP3 HIT")),cases[-1])
 
 def replay(plan,bars):
     """Partial structural exits, trailing remainder; no intrabar hindsight."""
@@ -314,7 +316,7 @@ function showSetups(j){
      proposal=c.plan;selectedSignalDate=c.signal_date;
      draw('w',j.weekly,c.plan);draw('d',j.daily,c.plan);
      $('result').textContent=JSON.stringify({signal_date:c.signal_date,status:c.status,plan:c.plan},null,2);
-     $('buy').disabled=c.status!=='PENDING'&&c.status!=='TRIGGERED'&&c.status!=='TP1 HIT';
+     $('buy').disabled=c.status!=='PENDING'&&c.status!=='TRIGGERED'&&c.status!=='TP1 HIT'&&c.status!=='TP2 HIT'&&c.status!=='TP3 HIT';
    };
    box.appendChild(btn);
  });
