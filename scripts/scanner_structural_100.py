@@ -25,7 +25,9 @@ def split_results(events,split_at):
                 "mean_net_r":str(net/len(complete)) if complete else None}
     train=[r for r in events if r["signal_at"]<split_at and r["status"]=="COMPLETE" and r["exit_at"]<split_at]
     unseen=[r for r in events if r["signal_at"]>=split_at and r["status"]=="COMPLETE"]
+    from collections import Counter
     return {"train":stats(train),"unseen":stats(unseen),
+            "skip_reasons":dict(Counter(r.get("reason","UNKNOWN") for r in events if r["status"]=="SKIPPED")),
             "pending":sum(r["status"]=="PENDING" for r in events),
             "skipped":sum(r["status"]=="SKIPPED" for r in events),
             "cross_split_excluded":sum(r["signal_at"]<split_at and r["status"]=="COMPLETE" and r["exit_at"]>=split_at for r in events)}
@@ -72,11 +74,13 @@ def main():
         except (ValueError,TypeError,KeyError,ZeroDivisionError) as exc:
             excluded[symbol]=str(exc)
         if n%10==0:print(f"Processed {n}/{len(selected)}",flush=True)
+    from collections import Counter
     report={"research_only":True,"method":"Causal confirmed swing low stop, nearest prior confirmed swing high target; if no resistance, 1.618 historical range Fibonacci extension; next-open entry, stop-first, no fixed candle timeout; no overlapping same-symbol/setup positions; 10 bps each side by default. No portfolio constraints.",
             "sample_method":"first N alphabetically sorted symbols with 1D data",
             "selected":selected,"excluded":excluded,"split_at":args.split_at,
             "min_rr":args.min_rr,"fee_bps_each_side":args.fee_bps,
             "setups":{name:{"train":aggregate(per_symbol,"train"),"unseen":aggregate(per_symbol,"unseen"),
+                            "skip_reasons":dict(sum((Counter(v["skip_reasons"]) for v in per_symbol.values()),Counter())),
                             "pending":sum(v["pending"] for v in per_symbol.values()),
                             "skipped":sum(v["skipped"] for v in per_symbol.values()),
                             "cross_split_excluded":sum(v["cross_split_excluded"] for v in per_symbol.values()),
