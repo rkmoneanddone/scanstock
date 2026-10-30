@@ -163,7 +163,9 @@ def propose(d,w):
     triggered=bool(candidates)
     return dict(decision="BUY SETUP" if triggered else "WATCH",
         setup=setup,signals=candidates,reason=("Potential long setup; entry requires a subsequent breakout above the cutoff candle." if triggered else "No confirmed bullish trigger at cutoff; conditional breakout watch only, not an immediate BUY."),
-        entry=entry,sl=stop,tp1=tp1,tp2=tp2,tp3=tp3,\n        target_evidence=levels[:3],\n        target_rr=[round((p["price"]-entry)/risk,2) for p in levels[:3]],
+        entry=entry,sl=stop,tp1=tp1,tp2=tp2,tp3=tp3,
+        target_evidence=levels[:3],
+        target_rr=[round((p["price"]-entry)/risk,2) for p in levels[:3]],
         swing_low_date=swing["date"],swing_low_price=swing["price"],
         swing_confirmation_date=swing["confirmation_date"],
         stop_method="Confirmed 2-left/2-right pivot low minus ₹0.05",
